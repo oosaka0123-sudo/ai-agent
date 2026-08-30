@@ -1,0 +1,41 @@
+{
+  "version": 1,
+  "updated": "2026-08-30",
+  "max_parallel_projects": 4,
+  "projects": [
+    {
+      "slug": "kansai-surfer-ks",
+      "name": "関西サーファーKS",
+      "public_url": "https://kansai.rss7.net/",
+      "repository": null,
+      "status": "pending-repository-connection",
+      "default_role": "web-pwa-production",
+      "copilot_review": "planned"
+    },
+    {
+      "slug": "s-league-now",
+      "name": "SリーグNOW",
+      "repository": null,
+      "status": "pending-repository-connection",
+      "default_role": "web-app",
+      "copilot_review": "planned"
+    },
+    {
+      "slug": "ai-agent",
+      "name": "AIエージェントシステム",
+      "repository": "oosaka0123-sudo/ai-agent",
+      "status": "active",
+      "default_role": "control-plane",
+      "copilot_review": "active"
+    },
+    {
+      "slug": "fx-trading",
+      "name": "FX取引",
+      "repository": null,
+      "status": "pending-repository-connection",
+      "default_role": "research-backtest-paper-trading",
+      "copilot_review": "planned",
+      "live_order_policy": "human-explicit-approval-required"
+    }
+  ]
+}
