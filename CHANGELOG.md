@@ -8,6 +8,8 @@
 
 ### Added
 
+- `AGENTS.md` に「自律実行ルール」「自己評価・品質保証」を追加し、
+  `PROJECT_SPEC.md`（機能仕様）と `docs/devlog/self-eval/`（AIごとの自己評価ログ）を新設。
 - 「複数AI比較ガイド」機能を追加。同じテーマについて Claude Code・Gemini/Jules・Codex が
   独立して書いた説明を読み比べられる `web/guides/`（一覧・テーマ・説明表示ページ）を追加し、
   データを `guides/themes.json` / `guides/<テーマID>/theme.json` / `guides/<テーマID>/{claude,gemini,codex}.md`
@@ -24,3 +26,10 @@
   GitHub Pagesで自動公開する `.github/workflows/pages.yml` を追加。
 - リポジトリ初期構成（README、`.gitignore`、`.env.example`、`AGENTS.md`/`CLAUDE.md`/`GEMINI.md`、
   CI（シークレットスキャン）、開発ルールドキュメント）を追加。
+
+### Fixed
+
+- デスクトップ幅でカード・グリッドの要素数が少ないときに右側へ余白が偏っていた
+  問題を、`grid-template-columns` を `auto-fill` から `auto-fit` に変更して解消。
+- `devlog.html` で一部フィールドを冗長に二重評価していた処理を整理。
+- トップページの検索欄に `aria-label` を追加し、アクセシビリティを改善。

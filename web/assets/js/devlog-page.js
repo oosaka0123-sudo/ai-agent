@@ -91,6 +91,6 @@
         ${linkListField("関連URL", entry.relatedUrls, "🌐")}
       </div>` : ""}
 
-    ${field("次にやること", entry.nextSteps) ? `<div class="detail-panel">${field("次にやること", entry.nextSteps)}</div>` : ""}
+    ${entry.nextSteps ? `<div class="detail-panel">${field("次にやること", entry.nextSteps)}</div>` : ""}
   `;
 })();

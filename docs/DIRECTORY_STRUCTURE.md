@@ -13,6 +13,7 @@
 │   ├── DEVELOPMENT.md              # 開発ルール
 │   ├── DIRECTORY_STRUCTURE.md      # 本ファイル
 │   ├── devlog/                     # 開発日記（Markdown、日付ごと）
+│   │   └── self-eval/              # AIごとの自己評価ログ（claude-code.md 等）
 │   └── screenshots/                # 開発記録用のスクリーンショット保存先
 ├── data/                           # 開発記録アーカイブサイトのデータ本体
 │   ├── projects.json               # プロジェクト一覧データ
@@ -38,7 +39,8 @@
 ├── .env.example                    # 環境変数サンプル
 ├── .gitignore
 ├── CHANGELOG.md                    # 利用者から見える変更の記録
-├── AGENTS.md                       # AIエージェント共通ルール（開発記録の自動記録ルールを含む）
+├── PROJECT_SPEC.md                 # 機能仕様（自己レビュー時の照合先）
+├── AGENTS.md                       # AIエージェント共通ルール（自律実行・自己評価・自動記録ルールを含む）
 ├── CLAUDE.md                       # Claude Code向け補足
 ├── GEMINI.md                       # Gemini向け補足
 └── README.md
@@ -87,3 +89,13 @@
 各AIは自分の担当ファイル（`claude.md` / `gemini.md` / `codex.md`）だけを編集し、
 他AIのファイルは変更しません。詳細は [`guides/README.md`](../guides/README.md) と
 [`AGENTS.md`](../AGENTS.md) の「複数AI比較ガイド（guides/）のルール」を参照してください。
+
+## PROJECT_SPEC.md・docs/devlog/self-eval/（仕様と自己評価）
+
+- [`PROJECT_SPEC.md`](../PROJECT_SPEC.md) — このリポジトリの機能仕様。作業完了前の
+  自己レビューで、実装がこの仕様を満たしているか照合する。
+- `docs/devlog/self-eval/` — AIごと（`claude-code.md` / `gemini-jules.md` / `codex.md`）の
+  自己評価ログ。初回実装内容・自己評価結果・発見した問題・修正内容・再テスト結果・
+  最終自己評価を記録する。各AIは自分のログにのみ追記する。
+
+詳細は [`AGENTS.md`](../AGENTS.md) の「自律実行ルール」「自己評価・品質保証」を参照してください。

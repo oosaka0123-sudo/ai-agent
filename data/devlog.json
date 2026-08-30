@@ -131,5 +131,33 @@
     "relatedUrls": [],
     "nextSteps": "Gemini/JulesとCodexにそれぞれ guides/smartphone-website/gemini.md と codex.md へ本文を執筆してもらう。Claude Code自身の claude.md も執筆する。",
     "tags": ["ガイド", "複数AI比較", "Gemini", "Codex"]
+  },
+  {
+    "id": "2026-08-30-self-eval-rules",
+    "date": "2026-08-30",
+    "title": "自律実行・自己評価ルールの追加と、既存成果物への適用",
+    "project": "ai-agent",
+    "purpose": "AIエージェントが確認待ちで作業を止めず、自分で実装・テスト・自己評価・修正まで完了できるようにする。あわせて今回すでに作った成果物にもその品質基準を適用する。",
+    "whatMade": "AGENTS.mdに「自律実行ルール」「自己評価・品質保証」を追加。仕様の照合先としてPROJECT_SPEC.mdを新規作成し、既存のMY DEVELOPMENT ARCHIVE・複数AI比較ガイドの仕様を明文化した。docs/devlog/self-eval/にAIごとの自己評価ログを新設し、Claude Code分の初回自己評価（PROJECT_SPEC.mdとの照合、Playwrightでの全ページ×モバイル/デスクトップ自動テスト、発見した3件の問題の修正、再テスト、100点満点評価）を記録した。",
+    "changes": [
+      "AGENTS.md（自律実行ルール・自己評価/品質保証ルールを追加）",
+      "PROJECT_SPEC.md（新規）",
+      "docs/devlog/self-eval/README.md, claude-code.md, gemini-jules.md, codex.md（新規）",
+      "web/assets/css/style.css（grid-template-columnsをauto-fillからauto-fitへ修正）",
+      "web/assets/js/devlog-page.js（次にやることフィールドの冗長な二重評価を整理）",
+      "web/index.html（検索欄にaria-label追加）"
+    ],
+    "aiUsed": ["Claude Code"],
+    "services": ["GitHub"],
+    "tech": ["HTML", "CSS", "JavaScript"],
+    "problems": "デスクトップ幅でガイドのプレビューカードが1件だけのとき、grid-template-columnsのauto-fill指定により右側に不自然な空白ができていた。devlog.htmlの一部フィールドを2回評価していた。検索欄にaria-labelがなかった。",
+    "solutions": "auto-fillをauto-fitに変更してアイテムが少ない場合も余白なく敷き詰めるようにした。フィールド評価をentry.nextStepsの真偽値判定に整理した。検索欄にaria-label=\"開発を検索\"を追加した。",
+    "learnings": "Playwrightで存在しないIDなどのエラーパスも含めて全ページ×モバイル/デスクトップを自動巡回すると、手動確認では気づきにくいレイアウト崩れを機械的に発見できる。",
+    "images": [],
+    "githubCommits": [],
+    "pullRequests": [],
+    "relatedUrls": [],
+    "nextSteps": "Gemini/JulesとCodexも、自分の担当ファイルを完成させたタイミングでdocs/devlog/self-eval/に自分のログを追記する。",
+    "tags": ["品質保証", "自己評価", "自律実行", "アクセシビリティ"]
   }
 ]
