@@ -3,74 +3,84 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>スマホで作るリモートAIエージェント最強構成</title>
-<meta name="description" content="Claude Code × GitHub × Cloud を使って、スマホだけでリモートAIエージェント環境を構築する構成図。">
-<meta name="theme-color" content="#050814">
-
-<meta property="og:type" content="website">
-<meta property="og:title" content="スマホで作るリモートAIエージェント最強構成">
-<meta property="og:description" content="Claude Code × GitHub × Cloud を使って、スマホだけでリモートAIエージェント環境を構築する構成図。">
-<meta property="og:image" content="./assets/remote-ai-agent-diagram.webp">
-<meta name="twitter:card" content="summary_large_image">
-
-<style>
-  :root {
-    color-scheme: dark;
-  }
-
-  * {
-    box-sizing: border-box;
-  }
-
-  html, body {
-    margin: 0;
-    background: #050814;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans JP", sans-serif;
-  }
-
-  body {
-    min-height: 100vh;
-  }
-
-  .wrap {
-    width: min(100%, 1100px);
-    margin: 0 auto;
-    padding: 12px;
-  }
-
-  .card {
-    background: linear-gradient(180deg, #0a1021, #060a14);
-    border: 1px solid rgba(255, 255, 255, .12);
-    border-radius: 20px;
-    overflow: hidden;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, .45);
-  }
-
-  img {
-    width: 100%;
-    height: auto;
-    display: block;
-  }
-
-  .note {
-    color: #aab4cb;
-    font-size: 13px;
-    text-align: center;
-    padding: 14px 10px 18px;
-  }
-</style>
+<title>MY DEVELOPMENT ARCHIVE ― 自分の開発記録</title>
+<meta name="description" content="Claude Code / ChatGPT / Codex / Gemini などを使って作ってきたWebサイト・アプリ・AIエージェントの開発記録アーカイブ。">
+<meta name="theme-color" content="#05070f">
+<link rel="stylesheet" href="assets/css/style.css">
 </head>
 <body>
-  <main class="wrap">
-    <section class="card">
-      <img
-        alt="スマホで作るリモートAIエージェント最強構成"
-        src="./assets/remote-ai-agent-diagram.webp"
-        width="935"
-        height="1683"
-      >
-      <div class="note">2026-08-30版</div>
+  <header class="topbar">
+    <a class="topbar-brand" href="index.html">MY <span>DEV</span> ARCHIVE</a>
+    <label class="search-box">
+      <span aria-hidden="true">🔎</span>
+      <input id="searchInput" type="search" placeholder="開発を検索（例: バス, Claude, PWA, GitHub）" autocomplete="off">
+    </label>
+  </header>
+
+  <div class="wrap">
+    <section class="hero">
+      <p class="hero-eyebrow">MY DEVELOPMENT ARCHIVE</p>
+      <h1 class="hero-title">MY DEVELOPMENT ARCHIVE</h1>
+      <p class="hero-subtitle">自分の開発記録</p>
+      <div class="stats-row" id="statsRow"></div>
     </section>
-  </main>
+
+    <div id="activeFilters" class="active-filters" style="margin-top:24px"></div>
+
+    <section class="section" id="recent">
+      <div class="section-head">
+        <h2 class="section-title">最近の開発</h2>
+      </div>
+      <div class="card-grid" id="recentList"></div>
+    </section>
+
+    <hr class="section-divider">
+
+    <section class="section" id="projects">
+      <div class="section-head">
+        <h2 class="section-title">プロジェクト</h2>
+        <p class="section-hint">タップして詳細へ</p>
+      </div>
+      <div class="card-grid" id="projectList"></div>
+    </section>
+
+    <hr class="section-divider">
+
+    <section class="section" id="timeline">
+      <div class="section-head">
+        <h2 class="section-title">開発タイムライン</h2>
+        <p class="section-hint">新しい順</p>
+      </div>
+      <div id="timelineList"></div>
+    </section>
+
+    <hr class="section-divider">
+
+    <section class="section" id="ai">
+      <div class="section-head">
+        <h2 class="section-title">使用したAI</h2>
+        <p class="section-hint">タップで絞り込み</p>
+      </div>
+      <div class="chip-row" id="aiChips"></div>
+    </section>
+
+    <hr class="section-divider">
+
+    <section class="section" id="tech">
+      <div class="section-head">
+        <h2 class="section-title">使用技術</h2>
+        <p class="section-hint">タップで絞り込み</p>
+      </div>
+      <div class="chip-row" id="techChips"></div>
+    </section>
+
+    <footer class="site-footer">
+      <p>MY DEVELOPMENT ARCHIVE ・ <a href="diagram.html">構成図を見る</a> ・ <a href="https://github.com/oosaka0123-sudo/ai-agent" target="_blank" rel="noopener">GitHub</a></p>
+    </footer>
+  </div>
+
+  <script src="assets/js/data.js"></script>
+  <script src="assets/js/render.js"></script>
+  <script src="assets/js/app.js"></script>
 </body>
 </html>

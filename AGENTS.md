@@ -39,16 +39,42 @@
 ```
 .
 ├── .github/        # GitHub Actions, PR/Issueテンプレート
-├── docs/           # ドキュメント（開発ルール、ディレクトリ構成の説明）
+├── docs/           # ドキュメント（開発ルール、ディレクトリ構成の説明、devlog/screenshots）
+├── data/           # 開発記録アーカイブサイトのデータ（projects.json, devlog.json）
+├── web/            # GitHub Pagesで公開する静的サイト（開発記録アーカイブ、構成図など）
 ├── src/            # アプリケーション本体（用途未確定、今後拡張）
 ├── tests/          # テストコード
 ├── scripts/        # 開発・運用補助スクリプト
 ├── config/         # 機密情報を含まない設定ファイル
 ├── .env.example    # 環境変数サンプル
+├── CHANGELOG.md    # 利用者から見える変更の記録
 ├── AGENTS.md       # 本ファイル（共通ルール）
 ├── CLAUDE.md       # Claude Code向け補足
 └── GEMINI.md       # Gemini向け補足
 ```
+
+## 開発記録の自動記録ルール（重要）
+
+このリポジトリには「MY DEVELOPMENT ARCHIVE（自分の開発記録）」という個人用の開発履歴サイトが
+`web/index.html` にあります。**開発作業をひとつ完了するたびに、以下を必ず行ってください。**
+（ユーザーから明示的に「記録しなくていい」と言われた軽微な作業を除く。）
+
+1. `docs/devlog/YYYY-MM-DD.md` を開く（今日の日付のファイルがなければ
+   [`docs/devlog/_template.md`](docs/devlog/_template.md) をもとに新規作成する）。
+   同じ日に複数の作業をした場合は見出し（`##`）を分けて追記する。以下を書く。
+   - 今日やったこと / 変更したファイル / 追加した機能 / 修正した不具合
+   - 使用したAI / 使用技術 / 困ったこと・判断したこと / 学んだこと / 次にやること
+2. `data/devlog.json` の配列に、同じ内容を1件構造化データとして追記する
+   （フィールドの意味は [`data/README.md`](data/README.md) を参照）。
+   - 新しいプロジェクトに関する記録であれば `data/projects.json` にもプロジェクトを追加・更新する。
+   - GitHubのコミットやPRを作成した場合は、そのURLを `githubCommits` / `pullRequests` に入れる。
+3. 利用者から見える変更（新機能・修正・破壊的変更）であれば `CHANGELOG.md` にも1行追記する。
+4. スクリーンショットがあれば `docs/screenshots/` に保存し、`images` / `screenshots` フィールドから
+   `assets/screenshots/ファイル名` の形式で参照する（詳細は [`docs/screenshots/README.md`](docs/screenshots/README.md)）。
+5. ローカルで確認する場合は `bash scripts/sync-site-data.sh` を実行してから `web/` を開く。
+
+このルールは、後から何年も見返せる開発記録を途切れさせないためのものです。
+面倒でも省略せず、必ず実施してください。
 
 ## コーディング規約
 

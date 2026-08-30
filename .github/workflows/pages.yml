@@ -5,6 +5,9 @@ on:
     branches: [main]
     paths:
       - "web/**"
+      - "data/**"
+      - "docs/screenshots/**"
+      - "scripts/sync-site-data.sh"
       - ".github/workflows/pages.yml"
   workflow_dispatch:
 
@@ -29,6 +32,9 @@ jobs:
 
       - name: GitHub Pagesの設定を検証
         uses: actions/configure-pages@v5
+
+      - name: 開発記録データ・スクリーンショットをサイトへ同期
+        run: bash scripts/sync-site-data.sh
 
       - name: 公開用アーティファクトをアップロード
         uses: actions/upload-pages-artifact@v3
