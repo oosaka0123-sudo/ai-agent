@@ -403,5 +403,45 @@
       "3AI運用",
       "品質保証"
     ]
+  },
+  {
+    "id": "2026-08-30-competition-01-mobile-ai-dev-claude",
+    "date": "2026-08-30",
+    "title": "3AI競争テスト第1回「スマホだけでAI開発はどこまでできる？」Claude Code版",
+    "project": "ai-agent",
+    "purpose": "他AI（Gemini/Jules・Codex）の作業完了を待たず、独立した専用ブランチでスマホだけのAI開発の実践ガイドを作成する。Claude Code・Gemini/Jules・OpenAI Codex・GitHub・GitHub Pages・PWA・API連携・自動化・複数AI運用を比較し、調査から公開までの具体的なフローを示す。",
+    "whatMade": "competitions/01-mobile-ai-dev/claude-code.html として、外部ライブラリ・JS依存なしの1枚完結HTML/CSSページを作成した。全体構成図、3AI比較表、できる/条件付き/できない早見表、調査〜公開の実践フロー、<details>要素による項目別の詳しい解説（HTML/CSS/JS、PWA、API連携、自動化、複数AI運用、ブランチ運用）、PCが必要な場面との比較、費用表、最も効率の良い構成、出典一覧を盛り込んだ。WebSearchで2026年8月30日時点の一次情報を調査し、断定を避けて出典を明記した。",
+    "changes": [
+      "competitions/README.md（新規）",
+      "competitions/01-mobile-ai-dev/claude-code.html（新規、成果物本体）",
+      "PROJECT_SPEC.md（第6章「3AI競争テスト」新設）",
+      "README.md（3AI競争テストセクション追加）"
+    ],
+    "aiUsed": [
+      "Claude Code"
+    ],
+    "services": [
+      "GitHub",
+      "GitHub Pages"
+    ],
+    "tech": [
+      "HTML",
+      "CSS"
+    ],
+    "problems": "「他AIの成果物を参考にしない」制約下で、リポジトリ同期によりgemini.md/codex.mdの中身がシステム通知として自動的に見えてしまう場面があった。デスクトップ幅では比較表の横スクロール案内が不要なのに常時表示されていた。",
+    "solutions": "他AIのCSS配色・クラス名・構成を意図的に模倣せず、独自の配色（ティール×アンバー×ローズ）とクラス設計で1から作成した。横スクロール案内は760px以上の画面幅では非表示にするメディアクエリを追加した。",
+    "learnings": "<details>のようなネイティブHTML要素を使うと、JavaScript無しでもスマホ向けの開閉式コンテンツを作れる。AIの料金・機能は変わりやすいため、断定を避けた表現と出典明記が誠実な情報提供につながる。",
+    "images": [],
+    "githubCommits": [],
+    "pullRequests": [],
+    "relatedUrls": [],
+    "nextSteps": "Pull Requestを作成して停止する（指示によりmainへはマージしない）。他AIの独立した成果物との比較はユーザーが行う。",
+    "tags": [
+      "競争テスト",
+      "スマホ開発",
+      "3AI比較",
+      "PWA",
+      "自動化"
+    ]
   }
 ]
