@@ -6,7 +6,7 @@
     "startDate": "2026-08-30",
     "status": "進行中",
     "summary": "Claude Code / Gemini・Jules / OpenAI Codexの3AIがGitHubを共通記憶として並行作業できるAIエージェント開発基盤。MY DEVELOPMENT ARCHIVE（このサイト自体）や複数AI比較ガイドは、この基盤の動作確認用サンプルプロジェクト。",
-    "aiUsed": ["Claude Code", "Codex"],
+    "aiUsed": ["Claude Code", "Gemini / Jules", "Codex"],
     "tech": ["GitHub", "GitHub Actions", "HTML", "CSS", "JavaScript"],
     "github": "https://github.com/oosaka0123-sudo/ai-agent",
     "website": "https://oosaka0123-sudo.github.io/ai-agent/",
