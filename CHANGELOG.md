@@ -20,6 +20,8 @@
 
 ### Added
 
+- 複数AI比較ガイドの第1テーマ「スマホだけでホームページを作る」に、Codex担当の
+  実践ガイドを追加。スマホでの作成・GitHub保存・公開・検証・安全上の注意を解説。
 - `AGENTS.md` に「自律実行ルール」「自己評価・品質保証」を追加し、
   `PROJECT_SPEC.md`（機能仕様）と `docs/devlog/self-eval/`（AIごとの自己評価ログ）を新設。
 - 「複数AI比較ガイド」機能を追加。同じテーマについて Claude Code・Gemini/Jules・Codex が
