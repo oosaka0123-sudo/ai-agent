@@ -13,6 +13,9 @@
 │   ├── DEVELOPMENT.md              # 開発ルール
 │   └── DIRECTORY_STRUCTURE.md      # 本ファイル
 ├── src/                            # アプリケーション本体（用途未確定・今後拡張）
+├── web/                            # GitHub Pagesで公開する静的サイト
+│   ├── index.html
+│   └── assets/
 ├── tests/                          # テストコード
 ├── scripts/                        # 開発・運用補助スクリプト
 ├── config/                         # 機密情報を含まない設定ファイル
@@ -37,3 +40,10 @@
 
 新しい機能を追加する際は、対応するテストを `tests/` に、必要な設定を `config/`
 （秘密情報は `.env`）に追加し、`docs/DEVELOPMENT.md` に規約を更新してください。
+
+## web/（GitHub Pages公開サイト）
+
+`web/` は GitHub Pages でそのまま公開される静的サイト用のディレクトリです。
+`.github/workflows/pages.yml` が `main` ブランチへの push をトリガーに `web/` の内容を
+ビルドせずそのままデプロイします。公開方法・有効化手順は [`README.md`](../README.md) の
+「公開ページ（GitHub Pages）」を参照してください。

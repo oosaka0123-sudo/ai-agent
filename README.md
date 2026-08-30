@@ -17,6 +17,7 @@
 ├── .github/          # GitHub Actions（CI）、PR/Issueテンプレート
 ├── docs/             # 開発ルール・ディレクトリ構成の説明
 ├── src/              # アプリケーション本体（用途未確定・今後拡張）
+├── web/              # GitHub Pagesで公開する静的サイト
 ├── tests/            # テストコード
 ├── scripts/          # 開発・運用補助スクリプト
 ├── config/           # 機密情報を含まない設定ファイル
@@ -58,6 +59,26 @@
 | [`GEMINI.md`](GEMINI.md) | Gemini向けの補足 |
 
 どのAIエージェントで作業する場合も、まず `AGENTS.md` の内容を確認してから作業してください。
+
+## 公開ページ（GitHub Pages）
+
+`web/` ディレクトリの内容を GitHub Pages でスマホ向けWebページとして公開できる構成にしています。
+
+- ページ本体: `web/index.html`（画像1枚をカード表示するシンプルな構成、スマホ幅で見やすいレスポンシブデザイン）
+- デプロイ設定: `.github/workflows/pages.yml`（`main` への push で自動デプロイ）
+
+### 有効化手順（リポジトリ管理者が最初に1回だけ行う作業）
+
+GitHub Pagesの有効化はリポジトリの管理者権限が必要なため、以下はGitHub上での手動設定が必要です。
+
+1. このブランチの内容を Pull Request 経由で `main` にマージする。
+2. GitHubリポジトリの `Settings` → `Pages` を開く。
+3. 「Build and deployment」の `Source` を **GitHub Actions** に設定する。
+4. `main` への push（今回のマージ）をきっかけに `Deploy Pages` ワークフローが自動実行され、
+   `https://<ユーザー名>.github.io/ai-agent/` で公開される
+   （このリポジトリの場合 `https://oosaka0123-sudo.github.io/ai-agent/`）。
+
+一度設定すれば、以降は `web/` を更新して `main` にマージするだけで自動的に再公開されます。
 
 ## セキュリティに関する重要な注意事項
 
