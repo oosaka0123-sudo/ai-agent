@@ -6,6 +6,6 @@
   "ais": [
     { "id": "claude-code", "label": "Claude Code", "emoji": "🟣", "file": "claude.md", "status": "not-started" },
     { "id": "gemini-jules", "label": "Gemini / Jules", "emoji": "🔵", "file": "gemini.md", "status": "not-started" },
-    { "id": "codex", "label": "Codex", "emoji": "🟢", "file": "codex.md", "status": "not-started" }
+    { "id": "codex", "label": "Codex", "emoji": "🟢", "file": "codex.md", "status": "completed" }
   ]
 }

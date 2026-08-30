@@ -188,5 +188,49 @@
     "relatedUrls": [],
     "nextSteps": "Gemini/JulesとCodexがguides/smartphone-website/{gemini,codex}.mdへ本文を執筆する。Claude Code自身もclaude.mdへ本文を執筆する。次回以降、Webサイト以外（PWA・API連携・自動化など）のサンプルプロジェクトをこの基盤の上に追加していく。",
     "tags": ["基盤整備", "ドキュメント", "3AI運用", "オンボーディング"]
-  }
+  },
+{
+  "id": "2026-08-30-codex-smartphone-website-guide",
+  "date": "2026-08-30",
+  "title": "Codex版「スマホだけでホームページを作る」ガイド完成",
+  "project": "ai-agent",
+  "purpose": "複数AI比較ガイドのCodex担当として、スマホだけで静的サイトを作成・保存・公開する方法を初心者が安全に実践できる形で完成させる。",
+  "whatMade": "共通テンプレートの全項目を執筆し、GitHubリポジトリ作成、Codexとの連携または手動受け渡し、HTML/CSS作成、GitHub Pages公開、モバイル検証、費用と制約を一連のガイドにした。",
+  "changes": [
+    "guides/smartphone-website/codex.md（Codex担当本文を完成）",
+    "guides/smartphone-website/theme.json（Codexをcompletedへ更新）",
+    "README.md / PROJECT_SPEC.md / CHANGELOG.md（実装状況を同期）",
+    "docs/devlog/ と data/devlog.json（開発記録・自己評価を追加）"
+  ],
+  "aiUsed": [
+    "Codex"
+  ],
+  "services": [
+    "GitHub",
+    "GitHub Pages",
+    "OpenAI Codex"
+  ],
+  "tech": [
+    "Markdown",
+    "JSON",
+    "HTML",
+    "CSS",
+    "GitHub"
+  ],
+  "problems": "AI連携や料金など変わり得る情報を断定せず、スマホ初心者が安全に完了できる普遍的な手順にする必要があった。",
+  "solutions": "GitHub連携と手動受け渡しの両経路を説明し、現在の公式画面を優先する注意、差分レビュー、秘密情報保護、静的サイトの限界、段階的なテストを明記した。",
+  "learnings": "初心者向けAI開発ガイドには操作手順だけでなく、AI出力を検証する方法とクライアント側へ秘密を置けない境界の説明が不可欠。",
+  "images": [],
+  "githubCommits": [],
+  "pullRequests": [],
+  "relatedUrls": [],
+  "nextSteps": "Claude Code版とGemini/Jules版が独立して完成した後に、3AIの説明を比較する。",
+  "tags": [
+    "ガイド",
+    "Codex",
+    "スマホ",
+    "GitHub Pages",
+    "セキュリティ"
+  ]
+}
 ]
