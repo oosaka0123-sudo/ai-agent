@@ -361,5 +361,47 @@
       "GitHub Pages",
       "セキュリティ"
     ]
+  },
+  {
+    "id": "2026-08-30-integration-final-merge",
+    "date": "2026-08-30",
+    "title": "integration/final にJules PR #1（Gemini/Jules版ガイド）を統合",
+    "project": "ai-agent",
+    "purpose": "integration/finalを最新化し、Codex成果物を消さずにJules PR #1（Gemini/Jules版ガイド）の競合を解消して統合する。両AIの成果物を保持したまま、テスト・自己レビューを経てintegration/final → mainのPRを用意する。",
+    "whatMade": "integration/finalをリモート最新（Codex統合済み）に更新した上でfeat/gemini-archive-...をマージし、CHANGELOG.md・data/devlog.json・data/projects.json・guides/smartphone-website/theme.jsonの競合をCodex/Jules双方の内容を残す形で解消した。Playwrightで全ページ×モバイル/デスクトップの回帰テストを行い、競合解消時に消えていたtheme.jsonのclaude-codeエントリと、guides-data.jsが\"completed\"ステータスを認識できていなかった不具合の2件を発見・修正・再テストした。",
+    "changes": [
+      "CHANGELOG.md、data/devlog.json、data/projects.json、guides/smartphone-website/theme.json（競合解消）",
+      "guides/smartphone-website/gemini.md、web/assets/js/markdown-lite.js、docs/devlog/2026-08-30-gemini.md（自動マージ）",
+      "README.md、PROJECT_SPEC.md（完成状況の反映）",
+      "web/assets/js/guides-data.js、web/assets/css/style.css（completedステータス対応）",
+      "guides/README.md（statusの許容値をドキュメント化）"
+    ],
+    "aiUsed": [
+      "Claude Code"
+    ],
+    "services": [
+      "GitHub"
+    ],
+    "tech": [
+      "Git",
+      "JSON",
+      "Markdown",
+      "JavaScript",
+      "CSS"
+    ],
+    "problems": "競合解消の手作業でguides/smartphone-website/theme.jsonのclaude-codeエントリを誤って消してしまった。また、CodexとJulesが独立に選んだステータス値\"completed\"を共通インフラ（guides-data.js）が認識できず、完成済みのガイドが「未執筆」と表示されていた。",
+    "solutions": "theme.jsonにclaude-codeエントリを復元した。guides-data.jsのSTATUS_LABELに\"completed\"を追加し、対応するCSSバッジスタイルも追加することで、theme.json側の値は書き換えずに共通インフラ側を対応させた。",
+    "learnings": "3方向マージの競合解消はJSONとして妥当かどうかだけでなく、実際にレンダリングして確認しないと配列要素が消えるような静かな破損に気づけない。複数AIが独立に同じ種類の列挙値を選ぶ場合は、共通インフラ側で両方の表記を受け入れる方が各AIの成果物を書き換えるより安全。",
+    "images": [],
+    "githubCommits": [],
+    "pullRequests": [],
+    "relatedUrls": [],
+    "nextSteps": "integration/final → main のPull Requestのレビュー・マージはユーザー判断を待つ。Claude Code自身のguides/smartphone-website/claude.mdを執筆する。",
+    "tags": [
+      "統合",
+      "競合解消",
+      "3AI運用",
+      "品質保証"
+    ]
   }
 ]

@@ -7,6 +7,7 @@ const GuidesData = (() => {
     "not-started": "未執筆",
     "in-progress": "執筆中",
     "published": "公開中",
+    "completed": "公開中",
   };
 
   // index.html（web/直下）から呼ばれる場合と、web/guides/*.html から呼ばれる場合とで

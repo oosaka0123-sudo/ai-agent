@@ -52,3 +52,8 @@
   問題を、`grid-template-columns` を `auto-fill` から `auto-fit` に変更して解消。
 - `devlog.html` で一部フィールドを冗長に二重評価していた処理を整理。
 - トップページの検索欄に `aria-label` を追加し、アクセシビリティを改善。
+- `integration/final` へJules PR #1（Gemini/Jules版ガイド）を統合する過程で発見した
+  2件の不具合を修正: 競合解消時に `guides/smartphone-website/theme.json` から
+  `claude-code` エントリが消えていた問題、および `web/assets/js/guides-data.js` が
+  ステータス値 `"completed"` を認識できず、公開済みのガイドが「未執筆」と
+  誤表示されていた問題。
