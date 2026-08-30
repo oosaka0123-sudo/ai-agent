@@ -1,5 +1,46 @@
 [
   {
+    "id": "2026-08-30-gemini-guide-smartphone-website",
+    "date": "2026-08-30",
+    "title": "Gemini/Julesによる「スマホだけでホームページを作る方法」のガイドを作成",
+    "project": "ai-agent",
+    "purpose": "初心者がスマホだけで、GitHubとGemini/Julesを使ってWebページを作成・保存・公開する流れを直感的に理解できる最高品質のWebページを制作する。",
+    "whatMade": "guides/smartphone-website/gemini.md に、GeminiとJulesの違い、GitHubの仕組み、HTML作成から公開までの流れを図解やカードを使って視覚的に分かりやすくまとめたガイドを作成した。また、Markdown内にリッチなHTMLコンポーネントを埋め込めるように web/assets/js/markdown-lite.js を修正し、:::html ... ::: ブロックをサポートした。",
+    "changes": [
+      "guides/smartphone-website/gemini.md (大幅更新)",
+      "guides/smartphone-website/theme.json (AI IDを更新)",
+      "web/assets/js/markdown-lite.js (:::htmlブロックのサポート追加)",
+      "web/assets/css/style.css (追加の調整があれば記録)"
+    ],
+    "aiUsed": [
+      "Gemini / Jules"
+    ],
+    "services": [
+      "GitHub",
+      "GitHub Pages"
+    ],
+    "tech": [
+      "HTML",
+      "CSS",
+      "JavaScript",
+      "Markdown"
+    ],
+    "problems": "通常のMarkdownパーサーでは、複雑なHTMLのネストやインラインCSSが正しくパースされず、pタグで囲まれて表示崩れが起きる問題があった。",
+    "solutions": "markdown-lite.js に :::html から ::: までのブロックをそのままのHTMLとして出力する特殊なパース処理を追加することで解決した。",
+    "learnings": "Markdownベースのドキュメントシステムに独自の強力なUIコンポーネントを組み込む場合、Markdownのパース処理をバイパスする専用の記法を設けるのが効果的である。",
+    "images": [],
+    "githubCommits": [],
+    "pullRequests": [],
+    "relatedUrls": [],
+    "nextSteps": "この変更をコミットしてPRを作成・公開する。",
+    "tags": [
+      "ガイド",
+      "Gemini",
+      "UI改善",
+      "Markdown"
+    ]
+  },
+  {
     "id": "2026-08-30-ai-agent-kickoff",
     "date": "2026-08-30",
     "title": "AIエージェント開発環境を開始",
@@ -16,9 +57,17 @@
       "docs/DEVELOPMENT.md、docs/DIRECTORY_STRUCTURE.md（新規）",
       "src/, tests/, scripts/, config/ の各README（新規）"
     ],
-    "aiUsed": ["Claude Code"],
-    "services": ["GitHub"],
-    "tech": ["GitHub", "GitHub Actions", "Markdown"],
+    "aiUsed": [
+      "Claude Code"
+    ],
+    "services": [
+      "GitHub"
+    ],
+    "tech": [
+      "GitHub",
+      "GitHub Actions",
+      "Markdown"
+    ],
     "problems": "秘密情報の誤コミットを防ぎつつ、特定用途に固定しない汎用的な構成にする必要があった。",
     "solutions": ".gitignoreとgitleaksによるシークレットスキャンをCIに組み込み、AGENTS.md/CLAUDE.md/GEMINI.mdでAIエージェント共通のルール（mainへ直push禁止、秘密情報禁止など）を明文化した。",
     "learnings": "複数のAIエージェントが同じリポジトリで作業する場合、AGENTS.mdのような共通ルールファイルを最初に用意しておくと、どのAIに頼んでも一貫した振る舞いになりやすい。",
@@ -32,7 +81,11 @@
     "pullRequests": [],
     "relatedUrls": [],
     "nextSteps": "GitHub Pagesで公開できる静的サイトを追加する。",
-    "tags": ["AIエージェント", "GitHub", "セットアップ"]
+    "tags": [
+      "AIエージェント",
+      "GitHub",
+      "セットアップ"
+    ]
   },
   {
     "id": "2026-08-30-remote-ai-agent-diagram-page",
@@ -46,13 +99,24 @@
       "web/assets/remote-ai-agent-diagram.webp（新規、構成図画像）",
       ".github/workflows/pages.yml（新規、GitHub Pagesデプロイ）"
     ],
-    "aiUsed": ["Claude Code"],
-    "services": ["GitHub", "GitHub Pages"],
-    "tech": ["HTML", "CSS", "GitHub Actions"],
+    "aiUsed": [
+      "Claude Code"
+    ],
+    "services": [
+      "GitHub",
+      "GitHub Pages"
+    ],
+    "tech": [
+      "HTML",
+      "CSS",
+      "GitHub Actions"
+    ],
     "problems": "元のHTMLに画像がBase64で埋め込まれており、ファイルサイズが約2.3MBと大きかった。",
     "solutions": "画像をファイルとして抽出し、PNG（約1.8MB）からWebP形式（約240KB）に変換して外部ファイル化した。見た目の画質はほぼ変えずに約1/7のサイズに圧縮できた。",
     "learnings": "Base64埋め込み画像はページを重くしがちなので、外部ファイル化してWebPに変換するとスマホでの表示速度改善に効果的。",
-    "images": ["assets/remote-ai-agent-diagram.webp"],
+    "images": [
+      "assets/remote-ai-agent-diagram.webp"
+    ],
     "githubCommits": [
       {
         "label": "GitHub Pages公開用の構成を追加（リモートAIエージェント構成図ページ）",
@@ -61,10 +125,17 @@
     ],
     "pullRequests": [],
     "relatedUrls": [
-      { "label": "構成図ページ（mainマージ後に公開）", "url": "https://oosaka0123-sudo.github.io/ai-agent/diagram.html" }
+      {
+        "label": "構成図ページ（mainマージ後に公開）",
+        "url": "https://oosaka0123-sudo.github.io/ai-agent/diagram.html"
+      }
     ],
     "nextSteps": "開発記録アーカイブサイト（このサイト自体）を構築する。",
-    "tags": ["GitHub Pages", "画像最適化", "公開"]
+    "tags": [
+      "GitHub Pages",
+      "画像最適化",
+      "公開"
+    ]
   },
   {
     "id": "2026-08-30-dev-archive-site",
@@ -83,9 +154,20 @@
       "scripts/sync-site-data.sh（新規）",
       ".github/workflows/pages.yml（更新）、AGENTS.md（更新、自動記録ルール追加）、CHANGELOG.md（新規）"
     ],
-    "aiUsed": ["Claude Code"],
-    "services": ["GitHub", "GitHub Pages"],
-    "tech": ["HTML", "CSS", "JavaScript", "GitHub Actions", "JSON"],
+    "aiUsed": [
+      "Claude Code"
+    ],
+    "services": [
+      "GitHub",
+      "GitHub Pages"
+    ],
+    "tech": [
+      "HTML",
+      "CSS",
+      "JavaScript",
+      "GitHub Actions",
+      "JSON"
+    ],
     "problems": "開発記録データを編集しやすい場所（data/、docs/）に置きつつ、公開フォルダ（web/）にどう反映するかが課題だった。",
     "solutions": "scripts/sync-site-data.sh で data/ と docs/screenshots/ をビルド時に web/ へコピーする方式にし、ローカル確認とGitHub Actionsの両方から同じスクリプトを呼ぶことで二重管理を防いだ。",
     "learnings": "個人用データベースサイトは「編集する場所」と「公開される場所」を分けておくと、何年も追記し続ける運用がしやすい。",
@@ -99,7 +181,12 @@
     "pullRequests": [],
     "relatedUrls": [],
     "nextSteps": "関西サーファーKS、次バス大阪、Claude Code教室など、他の実際のプロジェクト情報を data/projects.json に追記していく。",
-    "tags": ["開発記録", "アーカイブ", "データベース", "GitHub Pages"]
+    "tags": [
+      "開発記録",
+      "アーカイブ",
+      "データベース",
+      "GitHub Pages"
+    ]
   },
   {
     "id": "2026-08-30-multi-ai-guides",
@@ -119,9 +206,20 @@
       "scripts/sync-site-data.sh、.github/workflows/pages.yml、.gitignore（更新、guides/の同期を追加）",
       "AGENTS.md（更新、複数AI比較ガイドの担当ルールを追加）"
     ],
-    "aiUsed": ["Claude Code"],
-    "services": ["GitHub", "GitHub Pages"],
-    "tech": ["HTML", "CSS", "JavaScript", "JSON", "Markdown"],
+    "aiUsed": [
+      "Claude Code"
+    ],
+    "services": [
+      "GitHub",
+      "GitHub Pages"
+    ],
+    "tech": [
+      "HTML",
+      "CSS",
+      "JavaScript",
+      "JSON",
+      "Markdown"
+    ],
     "problems": "web/直下のページとweb/guides/配下のページとで、データファイルまでの相対パスの階層が異なり、最初theme.jsonの読み込みに失敗した。",
     "solutions": "guides-data.js内でlocation.pathnameを見て、/guides/配下から呼ばれているかどうかで相対パスの基準（guides-data/ か ../guides-data/ か）を自動判定するようにした。",
     "learnings": "同じJSファイルを深さの異なる複数ページから共有する場合、相対パスをハードコードせず、呼び出し元のパスから動的に基準パスを決めると事故が減る。",
@@ -130,7 +228,12 @@
     "pullRequests": [],
     "relatedUrls": [],
     "nextSteps": "Gemini/JulesとCodexにそれぞれ guides/smartphone-website/gemini.md と codex.md へ本文を執筆してもらう。Claude Code自身の claude.md も執筆する。",
-    "tags": ["ガイド", "複数AI比較", "Gemini", "Codex"]
+    "tags": [
+      "ガイド",
+      "複数AI比較",
+      "Gemini",
+      "Codex"
+    ]
   },
   {
     "id": "2026-08-30-self-eval-rules",
@@ -147,9 +250,17 @@
       "web/assets/js/devlog-page.js（次にやることフィールドの冗長な二重評価を整理）",
       "web/index.html（検索欄にaria-label追加）"
     ],
-    "aiUsed": ["Claude Code"],
-    "services": ["GitHub"],
-    "tech": ["HTML", "CSS", "JavaScript"],
+    "aiUsed": [
+      "Claude Code"
+    ],
+    "services": [
+      "GitHub"
+    ],
+    "tech": [
+      "HTML",
+      "CSS",
+      "JavaScript"
+    ],
     "problems": "デスクトップ幅でガイドのプレビューカードが1件だけのとき、grid-template-columnsのauto-fill指定により右側に不自然な空白ができていた。devlog.htmlの一部フィールドを2回評価していた。検索欄にaria-labelがなかった。",
     "solutions": "auto-fillをauto-fitに変更してアイテムが少ない場合も余白なく敷き詰めるようにした。フィールド評価をentry.nextStepsの真偽値判定に整理した。検索欄にaria-label=\"開発を検索\"を追加した。",
     "learnings": "Playwrightで存在しないIDなどのエラーパスも含めて全ページ×モバイル/デスクトップを自動巡回すると、手動確認では気づきにくいレイアウト崩れを機械的に発見できる。",
@@ -158,7 +269,12 @@
     "pullRequests": [],
     "relatedUrls": [],
     "nextSteps": "Gemini/JulesとCodexも、自分の担当ファイルを完成させたタイミングでdocs/devlog/self-eval/に自分のログを追記する。",
-    "tags": ["品質保証", "自己評価", "自律実行", "アクセシビリティ"]
+    "tags": [
+      "品質保証",
+      "自己評価",
+      "自律実行",
+      "アクセシビリティ"
+    ]
   },
   {
     "id": "2026-08-30-platform-foundation",
@@ -176,9 +292,17 @@
       "data/projects.json（ai-agentプロジェクトの概要文を更新）",
       "docs/devlog/self-eval/claude-code.md（本タスクの自己評価を追記）"
     ],
-    "aiUsed": ["Claude Code"],
-    "services": ["GitHub"],
-    "tech": ["Markdown", "JSON", "Python"],
+    "aiUsed": [
+      "Claude Code"
+    ],
+    "services": [
+      "GitHub"
+    ],
+    "tech": [
+      "Markdown",
+      "JSON",
+      "Python"
+    ],
     "problems": "README/AGENTS/PROJECT_SPECが「複数AIの共同開発」という一般論に留まり、「GitHubを共通記憶とした並行作業基盤」「Webサイト制作は主目的ではない」という位置づけが伝わらなかった。CODEX.mdが存在せず3AI間で非対称だった。オンボーディング手順が明文化されていなかった。",
     "solutions": "3つのドキュメントの目的記述を同じ文言で統一し、サンプルプロジェクトの章に明示的な注記を追加した。CODEX.mdを新規作成しCLAUDE.md/GEMINI.mdと対称の構成にした。READMEにオンボーディング手順（読む順番）を新設し、AGENTS.mdからも導線を張った。全内部リンクをスクリプトで機械検証した。",
     "learnings": "複数のドキュメントに同じ目的を書く場合、仕様変更時に全ファイルへ反映し忘れやすい。内部リンクの機械検証と合わせてチェックすると矛盾やリンク切れに気づきやすい。",
@@ -187,6 +311,97 @@
     "pullRequests": [],
     "relatedUrls": [],
     "nextSteps": "Gemini/JulesとCodexがguides/smartphone-website/{gemini,codex}.mdへ本文を執筆する。Claude Code自身もclaude.mdへ本文を執筆する。次回以降、Webサイト以外（PWA・API連携・自動化など）のサンプルプロジェクトをこの基盤の上に追加していく。",
-    "tags": ["基盤整備", "ドキュメント", "3AI運用", "オンボーディング"]
+    "tags": [
+      "基盤整備",
+      "ドキュメント",
+      "3AI運用",
+      "オンボーディング"
+    ]
+  },
+  {
+    "id": "2026-08-30-codex-smartphone-website-guide",
+    "date": "2026-08-30",
+    "title": "Codex版「スマホだけでホームページを作る」ガイド完成",
+    "project": "ai-agent",
+    "purpose": "複数AI比較ガイドのCodex担当として、スマホだけで静的サイトを作成・保存・公開する方法を初心者が安全に実践できる形で完成させる。",
+    "whatMade": "共通テンプレートの全項目を執筆し、GitHubリポジトリ作成、Codexとの連携または手動受け渡し、HTML/CSS作成、GitHub Pages公開、モバイル検証、費用と制約を一連のガイドにした。",
+    "changes": [
+      "guides/smartphone-website/codex.md（Codex担当本文を完成）",
+      "guides/smartphone-website/theme.json（Codexをcompletedへ更新）",
+      "README.md / PROJECT_SPEC.md / CHANGELOG.md（実装状況を同期）",
+      "docs/devlog/ と data/devlog.json（開発記録・自己評価を追加）"
+    ],
+    "aiUsed": [
+      "Codex"
+    ],
+    "services": [
+      "GitHub",
+      "GitHub Pages",
+      "OpenAI Codex"
+    ],
+    "tech": [
+      "Markdown",
+      "JSON",
+      "HTML",
+      "CSS",
+      "GitHub"
+    ],
+    "problems": "AI連携や料金など変わり得る情報を断定せず、スマホ初心者が安全に完了できる普遍的な手順にする必要があった。",
+    "solutions": "GitHub連携と手動受け渡しの両経路を説明し、現在の公式画面を優先する注意、差分レビュー、秘密情報保護、静的サイトの限界、段階的なテストを明記した。",
+    "learnings": "初心者向けAI開発ガイドには操作手順だけでなく、AI出力を検証する方法とクライアント側へ秘密を置けない境界の説明が不可欠。",
+    "images": [],
+    "githubCommits": [],
+    "pullRequests": [],
+    "relatedUrls": [],
+    "nextSteps": "Claude Code版とGemini/Jules版が独立して完成した後に、3AIの説明を比較する。",
+    "tags": [
+      "ガイド",
+      "Codex",
+      "スマホ",
+      "GitHub Pages",
+      "セキュリティ"
+    ]
+  },
+  {
+    "id": "2026-08-30-integration-final-merge",
+    "date": "2026-08-30",
+    "title": "integration/final にJules PR #1（Gemini/Jules版ガイド）を統合",
+    "project": "ai-agent",
+    "purpose": "integration/finalを最新化し、Codex成果物を消さずにJules PR #1（Gemini/Jules版ガイド）の競合を解消して統合する。両AIの成果物を保持したまま、テスト・自己レビューを経てintegration/final → mainのPRを用意する。",
+    "whatMade": "integration/finalをリモート最新（Codex統合済み）に更新した上でfeat/gemini-archive-...をマージし、CHANGELOG.md・data/devlog.json・data/projects.json・guides/smartphone-website/theme.jsonの競合をCodex/Jules双方の内容を残す形で解消した。Playwrightで全ページ×モバイル/デスクトップの回帰テストを行い、競合解消時に消えていたtheme.jsonのclaude-codeエントリと、guides-data.jsが\"completed\"ステータスを認識できていなかった不具合の2件を発見・修正・再テストした。",
+    "changes": [
+      "CHANGELOG.md、data/devlog.json、data/projects.json、guides/smartphone-website/theme.json（競合解消）",
+      "guides/smartphone-website/gemini.md、web/assets/js/markdown-lite.js、docs/devlog/2026-08-30-gemini.md（自動マージ）",
+      "README.md、PROJECT_SPEC.md（完成状況の反映）",
+      "web/assets/js/guides-data.js、web/assets/css/style.css（completedステータス対応）",
+      "guides/README.md（statusの許容値をドキュメント化）"
+    ],
+    "aiUsed": [
+      "Claude Code"
+    ],
+    "services": [
+      "GitHub"
+    ],
+    "tech": [
+      "Git",
+      "JSON",
+      "Markdown",
+      "JavaScript",
+      "CSS"
+    ],
+    "problems": "競合解消の手作業でguides/smartphone-website/theme.jsonのclaude-codeエントリを誤って消してしまった。また、CodexとJulesが独立に選んだステータス値\"completed\"を共通インフラ（guides-data.js）が認識できず、完成済みのガイドが「未執筆」と表示されていた。",
+    "solutions": "theme.jsonにclaude-codeエントリを復元した。guides-data.jsのSTATUS_LABELに\"completed\"を追加し、対応するCSSバッジスタイルも追加することで、theme.json側の値は書き換えずに共通インフラ側を対応させた。",
+    "learnings": "3方向マージの競合解消はJSONとして妥当かどうかだけでなく、実際にレンダリングして確認しないと配列要素が消えるような静かな破損に気づけない。複数AIが独立に同じ種類の列挙値を選ぶ場合は、共通インフラ側で両方の表記を受け入れる方が各AIの成果物を書き換えるより安全。",
+    "images": [],
+    "githubCommits": [],
+    "pullRequests": [],
+    "relatedUrls": [],
+    "nextSteps": "integration/final → main のPull Requestのレビュー・マージはユーザー判断を待つ。Claude Code自身のguides/smartphone-website/claude.mdを執筆する。",
+    "tags": [
+      "統合",
+      "競合解消",
+      "3AI運用",
+      "品質保証"
+    ]
   }
 ]

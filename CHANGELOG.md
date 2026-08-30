@@ -20,6 +20,13 @@
 
 ### Added
 
+- 複数AI比較ガイドの第1テーマ「スマホだけでホームページを作る」に、Codex担当の
+  実践ガイドを追加。スマホでの作成・GitHub保存・公開・検証・安全上の注意を解説。
+- 同テーマに、Gemini/Julesによる実践ガイド（`guides/smartphone-website/gemini.md`）も追加。
+  リッチな図解、比較表、ステップカードなどを駆使し、スマホ最優先で直感的に理解できる
+  デザインを実装。これに伴い `web/assets/js/markdown-lite.js` に `:::html ... :::`
+  ブロックのサポートを追加し、Markdownの行分割処理をバイパスして生のHTML/CSS
+  コンポーネントを描画できるようにした。
 - `AGENTS.md` に「自律実行ルール」「自己評価・品質保証」を追加し、
   `PROJECT_SPEC.md`（機能仕様）と `docs/devlog/self-eval/`（AIごとの自己評価ログ）を新設。
 - 「複数AI比較ガイド」機能を追加。同じテーマについて Claude Code・Gemini/Jules・Codex が
@@ -45,3 +52,8 @@
   問題を、`grid-template-columns` を `auto-fill` から `auto-fit` に変更して解消。
 - `devlog.html` で一部フィールドを冗長に二重評価していた処理を整理。
 - トップページの検索欄に `aria-label` を追加し、アクセシビリティを改善。
+- `integration/final` へJules PR #1（Gemini/Jules版ガイド）を統合する過程で発見した
+  2件の不具合を修正: 競合解消時に `guides/smartphone-website/theme.json` から
+  `claude-code` エントリが消えていた問題、および `web/assets/js/guides-data.js` が
+  ステータス値 `"completed"` を認識できず、公開済みのガイドが「未執筆」と
+  誤表示されていた問題。

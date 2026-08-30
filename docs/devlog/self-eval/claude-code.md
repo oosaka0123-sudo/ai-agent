@@ -218,3 +218,108 @@ GitHubを共通記憶として並行作業できるAIエージェント開発基
   （現時点では明示的な依頼がないため未実施）。
 - GitHub Pages公開設定（`Settings → Pages`）はリポジトリ管理者権限が
   必要なため未実施。
+
+---
+
+## 2026-08-30 — integration/final への Jules PR #1 統合と競合解消
+
+### 対象
+
+- `integration/final` ブランチ全体（Codex成果物 + Jules成果物 + Claude Code成果物の統合）
+- 競合解消: `CHANGELOG.md`, `data/devlog.json`, `data/projects.json`,
+  `guides/smartphone-website/theme.json`
+- 追加修正: `web/assets/js/guides-data.js`, `web/assets/css/style.css`,
+  `README.md`, `PROJECT_SPEC.md`, `guides/README.md`
+
+### 初回実装内容（このタスクでの作業）
+
+`integration/final` をリモート最新（Codex PR #2 統合済み）に更新した上で、
+競合していた Jules PR #1（`feat/gemini-archive-...`、Gemini/Jules版ガイド）を
+ローカルで `git merge` し、競合4ファイルをCodex・Jules双方の内容を保持する形で
+解消した。その後、統合結果に対して自己評価プロセス（仕様照合・自己レビュー・
+実動作テスト・自己採点・修正・再テスト）を実施した。
+
+### 自己評価結果（実動作テストで発見した問題）
+
+Playwrightで全19ページ×モバイル390px/デスクトップ1280pxの計38パターンを
+自動巡回し、コンソールエラー・異常レスポンスがないことをまず確認した
+（JSON構文チェック・内部リンクの機械検証も実施）。その上で、theme.htmlの
+3AI選択カードとview.htmlの実際の描画結果を目視確認したところ、以下の
+2件の問題を発見した。
+
+### 発見した問題
+
+1. **データ消失**: `guides/smartphone-website/theme.json` の競合解消時、
+   Edit操作の対象範囲を誤り、競合していなかった `claude-code` エントリまで
+   配列から消してしまっていた。JSON構文としては妥当だったため、
+   `python -c "json.load(...)"` によるバリデーションだけでは検出できず、
+   実際に `theme.json` の中身を再読み込みして初めて気づいた。
+2. **表示不整合**: CodexとJulesが独立に選んだステータス値 `"completed"` を、
+   共通インフラ（`web/assets/js/guides-data.js` の `STATUS_LABEL`）が
+   `"not-started" / "in-progress" / "published"` の3種類しか認識しておらず、
+   本文を書き終えたGemini/Jules版・Codex版のガイドが、テーマ選択画面で
+   「未執筆」と誤表示されていた。これもJSONバリデーションでは検出できず、
+   `theme.html` を実際にブラウザで開いて確認して発見した。
+
+### 修正した内容
+
+1. `guides/smartphone-website/theme.json` に `claude-code` エントリ
+   （`status: "not-started"`）を復元した。
+2. `web/assets/js/guides-data.js` の `STATUS_LABEL` に
+   `"completed": "公開中"` を追加し、対応するCSS
+   （`.badge.guide-status-completed`）も追加した。theme.json側の値
+   （Codex・Julesが実際に選んだ `"completed"`）は書き換えず、共通インフラ側を
+   両方の表記に対応させる方針を取った（各AIの成果物を尊重するため）。
+   あわせて `guides/README.md` に status の許容値
+   （`not-started` / `in-progress` / `completed` or `published`）を明文化し、
+   今後の表記ゆれを防ぐようにした。
+3. `README.md` / `PROJECT_SPEC.md` の「Codex版のみ公開済み」という記述を、
+   「Gemini/Jules版・Codex版が公開済み、Claude Code版のみ未執筆」に更新した。
+
+### 再テスト結果
+
+修正後、`theme.html` を再読み込みし、3枚のAI選択カードが
+「未執筆 / 公開中 / 公開中」（Claude Code / Gemini・Jules / Codex）と
+正しく表示されることを確認した。Playwrightの回帰テスト（19ページ×2ビューポート、
+計38パターン）を再実行し、全ページでコンソールエラー・異常レスポンスが
+ないことも再確認した。Gemini/Jules版・Codex版それぞれの `view.html` を
+スクリーンショットで目視確認し、Julesが追加した `:::html` ブロック
+（リッチなカード・比較表・フロー図）とCodexの通常のMarkdown本文が、
+どちらも意図通りレンダリングされていることを確認した。
+
+### 最終自己評価
+
+| 項目 | 点数 | 備考 |
+|---|---|---|
+| 仕様適合性 | 95/100 | ユーザー指示の12項目（最新化・確認・競合解消・両成果物保持・completed設定・記録統合・テスト・自己レビュー・修正・再テスト・commit/push・PR作成）をすべて実施。mainへの未マージも指示通り。 |
+| 正常動作 | 100/100 | 全19ページ×2ビューポート＝38パターンでエラーなしを確認。 |
+| スマホ対応 | 95/100 | 390pxで確認済み。Julesの`:::html`コンポーネントもスマホ幅で崩れないことを確認。 |
+| UI/UX | 90/100 | ステータス表示の不整合を修正済み。3AIの説明を違和感なく行き来できる。 |
+| コード品質 | 85/100 | `guides-data.js`の修正は最小限。ただし競合解消のマージコミット自体は差分が大きく複雑。 |
+| 保守性 | 92/100 | statusの許容値をguides/README.mdに明文化し、今後の表記ゆれを防止。 |
+| パフォーマンス | 対象外 | 今回はデータ・ドキュメント・小規模な共通インフラ修正のみ。 |
+| セキュリティ | 85/100 | 秘密情報の混入なしを確認済み。ただしJulesが追加した`:::html`ブロックは生HTMLをそのまま出力する仕様であり、AI間の信頼を前提にした設計であることを注記（下記「残っている問題」参照）。 |
+
+**総合: 92/100**
+
+### 残っている問題・今後の課題
+
+- `web/assets/js/markdown-lite.js` の `:::html ... :::` 機能は、Markdownの
+  範囲を超えて任意のHTML/CSS（および理論上はscriptタグ等）をそのまま
+  出力する。現状は「リポジトリにコミットする内容をAIエージェントが書く」
+  という信頼モデルの範囲内なので変更していないが、将来この仕組みを
+  ユーザー入力や外部データの表示に転用する場合は、サニタイズの検討が必要。
+- 今回の競合解消で「配列要素の消失」という編集ミスが実際に起きたことは、
+  今後同種の大きな競合解消を行う際、可能であれば差分（`git diff`）を
+  修正前後で見比べる、あるいは要素数を機械的にカウントするといった
+  追加の検証ステップを標準化する余地があることを示している。
+- Jules自身の自己評価ログ（`docs/devlog/self-eval/gemini-jules.md`）には
+  今回の作業に関する記録が追加されていないことを確認した（Claude Codeから
+  代筆はしていない。AI間の独立性ルールに基づき、Jules自身が今後追記することを想定）。
+
+### 人間による確認が必要な項目
+
+- `integration/final` → `main` のPull Requestは作成するが、指示により
+  `main` へはマージしない。レビュー・マージの判断はユーザーに委ねる。
+- `:::html` ブロックによる生HTML出力の許容範囲（今後どこまで信頼するか）は、
+  プロジェクトオーナーの方針判断が必要。

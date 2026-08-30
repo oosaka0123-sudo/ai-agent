@@ -654,7 +654,7 @@ img { max-width: 100%; }
 
 .badge.guide-status-not-started { color: var(--text-faint); border-style: dashed; }
 .badge.guide-status-in-progress { color: #fde68a; border-color: rgba(251, 191, 36, .4); background: rgba(251, 191, 36, .08); }
-.badge.guide-status-published { color: #bbf7d0; border-color: rgba(74, 222, 128, .4); background: rgba(74, 222, 128, .1); }
+.badge.guide-status-published, .badge.guide-status-completed { color: #bbf7d0; border-color: rgba(74, 222, 128, .4); background: rgba(74, 222, 128, .1); }
 
 .markdown-body h2 {
   font-size: 16px;
