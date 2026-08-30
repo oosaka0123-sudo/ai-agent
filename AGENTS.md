@@ -41,7 +41,8 @@
 ├── .github/        # GitHub Actions, PR/Issueテンプレート
 ├── docs/           # ドキュメント（開発ルール、ディレクトリ構成の説明、devlog/screenshots）
 ├── data/           # 開発記録アーカイブサイトのデータ（projects.json, devlog.json）
-├── web/            # GitHub Pagesで公開する静的サイト（開発記録アーカイブ、構成図など）
+├── guides/         # 複数AI比較ガイドのデータ（テーマ別、AIごとに独立したMarkdown）
+├── web/            # GitHub Pagesで公開する静的サイト（開発記録アーカイブ、ガイド、構成図など）
 ├── src/            # アプリケーション本体（用途未確定、今後拡張）
 ├── tests/          # テストコード
 ├── scripts/        # 開発・運用補助スクリプト
@@ -75,6 +76,25 @@
 
 このルールは、後から何年も見返せる開発記録を途切れさせないためのものです。
 面倒でも省略せず、必ず実施してください。
+
+## 複数AI比較ガイド（guides/）のルール（重要）
+
+`web/guides/` には、同じテーマについて **Claude Code / Gemini・Jules / Codex が
+それぞれ独立して書いた説明を読み比べられるガイド集**があります。
+「3つのAIに同じサイトを別々に作らせる」ものでは **ありません**。
+サイトのUI・ナビゲーション・データ構造は共通で、テーマごとの「説明文章」だけを
+AIごとに分けて `guides/<テーマID>/{claude,gemini,codex}.md` に書きます。
+
+**担当ルール（絶対に守ること）**
+
+- 自分が担当する `.md` ファイルだけを編集する。
+  - Claude Code → `claude.md` / Gemini・Jules → `gemini.md` / Codex → `codex.md`
+- **他のAIが担当する `.md` ファイルの中身は変更・参考にしない。**
+  同じ条件・同じテーマで独立して説明を書くことに意味がある。
+- `guides/themes.json`、`guides/<テーマID>/theme.json`、`web/guides/` のHTML/CSS/JSなど
+  サイトの共通部分は、どのAIが編集してもよい（新しいテーマの追加、UI改善など）。
+
+詳細は [`guides/README.md`](guides/README.md) を参照してください。
 
 ## コーディング規約
 

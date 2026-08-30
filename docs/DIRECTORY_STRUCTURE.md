@@ -17,12 +17,20 @@
 ├── data/                           # 開発記録アーカイブサイトのデータ本体
 │   ├── projects.json               # プロジェクト一覧データ
 │   └── devlog.json                 # 開発記録（タイムライン）データ
+├── guides/                         # 複数AI比較ガイドのデータ
+│   ├── themes.json                 # テーマ一覧
+│   └── smartphone-website/         # テーマごとのディレクトリ
+│       ├── theme.json              # テーマ情報 + 3AIの担当ファイル一覧
+│       ├── claude.md               # Claude Code の説明（担当AIのみ編集）
+│       ├── gemini.md               # Gemini / Jules の説明（担当AIのみ編集）
+│       └── codex.md                # Codex の説明（担当AIのみ編集）
 ├── src/                            # アプリケーション本体（用途未確定・今後拡張）
 ├── web/                            # GitHub Pagesで公開する静的サイト
 │   ├── index.html                  # 開発記録アーカイブ トップページ
 │   ├── project.html                # プロジェクト詳細ページ
 │   ├── devlog.html                 # 開発記録詳細ページ
 │   ├── diagram.html                # リモートAIエージェント構成図ページ
+│   ├── guides/                     # 複数AI比較ガイドのページ（index/theme/view）
 │   └── assets/
 ├── tests/                          # テストコード
 ├── scripts/                        # 開発・運用補助スクリプト（sync-site-data.sh 等）
@@ -69,3 +77,13 @@
 
 記録の追加方法・自動記録ルールの詳細は [`AGENTS.md`](../AGENTS.md) の
 「開発記録の自動記録ルール」を参照してください。
+
+## guides/（複数AI比較ガイド）
+
+同じテーマについて、Claude Code / Gemini・Jules / Codex がそれぞれ独立して書いた説明を
+読み比べられるガイド集のデータです。「3つのAIに同じサイトを別々に作らせる」ものでは
+なく、サイトのUI・データ構造は共通で、テーマごとの説明文章だけをAIごとに分けています。
+
+各AIは自分の担当ファイル（`claude.md` / `gemini.md` / `codex.md`）だけを編集し、
+他AIのファイルは変更しません。詳細は [`guides/README.md`](../guides/README.md) と
+[`AGENTS.md`](../AGENTS.md) の「複数AI比較ガイド（guides/）のルール」を参照してください。

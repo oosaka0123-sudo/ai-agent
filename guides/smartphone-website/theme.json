@@ -1,0 +1,11 @@
+{
+  "id": "smartphone-website",
+  "title": "スマホだけでホームページを作る",
+  "emoji": "📱",
+  "description": "同じテーマ「スマホだけでホームページを作る方法」について、Claude Code・Gemini/Jules・Codexが同じ条件で、それぞれ独立して説明します。AIごとの考え方や説明の違いを比べてみてください。",
+  "ais": [
+    { "id": "claude-code", "label": "Claude Code", "emoji": "🟣", "file": "claude.md", "status": "not-started" },
+    { "id": "gemini-jules", "label": "Gemini / Jules", "emoji": "🔵", "file": "gemini.md", "status": "not-started" },
+    { "id": "codex", "label": "Codex", "emoji": "🟢", "file": "codex.md", "status": "not-started" }
+  ]
+}

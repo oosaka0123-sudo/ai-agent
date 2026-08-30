@@ -6,6 +6,7 @@ on:
     paths:
       - "web/**"
       - "data/**"
+      - "guides/**"
       - "docs/screenshots/**"
       - "scripts/sync-site-data.sh"
       - ".github/workflows/pages.yml"

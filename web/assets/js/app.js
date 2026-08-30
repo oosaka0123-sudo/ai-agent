@@ -14,6 +14,7 @@
     timelineList: document.getElementById("timelineList"),
     aiChips: document.getElementById("aiChips"),
     techChips: document.getElementById("techChips"),
+    guidesPreview: document.getElementById("guidesPreview"),
   };
 
   const state = { query: "", ai: null, tech: null };
@@ -31,6 +32,7 @@
   initLightbox();
   renderStats();
   renderRecent();
+  renderGuidesPreview();
   renderChips(els.aiChips, AI_LIST, "ai", devlog.map((d) => d.aiUsed || []));
   renderChips(els.techChips, TECH_LIST, "tech", devlog.map((d) => d.tech || []));
   applyFiltersAndRender();
@@ -73,6 +75,29 @@
     const set = new Set();
     devlog.forEach((d) => (d.aiUsed || []).forEach((a) => set.add(a)));
     return set.size;
+  }
+
+  async function renderGuidesPreview() {
+    if (!els.guidesPreview) return;
+    try {
+      const themes = await GuidesData.loadThemes();
+      els.guidesPreview.innerHTML = themes.length
+        ? themes
+            .slice(0, 3)
+            .map(
+              (theme) => `
+              <a class="theme-card" href="guides/theme.html?theme=${encodeURIComponent(theme.id)}">
+                <span class="theme-card-emoji">${theme.emoji || "📘"}</span>
+                <p class="theme-card-title">${ArchiveData.escapeHTML(theme.title)}</p>
+                <p class="theme-card-desc">${ArchiveData.escapeHTML(theme.description || "")}</p>
+              </a>`
+            )
+            .join("")
+        : emptyStateHTML("まだガイドのテーマがありません。");
+    } catch (err) {
+      els.guidesPreview.innerHTML = emptyStateHTML("ガイドを読み込めませんでした。");
+      console.error(err);
+    }
   }
 
   function renderRecent() {

@@ -58,9 +58,10 @@ Thumbs.db
 # ==============================
 # 開発記録アーカイブサイト（ビルド時の自動コピー先）
 # ==============================
-# data/ と docs/screenshots/ が正本。scripts/sync-site-data.sh が
+# data/・guides/・docs/screenshots/ が正本。scripts/sync-site-data.sh が
 # 公開時にこれらへコピーするため、コピー先はコミットしない。
 /web/data/
+/web/guides-data/
 /web/assets/screenshots/
 
 # ==============================

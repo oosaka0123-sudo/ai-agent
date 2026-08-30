@@ -15,6 +15,9 @@
       <span aria-hidden="true">🔎</span>
       <input id="searchInput" type="search" placeholder="開発を検索（例: バス, Claude, PWA, GitHub）" autocomplete="off">
     </label>
+    <nav class="topbar-nav">
+      <a href="guides/index.html">ガイド</a>
+    </nav>
   </header>
 
   <div class="wrap">
@@ -24,6 +27,16 @@
       <p class="hero-subtitle">自分の開発記録</p>
       <div class="stats-row" id="statsRow"></div>
     </section>
+
+    <section class="section" id="guides">
+      <div class="section-head">
+        <h2 class="section-title">ガイド</h2>
+        <p class="section-hint"><a href="guides/index.html">すべて見る →</a></p>
+      </div>
+      <div class="theme-card-list" id="guidesPreview"></div>
+    </section>
+
+    <hr class="section-divider">
 
     <div id="activeFilters" class="active-filters" style="margin-top:24px"></div>
 
@@ -81,6 +94,7 @@
 
   <script src="assets/js/data.js"></script>
   <script src="assets/js/render.js"></script>
+  <script src="assets/js/guides-data.js"></script>
   <script src="assets/js/app.js"></script>
 </body>
 </html>

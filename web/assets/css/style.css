@@ -557,3 +557,141 @@ img { max-width: 100%; }
 @media (min-width: 720px) {
   .stat-tile { min-width: 130px; }
 }
+
+/* ---------- ガイド（複数AI比較） ---------- */
+
+.topbar-nav {
+  display: flex;
+  gap: 10px;
+  margin-left: auto;
+  font-size: 13px;
+}
+
+.topbar-nav a {
+  text-decoration: none;
+  color: var(--text-dim);
+  white-space: nowrap;
+}
+
+.topbar-nav a:hover, .topbar-nav a:focus-visible {
+  color: var(--text);
+}
+
+.theme-card-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 14px;
+}
+
+.theme-card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  text-decoration: none;
+  color: var(--text);
+  background: linear-gradient(160deg, rgba(167, 139, 250, .16), rgba(96, 165, 250, .06) 60%, transparent), var(--panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 22px 20px;
+  box-shadow: var(--shadow-lg);
+  transition: transform .15s ease, border-color .15s ease;
+}
+
+.theme-card:hover, .theme-card:focus-visible {
+  border-color: var(--accent-purple);
+  transform: translateY(-2px);
+}
+
+.theme-card-emoji { font-size: 34px; }
+
+.theme-card-title {
+  margin: 0;
+  font-size: 19px;
+  font-weight: 800;
+}
+
+.theme-card-desc {
+  margin: 0;
+  font-size: 13.5px;
+  line-height: 1.6;
+  color: var(--text-dim);
+}
+
+.ai-choice-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 12px;
+}
+
+.ai-choice-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  text-align: center;
+  text-decoration: none;
+  color: var(--text);
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 26px 16px;
+  box-shadow: var(--shadow-sm);
+  transition: transform .15s ease, border-color .15s ease;
+}
+
+.ai-choice-card:hover, .ai-choice-card:focus-visible {
+  border-color: var(--accent-blue);
+  transform: translateY(-2px);
+}
+
+.ai-choice-emoji { font-size: 30px; }
+
+.ai-choice-label {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.badge.guide-status-not-started { color: var(--text-faint); border-style: dashed; }
+.badge.guide-status-in-progress { color: #fde68a; border-color: rgba(251, 191, 36, .4); background: rgba(251, 191, 36, .08); }
+.badge.guide-status-published { color: #bbf7d0; border-color: rgba(74, 222, 128, .4); background: rgba(74, 222, 128, .1); }
+
+.markdown-body h2 {
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--text);
+  margin: 22px 0 8px;
+}
+
+.markdown-body h2:first-child { margin-top: 0; }
+
+.markdown-body h3 {
+  font-size: 14.5px;
+  font-weight: 700;
+  color: var(--accent-blue);
+  margin: 16px 0 6px;
+}
+
+.markdown-body p {
+  margin: 0 0 10px;
+  font-size: 14.5px;
+  line-height: 1.75;
+  color: var(--text);
+}
+
+.markdown-body ul {
+  margin: 0 0 10px;
+  padding-left: 1.3em;
+}
+
+.markdown-body li {
+  font-size: 14.5px;
+  line-height: 1.7;
+}
+
+.markdown-body code {
+  background: rgba(255, 255, 255, .08);
+  border-radius: 4px;
+  padding: 1px 6px;
+  font-size: 13px;
+}

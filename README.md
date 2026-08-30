@@ -17,8 +17,9 @@
 ├── .github/          # GitHub Actions（CI）、PR/Issueテンプレート
 ├── docs/             # 開発ルール・ディレクトリ構成の説明・開発日記・スクリーンショット
 ├── data/             # 開発記録アーカイブサイトのデータ（projects.json / devlog.json）
+├── guides/           # 複数AI比較ガイドのデータ（テーマ別、AIごとに独立したMarkdown）
 ├── src/              # アプリケーション本体（用途未確定・今後拡張）
-├── web/              # GitHub Pagesで公開する静的サイト（開発記録アーカイブ、構成図）
+├── web/              # GitHub Pagesで公開する静的サイト（開発記録アーカイブ、ガイド、構成図）
 ├── tests/            # テストコード
 ├── scripts/          # 開発・運用補助スクリプト
 ├── config/           # 機密情報を含まない設定ファイル
@@ -112,7 +113,7 @@ python3 -m http.server 8000 --directory web
 
 - ページ本体: `web/` 以下（トップページ・詳細ページ・構成図ページ `web/diagram.html`）
 - デプロイ設定: `.github/workflows/pages.yml`（`main` への push で、
-  `data/` と `docs/screenshots/` を `web/` へ同期してから自動デプロイ）
+  `data/`・`guides/`・`docs/screenshots/` を `web/` へ同期してから自動デプロイ）
 
 #### 有効化手順（リポジトリ管理者が最初に1回だけ行う作業）
 
@@ -127,6 +128,26 @@ GitHub Pagesの有効化はリポジトリの管理者権限が必要なため�
 
 一度設定すれば、以降は `data/devlog.json` などを更新して `main` にマージするだけで
 自動的に再公開されます。
+
+## ガイド（複数AI比較）
+
+`web/guides/` には、同じテーマについて **Claude Code・Gemini/Jules・Codexがそれぞれ
+独立して書いた説明を読み比べられるガイド集**があります。「3つのAIに同じサイトを
+別々に作らせる」ものではなく、**サイトのUI・データ構造は共通**で、テーマごとの
+「説明文章」だけをAIごとに分けて管理します。
+
+- 一覧: `web/guides/index.html`（テーマ一覧） → `web/guides/theme.html`（3AI選択）
+  → `web/guides/view.html`（各AIの説明を表示）
+- データ: `guides/themes.json`（テーマ一覧）、`guides/<テーマID>/theme.json`（テーマ情報）、
+  `guides/<テーマID>/{claude,gemini,codex}.md`（各AIの説明本文）
+
+最初のテーマは「スマホだけでホームページを作る」です。現時点では3AIとも
+本文は未執筆で、見出し構成のみのプレースホルダーになっています。
+
+**担当ルール**: 各AIは自分の担当ファイル（`claude.md` / `gemini.md` / `codex.md`）
+だけを編集し、他AIのファイルは変更しません。共通UI（HTML/CSS/JS、`themes.json` など）
+はどのAIが編集してもかまいません。詳細は [`guides/README.md`](guides/README.md) と
+[`AGENTS.md`](AGENTS.md) の「複数AI比較ガイド（guides/）のルール」を参照してください。
 
 ## セキュリティに関する重要な注意事項
 

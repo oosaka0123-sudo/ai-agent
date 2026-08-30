@@ -90,10 +90,46 @@
     "solutions": "scripts/sync-site-data.sh で data/ と docs/screenshots/ をビルド時に web/ へコピーする方式にし、ローカル確認とGitHub Actionsの両方から同じスクリプトを呼ぶことで二重管理を防いだ。",
     "learnings": "個人用データベースサイトは「編集する場所」と「公開される場所」を分けておくと、何年も追記し続ける運用がしやすい。",
     "images": [],
-    "githubCommits": [],
+    "githubCommits": [
+      {
+        "label": "個人用開発記録アーカイブサイト「MY DEVELOPMENT ARCHIVE」を追加",
+        "url": "https://github.com/oosaka0123-sudo/ai-agent/commit/721bd0345839da3f4858dca646be236c706d8163"
+      }
+    ],
     "pullRequests": [],
     "relatedUrls": [],
     "nextSteps": "関西サーファーKS、次バス大阪、Claude Code教室など、他の実際のプロジェクト情報を data/projects.json に追記していく。",
     "tags": ["開発記録", "アーカイブ", "データベース", "GitHub Pages"]
+  },
+  {
+    "id": "2026-08-30-multi-ai-guides",
+    "date": "2026-08-30",
+    "title": "複数AI比較ガイド機能を追加",
+    "project": "ai-agent",
+    "purpose": "同じテーマについて、Claude Code・Gemini/Jules・Codexがそれぞれ独立して書いた説明を読み比べられるガイド集を作る。3つのAIに同じサイトを別々に作らせるのではなく、共通のUI・データ構造の上で、説明文章の部分だけをAIごとに分離する。",
+    "whatMade": "web/guides/ にガイド一覧・テーマ詳細（3AI選択）・説明表示の3ページを追加。データは guides/themes.json、guides/<テーマID>/theme.json、guides/<テーマID>/{claude,gemini,codex}.md で管理する構成にした。最初のテーマ「スマホだけでホームページを作る」を用意し、3AIとも本文はまだ書かず、共通の見出し構成のみのプレースホルダーとした。外部ライブラリを使わない最小限のMarkdownレンダラーも実装。",
+    "changes": [
+      "guides/themes.json、guides/smartphone-website/theme.json（新規）",
+      "guides/smartphone-website/claude.md、gemini.md、codex.md（新規、いずれも構造のみ）",
+      "guides/README.md、guides/_template.md（新規）",
+      "web/guides/index.html、theme.html、view.html（新規）",
+      "web/assets/js/guides-data.js、guides-index.js、guides-theme.js、guides-view.js、markdown-lite.js（新規）",
+      "web/assets/css/style.css（更新、ガイド用コンポーネント追加）",
+      "web/index.html、web/assets/js/app.js（更新、トップページにガイドの入口を追加）",
+      "scripts/sync-site-data.sh、.github/workflows/pages.yml、.gitignore（更新、guides/の同期を追加）",
+      "AGENTS.md（更新、複数AI比較ガイドの担当ルールを追加）"
+    ],
+    "aiUsed": ["Claude Code"],
+    "services": ["GitHub", "GitHub Pages"],
+    "tech": ["HTML", "CSS", "JavaScript", "JSON", "Markdown"],
+    "problems": "web/直下のページとweb/guides/配下のページとで、データファイルまでの相対パスの階層が異なり、最初theme.jsonの読み込みに失敗した。",
+    "solutions": "guides-data.js内でlocation.pathnameを見て、/guides/配下から呼ばれているかどうかで相対パスの基準（guides-data/ か ../guides-data/ か）を自動判定するようにした。",
+    "learnings": "同じJSファイルを深さの異なる複数ページから共有する場合、相対パスをハードコードせず、呼び出し元のパスから動的に基準パスを決めると事故が減る。",
+    "images": [],
+    "githubCommits": [],
+    "pullRequests": [],
+    "relatedUrls": [],
+    "nextSteps": "Gemini/JulesとCodexにそれぞれ guides/smartphone-website/gemini.md と codex.md へ本文を執筆してもらう。Claude Code自身の claude.md も執筆する。",
+    "tags": ["ガイド", "複数AI比較", "Gemini", "Codex"]
   }
 ]
