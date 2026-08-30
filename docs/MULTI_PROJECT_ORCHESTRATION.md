@@ -11,6 +11,14 @@
 3. AIエージェントシステム
 4. FX取引
 
+## 状態管理の正本
+
+- 4プロジェクトの接続状態、運用状態、安全境界の正本は `projects/registry.json` とする。
+- プロジェクト識別子は既存仕様に合わせて `slug` を使う。
+- `data/projects.json` は MY DEVELOPMENT ARCHIVE の表示・紹介用データであり、4プロジェクト運用状態の正本にはしない。
+- 同じプロジェクトが `projects/registry.json` と `data/projects.json` の両方に存在する場合、`slug` は必ず一致させる。
+- リポジトリ接続状況やCopilot監督状態を更新する場合は、まず `projects/registry.json` を更新する。
+
 ## 基本運用
 
 - 最大4プロジェクトを同時進行する。
@@ -51,6 +59,7 @@ AI Credits節約のため、標準では「PRを開いた時の1回レビュー�
 3. `.github/workflows/copilot-auto-review.yml`
 4. `AGENTS.md` または既存の共通AIルール
 5. ブランチ/PR運用
+6. `projects/registry.json` の `repository` / `status` / `copilot_review` を更新
 
 ## FX安全境界
 
