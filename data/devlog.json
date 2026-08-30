@@ -159,5 +159,34 @@
     "relatedUrls": [],
     "nextSteps": "Gemini/JulesとCodexも、自分の担当ファイルを完成させたタイミングでdocs/devlog/self-eval/に自分のログを追記する。",
     "tags": ["品質保証", "自己評価", "自律実行", "アクセシビリティ"]
+  },
+  {
+    "id": "2026-08-30-platform-foundation",
+    "date": "2026-08-30",
+    "title": "Claude Code担当の初期基盤完成（3AI並行運用ドキュメントの整合性確認）",
+    "project": "ai-agent",
+    "purpose": "このリポジトリの本当の目的（Web/PWA/API/自動化/調査/通知/アプリなどをClaude Code・Gemini/Jules・OpenAI Codexの3AIがGitHubを共通記憶として作れる基盤であり、Webサイト制作そのものは目的ではないこと）を、README.md/AGENTS.md/PROJECT_SPEC.mdに矛盾なく明記し、会話履歴のない次回セッションでもGitHubだけでプロジェクトを理解できる状態にする。",
+    "whatMade": "README.md冒頭とAGENTS.mdの「このプロジェクトについて」を書き直し、PROJECT_SPEC.mdの第2・3章をサンプルプロジェクトと明記した上で、AIチーム運用基盤そのものをまとめた第5章を新設した。README.mdに新規AI向けのオンボーディング手順（読む順番）を追加。CLAUDE.md/GEMINI.mdと対称になるようCODEX.mdを新規作成し、GEMINI.mdにJulesを併記した。data/projects.jsonのai-agentプロジェクト概要も更新後の位置づけに合わせて修正した。",
+    "changes": [
+      "README.md（目的の書き直し、オンボーディングセクション新設）",
+      "AGENTS.md（このプロジェクトについて、を書き直し）",
+      "PROJECT_SPEC.md（第1章書き直し、第2・3章をサンプルプロジェクトと明記、第5章新設）",
+      "CODEX.md（新規）",
+      "GEMINI.md、CLAUDE.md（更新）",
+      "data/projects.json（ai-agentプロジェクトの概要文を更新）",
+      "docs/devlog/self-eval/claude-code.md（本タスクの自己評価を追記）"
+    ],
+    "aiUsed": ["Claude Code"],
+    "services": ["GitHub"],
+    "tech": ["Markdown", "JSON", "Python"],
+    "problems": "README/AGENTS/PROJECT_SPECが「複数AIの共同開発」という一般論に留まり、「GitHubを共通記憶とした並行作業基盤」「Webサイト制作は主目的ではない」という位置づけが伝わらなかった。CODEX.mdが存在せず3AI間で非対称だった。オンボーディング手順が明文化されていなかった。",
+    "solutions": "3つのドキュメントの目的記述を同じ文言で統一し、サンプルプロジェクトの章に明示的な注記を追加した。CODEX.mdを新規作成しCLAUDE.md/GEMINI.mdと対称の構成にした。READMEにオンボーディング手順（読む順番）を新設し、AGENTS.mdからも導線を張った。全内部リンクをスクリプトで機械検証した。",
+    "learnings": "複数のドキュメントに同じ目的を書く場合、仕様変更時に全ファイルへ反映し忘れやすい。内部リンクの機械検証と合わせてチェックすると矛盾やリンク切れに気づきやすい。",
+    "images": [],
+    "githubCommits": [],
+    "pullRequests": [],
+    "relatedUrls": [],
+    "nextSteps": "Gemini/JulesとCodexがguides/smartphone-website/{gemini,codex}.mdへ本文を執筆する。Claude Code自身もclaude.mdへ本文を執筆する。次回以降、Webサイト以外（PWA・API連携・自動化など）のサンプルプロジェクトをこの基盤の上に追加していく。",
+    "tags": ["基盤整備", "ドキュメント", "3AI運用", "オンボーディング"]
   }
 ]

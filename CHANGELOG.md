@@ -6,6 +6,18 @@
 
 ## [Unreleased]
 
+### Changed
+
+- リポジトリの目的を「Claude Code・Gemini/Jules・OpenAI Codexの3AIがGitHubを
+  共通記憶として並行作業できるAIエージェント開発基盤」として明確化し、
+  `README.md`・`AGENTS.md`・`PROJECT_SPEC.md` の記述を統一。
+  MY DEVELOPMENT ARCHIVEと複数AI比較ガイドは、この基盤の動作確認用
+  サンプルプロジェクトである旨を明記した。
+- `README.md` に、会話履歴のない新規AIセッション向けのオンボーディング手順
+  （読む順番）を追加。
+- `CODEX.md` を新規追加し、`CLAUDE.md` / `GEMINI.md` と対称の構成にした。
+  `GEMINI.md` は「Gemini / Jules」向けの内容に更新。
+
 ### Added
 
 - `AGENTS.md` に「自律実行ルール」「自己評価・品質保証」を追加し、

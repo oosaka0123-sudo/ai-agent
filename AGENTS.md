@@ -1,16 +1,28 @@
 # AGENTS.md
 
-このファイルは、Claude Code / Codex / Gemini など、このリポジトリで作業する
-すべてのAIエージェントが最初に読むべき共通ルールをまとめたものです。
-（`CLAUDE.md` や `GEMINI.md` からもこのファイルを参照しています。）
+このファイルは、**Claude Code / Gemini・Jules / OpenAI Codex** の3AIが
+このリポジトリで作業する際に最初に読むべき共通ルールをまとめたものです。
+（`CLAUDE.md` / `GEMINI.md` / `CODEX.md` からもこのファイルを参照しています。）
+
+会話履歴を共有できない複数のAIが、GitHubリポジトリそのものを共通の記憶として
+読み書きすることで、途切れずに共同開発を続けられるようにするための基盤です。
+初めて開くAIは、このファイルの前に [`README.md`](README.md) の
+「初めてこのリポジトリを開くAIエージェントへ（オンボーディング）」を読んでください。
 
 ## このプロジェクトについて
 
-複数のLLM/AIエージェント（Claude Code, Codex, Gemini など）が共同で開発できることを
-目的とした汎用プロジェクトです。まだ特定の用途には固定されておらず、今後
-ニュース収集・Web操作・通知・自動処理などの機能を追加していく予定です。
+- **本当の目的**: Web / PWA / API連携 / 自動化 / 調査 / 通知 / アプリなど、
+  さまざまなものを複数のAIエージェントがチームとして作れる汎用基盤を作ること。
+- **Webサイト制作そのものが目的ではない**: `web/index.html`（MY DEVELOPMENT ARCHIVE）や
+  `web/guides/`（複数AI比較ガイド）はすでに存在するが、これらは
+  **この基盤が実際に機能するかを確かめるためのサンプル（例示）プロジェクト**であり、
+  目的そのものではない。新しいプロジェクトを追加するときも、この基盤（ブランチ運用・
+  自律実行ルール・自己評価ルール・開発記録ルール）を維持したまま拡張すること。
+- **現状**: 特定の用途に固定していない汎用構成。今後、上記のようなプロジェクトを
+  必要に応じて追加していく。
 
 ディレクトリ構成の詳細は [`docs/DIRECTORY_STRUCTURE.md`](docs/DIRECTORY_STRUCTURE.md)、
+仕様の詳細は [`PROJECT_SPEC.md`](PROJECT_SPEC.md)、
 開発ルールの詳細は [`docs/DEVELOPMENT.md`](docs/DEVELOPMENT.md) を参照してください。
 
 ## 最優先ルール（絶対に守ること）
@@ -199,7 +211,8 @@ CodexはCodexの成果物を評価・修正する。他AIの担当ファイル�
 ├── PROJECT_SPEC.md # 機能仕様（自己レビュー時の照合先）
 ├── AGENTS.md       # 本ファイル（共通ルール）
 ├── CLAUDE.md       # Claude Code向け補足
-└── GEMINI.md       # Gemini向け補足
+├── GEMINI.md       # Gemini/Jules向け補足
+└── CODEX.md        # OpenAI Codex向け補足
 ```
 
 ## 開発記録の自動記録ルール（重要）

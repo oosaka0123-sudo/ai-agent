@@ -42,7 +42,8 @@
 ├── PROJECT_SPEC.md                 # 機能仕様（自己レビュー時の照合先）
 ├── AGENTS.md                       # AIエージェント共通ルール（自律実行・自己評価・自動記録ルールを含む）
 ├── CLAUDE.md                       # Claude Code向け補足
-├── GEMINI.md                       # Gemini向け補足
+├── GEMINI.md                       # Gemini/Jules向け補足
+├── CODEX.md                        # OpenAI Codex向け補足
 └── README.md
 ```
 
