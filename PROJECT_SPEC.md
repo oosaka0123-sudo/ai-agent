@@ -154,3 +154,25 @@ AIエージェントは、作業完了前の自己レビュー（[`AGENTS.md`](A
 - **ブランチ・PRルール**: `main` へ直接pushせず作業ブランチ + PRで進める。
   秘密情報は `.env`（gitignore済み）にのみ記載する（[`AGENTS.md`](AGENTS.md)、
   [`docs/DEVELOPMENT.md`](docs/DEVELOPMENT.md) 参照）。
+
+## 6. サンプルプロジェクト: 3AI競争テスト（competitions/）
+
+> 基盤の動作確認のためのサンプルプロジェクトです。リポジトリの目的そのものではありません。
+
+`guides/` が「共通サイト・共通UIの上で説明文章だけを独立して書く」比較なのに対し、
+`competitions/` は **成果物そのもの（1枚完結のHTMLページ等）を、Claude Code /
+Gemini・Jules / OpenAI Codexがそれぞれ完全に独立して作る競争テスト**。
+各AIは自分の名前を含む専用ブランチで作業し、他AIのブランチ・成果物・PRは
+参照・参考にしない。成果物は `competitions/<回番号>-<お題>/<ai-name>.html` に置き、
+完了したらPRを作成して停止する（`main`へはマージしない）。
+
+### 第1回: スマホだけでAI開発はどこまでできる？
+
+- ディレクトリ: `competitions/01-mobile-ai-dev/`
+- お題: Claude Code・Gemini/Jules・OpenAI Codexの比較を含む、スマホだけでの
+  AI開発（調査→設計→コーディング→テスト→GitHub保存→公開）の実践ガイドを、
+  CSS埋め込みの1枚のHTMLページとして作成する。
+- 2026-08-30時点のステータス: Claude Code版（`claude-code.html`）完成。
+  他AI版は各AIが自分のブランチ・PRで独立して追加する。
+
+詳細は [`competitions/README.md`](competitions/README.md) を参照。

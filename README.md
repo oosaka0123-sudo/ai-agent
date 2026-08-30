@@ -186,6 +186,19 @@ GitHub Pagesの有効化はリポジトリの管理者権限が必要なため�
 はどのAIが編集してもかまいません。詳細は [`guides/README.md`](guides/README.md) と
 [`AGENTS.md`](AGENTS.md) の「複数AI比較ガイド（guides/）のルール」を参照してください。
 
+### 3AI競争テスト（competitions/）
+
+`guides/` が「共通サイトの上で説明文章だけを独立して書く」比較なのに対し、
+`competitions/` は **成果物そのもの（1枚完結のHTMLページ）を、Claude Code /
+Gemini・Jules / OpenAI Codexがそれぞれ完全に独立したブランチで作る競争テスト**です。
+他AIのブランチ・成果物・PRは一切参照せず、成果物は
+`competitions/<回番号>-<お題>/<ai-name>.html` に置きます。
+
+第1回のお題は「スマホだけでAI開発はどこまでできる？」です。Claude Code版
+（`competitions/01-mobile-ai-dev/claude-code.html`）は、3AIの比較・できる/できないの
+早見表・実践フロー・PWAやAPI連携の解説などを1枚のページにまとめています。
+詳細は [`competitions/README.md`](competitions/README.md) を参照してください。
+
 ## セキュリティに関する重要な注意事項
 
 - **APIキー・パスワードなどの秘密情報は絶対にGitHubへコミットしないでください。**

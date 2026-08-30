@@ -6,6 +6,13 @@
 
 ## [Unreleased]
 
+### Added
+
+- 「3AI競争テスト」第1回として、`competitions/01-mobile-ai-dev/claude-code.html`
+  を追加。Claude Code・Gemini/Jules・OpenAI Codexを比較しながら、スマホだけで
+  「調査→設計→コーディング→テスト→GitHub保存→公開」を行う実践フローをまとめた
+  1枚完結のHTML/CSSガイド（2026年8月30日時点の公開情報にもとづく）。
+
 ### Changed
 
 - リポジトリの目的を「Claude Code・Gemini/Jules・OpenAI Codexの3AIがGitHubを

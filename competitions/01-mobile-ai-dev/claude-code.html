@@ -1,0 +1,555 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>スマホだけでAI開発はどこまでできる？（Claude Code版）</title>
+<meta name="description" content="Claude Code・Gemini/Jules・OpenAI Codexを比較し、スマホだけで調査→設計→コーディング→テスト→GitHub保存→公開までできる範囲を検証したガイド（2026年8月30日時点）。">
+<style>
+  :root{
+    color-scheme: dark;
+    --bg:#080b10;
+    --bg-glow: radial-gradient(55% 45% at 50% -8%, rgba(45,212,191,.16), transparent),
+               radial-gradient(45% 35% at 95% 5%, rgba(251,146,60,.10), transparent);
+    --panel: linear-gradient(180deg,#101720,#0a0f16);
+    --panel-soft: linear-gradient(180deg,#0c1119,#080b10);
+    --border: rgba(255,255,255,.10);
+    --border-strong: rgba(255,255,255,.20);
+    --text:#e8eef0;
+    --text-dim:#9fb0ac;
+    --text-faint:#657270;
+    --teal:#2dd4bf;
+    --amber:#fbbf24;
+    --rose:#fb7185;
+    --green:#4ade80;
+    --claude:#f4845f;
+    --gemini:#5b8def;
+    --codex:#10b981;
+    --radius-lg:22px;
+    --radius-md:14px;
+    --radius-sm:9px;
+    --shadow: 0 18px 50px rgba(0,0,0,.5);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;background:var(--bg);color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Hiragino Sans","Noto Sans JP",sans-serif;
+    -webkit-text-size-adjust:100%;}
+  body{background-image:var(--bg-glow);background-repeat:no-repeat;padding-bottom:56px;line-height:1.7;}
+  img{max-width:100%;}
+  a{color:var(--teal);}
+  .wrap{width:min(100%,900px);margin:0 auto;padding:0 18px;}
+
+  /* ---- hero ---- */
+  .hero{padding:38px 0 18px;text-align:center;}
+  .hero-badge{display:inline-block;font-size:12px;letter-spacing:.06em;color:var(--teal);
+    border:1px solid rgba(45,212,191,.4);background:rgba(45,212,191,.08);
+    border-radius:999px;padding:5px 14px;margin-bottom:16px;}
+  .hero h1{margin:0;font-size:clamp(26px,7.5vw,38px);line-height:1.35;font-weight:800;letter-spacing:-.01em;}
+  .hero h1 em{font-style:normal;background:linear-gradient(120deg,#fff,#bff3ea 55%,var(--teal));
+    -webkit-background-clip:text;background-clip:text;color:transparent;}
+  .hero p.lead{color:var(--text-dim);font-size:15.5px;margin:14px auto 0;max-width:34em;}
+  .hero .meta{margin-top:16px;font-size:12.5px;color:var(--text-faint);}
+
+  /* ---- section shells ---- */
+  .section{padding:34px 0 4px;}
+  .section h2{font-size:20px;font-weight:800;margin:0 0 6px;display:flex;align-items:center;gap:8px;}
+  .section h2 .num{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;
+    border-radius:8px;background:rgba(45,212,191,.14);color:var(--teal);font-size:13px;font-weight:800;flex:none;}
+  .section .kicker{margin:0 0 16px;font-size:13px;color:var(--text-faint);}
+  .divider{border:none;border-top:1px dashed var(--border);margin:34px 0 0;}
+
+  .panel{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius-lg);
+    padding:18px;box-shadow:var(--shadow);margin-bottom:14px;}
+  .panel h3{margin:0 0 8px;font-size:15px;font-weight:800;color:var(--teal);}
+  .panel p{margin:0 0 8px;font-size:14.5px;color:var(--text);}
+  .panel p:last-child{margin-bottom:0;}
+  .panel ul{margin:6px 0 0;padding-left:1.25em;}
+  .panel li{font-size:14.5px;margin-bottom:6px;}
+
+  /* ---- 結論ボックス ---- */
+  .verdict{background:linear-gradient(160deg,rgba(45,212,191,.14),rgba(244,132,95,.06) 65%,transparent),var(--panel);
+    border:1px solid rgba(45,212,191,.35);border-radius:var(--radius-lg);padding:20px;box-shadow:var(--shadow);}
+  .verdict .tag{font-size:12px;color:var(--teal);font-weight:800;letter-spacing:.04em;}
+  .verdict p{margin:8px 0 0;font-size:15px;}
+  .verdict strong{color:#fff;}
+
+  /* ---- 構成図（フローチャート） ---- */
+  .flow{display:flex;flex-direction:column;gap:0;margin-top:6px;}
+  .flow-node{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius-md);
+    padding:13px 15px;display:flex;align-items:center;gap:12px;}
+  .flow-node .ico{font-size:22px;flex:none;width:40px;height:40px;display:flex;align-items:center;justify-content:center;
+    border-radius:11px;background:rgba(255,255,255,.06);}
+  .flow-node .label{font-size:14.5px;font-weight:700;}
+  .flow-node .sub{font-size:12.5px;color:var(--text-dim);margin-top:2px;}
+  .flow-arrow{text-align:center;color:var(--text-faint);font-size:18px;padding:4px 0;}
+
+  /* ---- 比較表 ---- */
+  .table-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;border-radius:var(--radius-md);
+    border:1px solid var(--border);margin-top:6px;}
+  table{border-collapse:collapse;width:100%;min-width:560px;font-size:13.5px;}
+  th,td{padding:10px 12px;border-bottom:1px solid var(--border);text-align:left;vertical-align:top;}
+  thead th{background:rgba(255,255,255,.04);color:var(--text-dim);font-size:12px;letter-spacing:.02em;
+    text-transform:uppercase;position:sticky;top:0;}
+  tbody tr:last-child td{border-bottom:none;}
+  td.ai-claude{border-left:3px solid var(--claude);}
+  td.ai-gemini{border-left:3px solid var(--gemini);}
+  td.ai-codex{border-left:3px solid var(--codex);}
+  .table-scroll::after{content:"→ 横にスクロールできます";display:block;font-size:11px;color:var(--text-faint);
+    text-align:right;padding:4px 10px;background:rgba(255,255,255,.02);}
+  @media(min-width:760px){.table-scroll::after{display:none;}}
+
+  /* ---- AIロゴ風チップ ---- */
+  .chip-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px;}
+  .chip{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:700;
+    padding:6px 12px;border-radius:999px;border:1px solid var(--border);}
+  .chip.claude{color:var(--claude);border-color:rgba(244,132,95,.4);background:rgba(244,132,95,.08);}
+  .chip.gemini{color:var(--gemini);border-color:rgba(91,141,239,.4);background:rgba(91,141,239,.08);}
+  .chip.codex{color:var(--codex);border-color:rgba(16,185,129,.4);background:rgba(16,185,129,.08);}
+
+  /* ---- できる/できない マトリクス ---- */
+  .yn-list{display:flex;flex-direction:column;gap:8px;margin-top:6px;}
+  .yn-row{display:grid;grid-template-columns:1fr auto;align-items:center;gap:10px;
+    background:var(--panel);border:1px solid var(--border);border-radius:var(--radius-sm);padding:11px 14px;}
+  .yn-row .t{font-size:14px;}
+  .yn-row .t small{display:block;color:var(--text-faint);font-size:12px;margin-top:2px;}
+  .yn-badge{flex:none;font-size:12px;font-weight:800;padding:5px 11px;border-radius:999px;white-space:nowrap;}
+  .yn-yes{color:var(--green);background:rgba(74,222,128,.12);border:1px solid rgba(74,222,128,.4);}
+  .yn-cond{color:var(--amber);background:rgba(251,191,36,.1);border:1px solid rgba(251,191,36,.4);}
+  .yn-no{color:var(--rose);background:rgba(251,113,133,.12);border:1px solid rgba(251,113,133,.4);}
+
+  /* ---- ステップフロー（実践フロー） ---- */
+  .steps{display:flex;flex-direction:column;gap:12px;margin-top:8px;counter-reset:stepnum;}
+  .step{position:relative;background:var(--panel);border:1px solid var(--border);border-left:3px solid var(--teal);
+    border-radius:var(--radius-md);padding:14px 16px 14px 50px;}
+  .step::before{counter-increment:stepnum;content:counter(stepnum);position:absolute;left:14px;top:14px;
+    width:24px;height:24px;border-radius:50%;background:var(--teal);color:#04231d;font-weight:800;font-size:13px;
+    display:flex;align-items:center;justify-content:center;}
+  .step h4{margin:0 0 4px;font-size:14.5px;font-weight:800;}
+  .step p{margin:0 0 6px;font-size:13.5px;color:var(--text-dim);}
+  .step .tools{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px;}
+  .tool-tag{font-size:11px;padding:3px 9px;border-radius:999px;border:1px solid var(--border);color:var(--text-dim);}
+
+  /* ---- 2カラムのPC要否 ---- */
+  .split{display:grid;grid-template-columns:1fr;gap:12px;margin-top:6px;}
+  @media(min-width:640px){.split{grid-template-columns:1fr 1fr;}}
+  .split .col{border-radius:var(--radius-md);padding:16px;border:1px solid var(--border);}
+  .split .col.ok{background:rgba(74,222,128,.06);border-color:rgba(74,222,128,.3);}
+  .split .col.ng{background:rgba(251,113,133,.06);border-color:rgba(251,113,133,.3);}
+  .split .col h4{margin:0 0 8px;font-size:14.5px;}
+  .split .col ul{margin:0;padding-left:1.2em;}
+  .split .col li{font-size:13.5px;margin-bottom:6px;}
+
+  /* ---- details（詳細開閉） ---- */
+  details{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius-md);
+    padding:0;margin-bottom:10px;overflow:hidden;}
+  details summary{cursor:pointer;list-style:none;padding:14px 16px;font-size:14.5px;font-weight:700;
+    display:flex;align-items:center;justify-content:space-between;gap:10px;}
+  details summary::-webkit-details-marker{display:none;}
+  details summary::after{content:"＋";color:var(--teal);font-size:16px;flex:none;}
+  details[open] summary::after{content:"－";}
+  details .body{padding:0 16px 16px;font-size:13.8px;color:var(--text-dim);}
+  details .body p{margin:0 0 8px;color:var(--text);}
+  details .body ul{margin:6px 0;padding-left:1.2em;}
+  details .body li{margin-bottom:6px;}
+  pre{background:#050a08;border:1px solid var(--border);border-radius:var(--radius-sm);
+    padding:12px 14px;overflow-x:auto;font-size:12.5px;line-height:1.55;color:#c9f7ec;margin:8px 0;}
+  code{background:rgba(255,255,255,.08);border-radius:4px;padding:1px 6px;font-size:.92em;}
+  pre code{background:none;padding:0;}
+
+  /* ---- 費用表 ---- */
+  .price-card{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius-md);
+    padding:14px 16px;margin-bottom:10px;}
+  .price-card .head{display:flex;align-items:baseline;justify-content:space-between;gap:8px;}
+  .price-card .head b{font-size:14.5px;}
+  .price-card .head span{font-size:12px;color:var(--text-faint);}
+  .price-card p{margin:6px 0 0;font-size:13.5px;color:var(--text-dim);}
+
+  .note{font-size:12.5px;color:var(--text-faint);border-left:3px solid var(--amber);
+    background:rgba(251,191,36,.06);padding:9px 12px;border-radius:0 var(--radius-sm) var(--radius-sm) 0;margin-top:10px;}
+
+  .final-verdict{background:linear-gradient(160deg,rgba(45,212,191,.18),rgba(91,141,239,.06) 60%,transparent),var(--panel);
+    border:1px solid rgba(45,212,191,.4);border-radius:var(--radius-lg);padding:22px;box-shadow:var(--shadow);text-align:center;}
+  .final-verdict .big{font-size:19px;font-weight:800;margin:6px 0 10px;}
+
+  .sources{font-size:12.5px;color:var(--text-faint);}
+  .sources li{margin-bottom:6px;word-break:break-all;}
+
+  footer{margin-top:40px;text-align:center;font-size:12px;color:var(--text-faint);}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <section class="hero">
+    <span class="hero-badge">3AI競争テスト 第1回 ・ Claude Code版</span>
+    <h1>スマホだけで<br><em>AI開発</em>はどこまでできる？</h1>
+    <p class="lead">Claude Code・Google Gemini / Jules・OpenAI Codexを比較し、調査から公開まで
+      スマートフォン1台で完結できる範囲を検証しました。</p>
+    <p class="meta">2026年8月30日時点の公開情報にもとづく ・ 料金や無料枠は変更される可能性があります</p>
+  </section>
+
+  <div class="verdict">
+    <div class="tag">結論を先に</div>
+    <p><strong>「静的サイトを作ってGitHub Pagesで公開する」までは、スマホだけで完全に完結します。</strong>
+      Claude Code・Jules・Codexのいずれも、スマホのブラウザやアプリからチャットで指示を出すだけで、
+      クラウド上のAIがコードを書き、GitHubへPull Requestとして提案してくれます。
+      一方で、<strong>複雑な大規模改修・実機での細かいデバッグ・重い自動テストの実行</strong>は、
+      現時点ではPCがあった方が圧倒的に効率的です。詳しくは各章で解説します。</p>
+  </div>
+
+  <!-- 1. 全体構成図 -->
+  <section class="section" id="architecture">
+    <h2><span class="num">1</span>全体の構成図</h2>
+    <p class="kicker">スマホから公開まで、データはこう流れる</p>
+    <div class="flow">
+      <div class="flow-node"><span class="ico">📱</span>
+        <div><div class="label">スマホのブラウザ / アプリ</div><div class="sub">Claude / Gemini・Jules / ChatGPTのアプリまたはWebで指示を出す</div></div></div>
+      <div class="flow-arrow">↓</div>
+      <div class="flow-node"><span class="ico">☁️</span>
+        <div><div class="label">AIエージェント（クラウド実行）</div><div class="sub">Anthropic / Google / OpenAIの管理するクラウドVM上でコードを作成</div></div></div>
+      <div class="flow-arrow">↓</div>
+      <div class="flow-node"><span class="ico">🐙</span>
+        <div><div class="label">GitHubリポジトリ</div><div class="sub">作業ブランチ＋Pull Requestとして変更が届く。人が差分を確認してマージ</div></div></div>
+      <div class="flow-arrow">↓</div>
+      <div class="flow-node"><span class="ico">⚙️</span>
+        <div><div class="label">GitHub Actions（任意）</div><div class="sub">ビルド・テスト・デプロイを自動化。cronで定期実行も可能</div></div></div>
+      <div class="flow-arrow">↓</div>
+      <div class="flow-node"><span class="ico">🚀</span>
+        <div><div class="label">GitHub Pages（公開）</div><div class="sub">https://ユーザー名.github.io/リポジトリ名/ で世界に公開</div></div></div>
+    </div>
+    <p class="note">ポイント: どのAIも「本番ブランチを直接書き換える」のではなく、作業ブランチ＋Pull Requestを提案する設計です。マージするかどうかは常に人間が最終確認します。</p>
+  </section>
+
+  <hr class="divider">
+
+  <!-- 2. 3AI比較 -->
+  <section class="section" id="compare">
+    <h2><span class="num">2</span>3つのAIを徹底比較</h2>
+    <p class="kicker">Claude Code / Google Gemini・Jules / OpenAI Codex</p>
+
+    <div class="chip-row">
+      <span class="chip claude">🟠 Claude Code</span>
+      <span class="chip gemini">🔵 Gemini / Jules</span>
+      <span class="chip codex">🟢 OpenAI Codex</span>
+    </div>
+
+    <div class="table-scroll" style="margin-top:12px">
+      <table>
+        <thead><tr><th>項目</th><th>Claude Code</th><th>Gemini / Jules</th><th>OpenAI Codex</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>スマホ対応</td>
+            <td class="ai-claude">◎ Claude Cowork（Web版・iOS/Android版）から起動・確認できる</td>
+            <td class="ai-gemini">◎ jules.google.com はスマホのブラウザで操作可能</td>
+            <td class="ai-codex">◎ ChatGPTアプリ／Webから起動・確認できる</td>
+          </tr>
+          <tr>
+            <td>実行方式</td>
+            <td class="ai-claude">クラウド上のエージェント。ブラウザの内蔵ブラウザ機能も追加され、Web閲覧を伴う作業もこなせる</td>
+            <td class="ai-gemini">非同期エージェント。リポジトリをクラウドVMにクローンし、計画→実行→PR提案</td>
+            <td class="ai-codex">クラウドのサンドボックス（一時的なコンテナ）でリポジトリを操作し、テスト実行後にPRを作成</td>
+          </tr>
+          <tr>
+            <td>GitHub連携</td>
+            <td class="ai-claude">リポジトリ接続、ブランチ作成、PR提案に対応</td>
+            <td class="ai-gemini">Issueに<code>jules</code>ラベルを付けてタスク割り当ても可能</td>
+            <td class="ai-codex">Issue割り当てにも対応。GitHub Actions環境内で作業する場合もある</td>
+          </tr>
+          <tr>
+            <td>自動化・定期実行</td>
+            <td class="ai-claude">「Routines」機能で、スケジュール・API・GitHub Webhookをトリガーに自律実行可能（研究プレビュー、有料プラン）</td>
+            <td class="ai-gemini">タスク単位の非同期実行が中心。定期スケジュール機能は本記事執筆時点で確認できず</td>
+            <td class="ai-codex">GitHub Actionsと組み合わせた自動化が可能</td>
+          </tr>
+          <tr>
+            <td>無料枠</td>
+            <td class="ai-claude">Claude Code自体は基本的に有料プラン（Pro以上）に含まれる</td>
+            <td class="ai-gemini">無料で1日15タスク・同時3タスクまで利用可能</td>
+            <td class="ai-codex">ChatGPTの無料枠には含まれず、Plus以上のプランに含まれる</td>
+          </tr>
+          <tr>
+            <td>代表的な料金目安</td>
+            <td class="ai-claude">Pro 月20ドル前後 / Max 5x 月100ドル前後 / Max 20x 月200ドル前後</td>
+            <td class="ai-gemini">Google AI Pro 月19.99ドル（1日約75タスク）/ Ultra 月124.99ドル（1日300タスク）</td>
+            <td class="ai-codex">ChatGPT Plus 月20ドル前後 / Pro 月200ドル前後（2026年4月からトークン従量制に変更）</td>
+          </tr>
+          <tr>
+            <td>強み</td>
+            <td class="ai-claude">対話しながら段階的に作り込む「co-work」的な使い方に強く、内蔵ブラウザで実際のWebページを見ながら作業できる</td>
+            <td class="ai-gemini">「投げて放置」しやすい非同期設計。無料枠のタスク数が比較的多い</td>
+            <td class="ai-codex">ChatGPTを日常的に使っている人には導線が近く、テスト実行込みで提案してくれる</td>
+          </tr>
+          <tr>
+            <td>弱み・注意点</td>
+            <td class="ai-claude">Claude Code自体の無料利用枠は限定的</td>
+            <td class="ai-gemini">タスク上限は「チーム全体」ではなく「1人あたり」。人数が増えても共有はされない</td>
+            <td class="ai-codex">2026年4月の課金方式変更で、タスクごとの費用が予測しにくくなった</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="note">料金・無料枠・機能名は各社の発表時点のものです。実際に使う前に必ず公式サイトの最新情報を確認してください（本ページ末尾に出典を掲載）。</p>
+  </section>
+
+  <hr class="divider">
+
+  <!-- 3. できる/できない -->
+  <section class="section" id="matrix">
+    <h2><span class="num">3</span>「できる／できない」早見表</h2>
+    <p class="kicker">スマホだけで完結できるかどうか</p>
+    <div class="yn-list">
+      <div class="yn-row"><div class="t">静的サイト（HTML/CSS/JS）の作成<small>チャットでAIに依頼→コードを受け取る</small></div><span class="yn-badge yn-yes">できる</span></div>
+      <div class="yn-row"><div class="t">GitHubへの保存・コミット<small>GitHubアプリ／Webの編集機能で反映</small></div><span class="yn-badge yn-yes">できる</span></div>
+      <div class="yn-row"><div class="t">ブランチ作成・Pull Requestのレビュー<small>差分を見て承認・マージ</small></div><span class="yn-badge yn-yes">できる</span></div>
+      <div class="yn-row"><div class="t">GitHub Pagesでの公開<small>Settings → Pagesの設定のみ</small></div><span class="yn-badge yn-yes">できる</span></div>
+      <div class="yn-row"><div class="t">PWA化（ホーム画面追加・オフライン対応）<small>manifest.jsonとService Workerのコード自体はAIに書かせられる</small></div><span class="yn-badge yn-cond">条件付き</span></div>
+      <div class="yn-row"><div class="t">公開APIの呼び出し（天気・ニュースなど）<small>クライアント側から直接fetchするだけなら可能</small></div><span class="yn-badge yn-yes">できる</span></div>
+      <div class="yn-row"><div class="t">秘密鍵が必要なAPI連携<small>キーをブラウザに置けないため、仲介サーバーやGitHub Actions Secretsの設計が必要</small></div><span class="yn-badge yn-cond">条件付き</span></div>
+      <div class="yn-row"><div class="t">定期実行・自動化<small>Claude RoutinesやGitHub Actionsのcronで設定自体はスマホから可能</small></div><span class="yn-badge yn-cond">条件付き</span></div>
+      <div class="yn-row"><div class="t">複数AIを同じGitHubリポジトリで併用<small>担当ファイルやブランチを分ければ問題なく可能</small></div><span class="yn-badge yn-yes">できる</span></div>
+      <div class="yn-row"><div class="t">自動テスト・CIの実行結果を細かく追う<small>ログの精読・エディタでの再現はスマホ画面では厳しい</small></div><span class="yn-badge yn-cond">条件付き</span></div>
+      <div class="yn-row"><div class="t">数十ファイルにまたがる大規模リファクタ<small>差分レビューが画面サイズ的に困難</small></div><span class="yn-badge yn-no">できない</span></div>
+      <div class="yn-row"><div class="t">実機でのパフォーマンス計測・詳細デバッグ<small>DevToolsに相当する機能がスマホには乏しい</small></div><span class="yn-badge yn-no">できない</span></div>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <!-- 4. 実践フロー -->
+  <section class="section" id="flow">
+    <h2><span class="num">4</span>実践フロー：調査→設計→コーディング→テスト→GitHub保存→公開</h2>
+    <p class="kicker">実際にスマホ1台で進める手順</p>
+    <div class="steps">
+      <div class="step">
+        <h4>調査</h4>
+        <p>作りたいものと似た既存サービスをブラウザで検索し、必要な機能・画面をスマホのメモアプリに箇条書きする。AIに「〇〇を作りたいが、必要な機能を整理して」と壁打ちするのも有効。</p>
+        <div class="tools"><span class="tool-tag">ブラウザ</span><span class="tool-tag">メモアプリ</span><span class="tool-tag">AIチャット</span></div>
+      </div>
+      <div class="step">
+        <h4>設計</h4>
+        <p>画面構成・データ構造・使う技術（静的サイトか、PWAか、API連携があるか）をAIとの対話で決める。「初心者向けに、まずは最小構成で」と伝えると迷いにくい。</p>
+        <div class="tools"><span class="tool-tag">Claude Code</span><span class="tool-tag">Gemini</span><span class="tool-tag">ChatGPT</span></div>
+      </div>
+      <div class="step">
+        <h4>コーディング</h4>
+        <p>GitHubで空のリポジトリを作成し、AIエージェント（Claude Code / Jules / Codex）にリポジトリへのアクセスを許可。「index.htmlとstyle.cssを作って」のように、変更範囲を絞って依頼する。</p>
+        <div class="tools"><span class="tool-tag">GitHub</span><span class="tool-tag">Claude Code / Jules / Codex</span></div>
+      </div>
+      <div class="step">
+        <h4>テスト</h4>
+        <p>AIが提案したPull Requestのプレビュー、または公開後のURLをスマホの複数ブラウザ（Safari・Chromeなど）・縦横回転で確認。ボタンの押しやすさ・横スクロールの有無をチェックする。</p>
+        <div class="tools"><span class="tool-tag">Safari</span><span class="tool-tag">Chrome</span><span class="tool-tag">GitHub Actions</span></div>
+      </div>
+      <div class="step">
+        <h4>GitHub保存</h4>
+        <p>差分（追加行・削除行）を必ず自分の目で確認してからマージする。特に外部URL・スクリプトの読み込み先・秘密情報らしき文字列が紛れていないかを確認する。</p>
+        <div class="tools"><span class="tool-tag">GitHub Pull Request</span></div>
+      </div>
+      <div class="step">
+        <h4>公開</h4>
+        <p>リポジトリの Settings → Pages で公開元ブランチを指定するだけ。数分後に <code>https://ユーザー名.github.io/リポジトリ名/</code> で公開される。反映まで時間差があるので焦らない。</p>
+        <div class="tools"><span class="tool-tag">GitHub Pages</span></div>
+      </div>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <!-- 5. 詳細ガイド（開閉式） -->
+  <section class="section" id="deep-dive">
+    <h2><span class="num">5</span>項目別の詳しい解説</h2>
+    <p class="kicker">タップして開く</p>
+
+    <details>
+      <summary>HTML / CSS / JavaScript開発</summary>
+      <div class="body">
+        <p>スマホでの開発は「自分でコードを一文字ずつ書く」のではなく、「AIに書かせて、結果を確認・微修正する」スタイルが現実的です。GitHubのWeb版編集機能はシンタックスハイライト付きのシンプルなエディタなので、小さな修正（文言変更、色の調整）ならスマホからでも直接編集できます。</p>
+        <ul>
+          <li>最初は<code>index.html</code>と<code>style.css</code>の2ファイルだけで始める</li>
+          <li>JavaScriptは必要になってから追加し、外部ライブラリへの依存はなるべく避ける</li>
+          <li>1回の依頼で変更するファイルを1〜2個に絞ると、差分レビューが楽になる</li>
+        </ul>
+      </div>
+    </details>
+
+    <details>
+      <summary>PWA（Progressive Web App）開発</summary>
+      <div class="body">
+        <p>2026年時点でPWAをホーム画面に追加できるようにするには、主要ブラウザ共通で次の3つが必須です。</p>
+        <ul>
+          <li><strong>HTTPS</strong>（GitHub Pagesは標準でHTTPS配信）</li>
+          <li><strong>Web App Manifest</strong>（name・icons・start_url・displayなどを記載したJSON）</li>
+          <li><strong>Service Worker</strong>（オフライン対応やキャッシュ制御を行うスクリプト）</li>
+        </ul>
+        <p>この3点セットのコード自体はAIに生成させられます。ただし、複数サイズのアイコン画像を用意する作業はスマホだと手間がかかりやすく、ここはPCの画像編集ソフトがあると効率的です。</p>
+        <pre><code>{
+  "name": "マイアプリ",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "theme_color": "#080b10",
+  "icons": [{ "src": "icon-192.png", "sizes": "192x192", "type": "image/png" }]
+}</code></pre>
+      </div>
+    </details>
+
+    <details>
+      <summary>API連携（公開API／秘密鍵が必要なAPI）</summary>
+      <div class="body">
+        <p>天気・ニュース・地図など「キー不要、または公開キーでよいAPI」は、スマホから作った静的サイトに<code>fetch()</code>を書くだけで連携できます。</p>
+        <p>一方、決済・生成AI・DBアクセスなど「秘密鍵が必要なAPI」は、HTML/CSS/JavaScriptだけで動く静的サイトのブラウザ側コードには絶対に書けません（誰でも見られてしまうため）。この場合は、GitHub Actionsやサーバーレス関数など「鍵を安全に保管できる場所」を別途用意する設計が必要です。この設計自体はAIに相談しながら決められますが、実際に鍵を安全な場所（GitHub Secretsなど）に登録する操作は、慎重に確認しながら行ってください。</p>
+      </div>
+    </details>
+
+    <details>
+      <summary>AIエージェント開発・自動化</summary>
+      <div class="body">
+        <p>Claude Codeの「Routines」は、プロンプト・接続するリポジトリ・使えるツールをあらかじめ登録しておき、スケジュール（毎日・毎週など）やAPI呼び出し、GitHubのWebhookイベントをきっかけに自動実行できる機能です（2026年4月から研究プレビューとして有料プランに提供）。「毎晩バグ報告を確認して修正案のPRを作る」といった無人運用が可能になります。</p>
+        <p>Gemini・JulesやOpenAI Codexも、GitHub Actionsと組み合わせることで「Issueが立ったら自動でタスクを割り当てる」といった自動化を組めますが、Claude CodeのRoutinesのような「AI自身がスケジュールを持つ」専用機能は、本記事執筆時点ではClaude Codeが先行しています。</p>
+      </div>
+    </details>
+
+    <details>
+      <summary>複数AIを同じGitHubリポジトリで使う方法</summary>
+      <div class="body">
+        <p>複数のAIエージェントが同じリポジトリで衝突せず作業するための、よく使われる工夫です。</p>
+        <ul>
+          <li><strong>共通ルールファイルを置く</strong>: <code>AGENTS.md</code>のような、どのAIも参照する共通指示ファイルを用意し、ブランチ運用・秘密情報の扱いなどを明文化する</li>
+          <li><strong>担当ファイル・担当ディレクトリを分ける</strong>: 同じファイルを複数のAIが同時に編集しないようにする</li>
+          <li><strong>作業ブランチを分ける</strong>: 各AIが自分専用のブランチで作業し、Pull Request経由で統合する</li>
+          <li><strong>他のAIの成果物を書き換えない</strong>: 比較・競争のような文脈では、それぞれが独立して作業したことに意味があるため、他AIのファイルには触れない運用にする</li>
+        </ul>
+      </div>
+    </details>
+
+    <details>
+      <summary>ブランチ・Pull Request運用</summary>
+      <div class="body">
+        <p>AIエージェント（人間も同様）は、<code>main</code>ブランチを直接書き換えるのではなく、作業ブランチを作ってPull Requestを提案する、という流れを徹底するのが安全です。理由は次の3つです。</p>
+        <ul>
+          <li>差分（変更点だけ）を確認できるので、意図しない変更に気づきやすい</li>
+          <li>問題があればPull Requestを閉じるだけで済み、本番を壊さない</li>
+          <li>複数AI・複数人が同時に作業しても、それぞれ独立したブランチなら衝突しにくい</li>
+        </ul>
+      </div>
+    </details>
+  </section>
+
+  <hr class="divider">
+
+  <!-- 6. PCが必要な場面 -->
+  <section class="section" id="pc-needed">
+    <h2><span class="num">6</span>PCが必要になる場面 / スマホだけで完結する範囲</h2>
+    <div class="split">
+      <div class="col ok">
+        <h4>📱 スマホだけで完結できる</h4>
+        <ul>
+          <li>アイデア出し・要件整理（AIとの壁打ち）</li>
+          <li>1〜数ページの静的サイトの作成・公開</li>
+          <li>文言修正・配色変更などの軽微な編集</li>
+          <li>GitHub上でのPull Requestレビュー・マージ</li>
+          <li>GitHub Pagesの公開設定</li>
+          <li>公開APIを使った簡単な連携</li>
+        </ul>
+      </div>
+      <div class="col ng">
+        <h4>💻 PCがあった方がよい</h4>
+        <ul>
+          <li>数十ファイルにまたがる大規模な設計変更</li>
+          <li>複雑な差分レビュー（画面の狭さがボトルネックになる）</li>
+          <li>自動テスト・CIログの詳細な調査</li>
+          <li>複数サイズの画像・アイコン素材の一括加工</li>
+          <li>実機に近い環境でのパフォーマンス計測</li>
+          <li>秘密鍵を扱うサーバー設計・デプロイの検証</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <!-- 7. 費用 -->
+  <section class="section" id="cost">
+    <h2><span class="num">7</span>無料枠・料金の目安</h2>
+    <div class="price-card">
+      <div class="head"><b>🟠 Claude Code</b><span>Anthropic</span></div>
+      <p>Claude Code自体は基本的に有料プラン（Pro以上）に含まれます。Pro 月20ドル前後、Max 5x 月100ドル前後、Max 20x 月200ドル前後が目安です。</p>
+    </div>
+    <div class="price-card">
+      <div class="head"><b>🔵 Gemini / Jules</b><span>Google</span></div>
+      <p>Julesは無料で1日15タスク・同時3タスクまで利用できます。Google AI Pro（月19.99ドル）で1日約75タスク、Google AI Ultra（月124.99ドル）で1日300タスク・同時60タスクまで拡大されます。タスク上限は1人あたりの数で、チームで共有されるものではありません。</p>
+    </div>
+    <div class="price-card">
+      <div class="head"><b>🟢 OpenAI Codex</b><span>OpenAI</span></div>
+      <p>ChatGPTのサブスクリプションに含まれ、単体販売はされていません。Plus 月20ドル前後、Pro 月200ドル前後が目安です。2026年4月にメッセージ単位からトークン従量制の課金に変更され、複雑なタスクほど消費が増える点に注意が必要です。</p>
+    </div>
+    <div class="price-card">
+      <div class="head"><b>🐙 GitHub / GitHub Pages</b><span>GitHub</span></div>
+      <p>GitHub Pagesは無料で、公開サイト1リポジトリあたり1GB、月間帯域100GB（ソフト上限）、ビルド10回/時間（ソフト上限、GitHub Actionsのカスタムワークフローでのデプロイには適用されない）が目安です。個人利用の範囲では無料枠だけで十分な場合がほとんどです。</p>
+    </div>
+    <p class="note">料金・無料枠は各社の判断で変更されます。実際に契約する前には、必ず各サービスの公式料金ページで最新の条件を確認してください。</p>
+  </section>
+
+  <hr class="divider">
+
+  <!-- 8. 最も効率の良い構成 -->
+  <section class="section" id="best">
+    <h2><span class="num">8</span>最も効率の良い構成（結論）</h2>
+    <div class="final-verdict">
+      <div class="big">📱 Claude Code / Jules / Codex + GitHub + GitHub Pages</div>
+      <p style="color:var(--text-dim);font-size:14px;margin:0 0 10px;">
+        3AIとも「スマホから指示 → クラウドでコード生成 → GitHub Pull Request → GitHub Pagesで公開」
+        という同じ型が使えます。どれを選ぶかは、費用や普段使っているエコシステムで決めるのが現実的です。
+      </p>
+      <div class="chip-row" style="justify-content:center">
+        <span class="chip claude">放置して非同期に進めたい → Routines対応のClaude Code</span>
+      </div>
+      <div class="chip-row" style="justify-content:center;margin-top:8px">
+        <span class="chip gemini">無料でとにかく数をこなしたい → Jules無料枠</span>
+      </div>
+      <div class="chip-row" style="justify-content:center;margin-top:8px">
+        <span class="chip codex">普段からChatGPTを使っている → Codex</span>
+      </div>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <!-- 9. まとめ・出典 -->
+  <section class="section" id="summary">
+    <h2><span class="num">9</span>まとめと注意事項</h2>
+    <div class="panel">
+      <h3>要点</h3>
+      <ul>
+        <li>「調査→設計→コーディング→GitHub保存→公開」までは、3つのAIいずれを使ってもスマホだけで完結できる</li>
+        <li>PWA・API連携は「コードを書く」段階はスマホで可能。ただし秘密鍵の扱いや画像素材の加工はPCが楽</li>
+        <li>大規模な改修・詳細なデバッグ・自動テストのログ調査は、現時点ではPCの方が効率的</li>
+        <li>複数AIの併用は、共通ルールファイル・担当分割・ブランチ運用で衝突を防げる</li>
+        <li>料金・無料枠・機能名は変わりやすいため、契約前に必ず公式情報を確認する</li>
+      </ul>
+    </div>
+    <div class="panel">
+      <h3>出典（本ページ作成時に確認した情報源）</h3>
+      <ul class="sources">
+        <li>Claude Cowork on web and mobile — claude.com/blog/cowork-web-mobile</li>
+        <li>Anthropic Releases Claude Code with Built-in Browser Functionality — news.aibase.com/news/29538</li>
+        <li>Introducing routines in Claude Code — claude.com/blog/introducing-routines-in-claude-code</li>
+        <li>Claude Code Pricing 2026 — duet.so/blog/claude-code-pricing</li>
+        <li>Jules: Google's Coding Agent Explained — morphllm.com/comparisons/jules-google-coding-agent</li>
+        <li>Google Jules Pricing 2026 — hackup.ai/ai-plans/jules</li>
+        <li>OpenAI Codex pricing in 2026 — eesel.ai/blog/codex-pricing</li>
+        <li>Best AI Coding Agents in 2026 — firecrawl.dev/blog/best-ai-coding-agents</li>
+        <li>GitHub Pages Free Tier 2026 — agentdeals.dev/vendor/github-pages</li>
+        <li>How to make PWAs installable — udn.realityripple.com/docs/Web/Progressive_web_apps/Installable_PWAs</li>
+      </ul>
+      <p style="margin-top:10px;font-size:12.5px;color:var(--text-faint)">
+        いずれも2026年8月時点でアクセス可能だった二次情報源です。契約・実装の前に、各社の公式ドキュメントで最終確認してください。
+      </p>
+    </div>
+  </section>
+
+  <footer>
+    スマホだけでAI開発はどこまでできる？ ・ Claude Code版 ・ 3AI競争テスト 第1回 ・ 2026-08-30
+  </footer>
+</div>
+</body>
+</html>
