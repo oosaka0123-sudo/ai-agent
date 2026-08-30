@@ -1,5 +1,46 @@
 [
   {
+    "id": "2026-08-30-gemini-guide-smartphone-website",
+    "date": "2026-08-30",
+    "title": "Gemini/Julesによる「スマホだけでホームページを作る方法」のガイドを作成",
+    "project": "ai-agent",
+    "purpose": "初心者がスマホだけで、GitHubとGemini/Julesを使ってWebページを作成・保存・公開する流れを直感的に理解できる最高品質のWebページを制作する。",
+    "whatMade": "guides/smartphone-website/gemini.md に、GeminiとJulesの違い、GitHubの仕組み、HTML作成から公開までの流れを図解やカードを使って視覚的に分かりやすくまとめたガイドを作成した。また、Markdown内にリッチなHTMLコンポーネントを埋め込めるように web/assets/js/markdown-lite.js を修正し、:::html ... ::: ブロックをサポートした。",
+    "changes": [
+      "guides/smartphone-website/gemini.md (大幅更新)",
+      "guides/smartphone-website/theme.json (AI IDを更新)",
+      "web/assets/js/markdown-lite.js (:::htmlブロックのサポート追加)",
+      "web/assets/css/style.css (追加の調整があれば記録)"
+    ],
+    "aiUsed": [
+      "Gemini / Jules"
+    ],
+    "services": [
+      "GitHub",
+      "GitHub Pages"
+    ],
+    "tech": [
+      "HTML",
+      "CSS",
+      "JavaScript",
+      "Markdown"
+    ],
+    "problems": "通常のMarkdownパーサーでは、複雑なHTMLのネストやインラインCSSが正しくパースされず、pタグで囲まれて表示崩れが起きる問題があった。",
+    "solutions": "markdown-lite.js に :::html から ::: までのブロックをそのままのHTMLとして出力する特殊なパース処理を追加することで解決した。",
+    "learnings": "Markdownベースのドキュメントシステムに独自の強力なUIコンポーネントを組み込む場合、Markdownのパース処理をバイパスする専用の記法を設けるのが効果的である。",
+    "images": [],
+    "githubCommits": [],
+    "pullRequests": [],
+    "relatedUrls": [],
+    "nextSteps": "この変更をコミットしてPRを作成・公開する。",
+    "tags": [
+      "ガイド",
+      "Gemini",
+      "UI改善",
+      "Markdown"
+    ]
+  },
+  {
     "id": "2026-08-30-ai-agent-kickoff",
     "date": "2026-08-30",
     "title": "AIエージェント開発環境を開始",
@@ -16,9 +57,17 @@
       "docs/DEVELOPMENT.md、docs/DIRECTORY_STRUCTURE.md（新規）",
       "src/, tests/, scripts/, config/ の各README（新規）"
     ],
-    "aiUsed": ["Claude Code"],
-    "services": ["GitHub"],
-    "tech": ["GitHub", "GitHub Actions", "Markdown"],
+    "aiUsed": [
+      "Claude Code"
+    ],
+    "services": [
+      "GitHub"
+    ],
+    "tech": [
+      "GitHub",
+      "GitHub Actions",
+      "Markdown"
+    ],
     "problems": "秘密情報の誤コミットを防ぎつつ、特定用途に固定しない汎用的な構成にする必要があった。",
     "solutions": ".gitignoreとgitleaksによるシークレットスキャンをCIに組み込み、AGENTS.md/CLAUDE.md/GEMINI.mdでAIエージェント共通のルール（mainへ直push禁止、秘密情報禁止など）を明文化した。",
     "learnings": "複数のAIエージェントが同じリポジトリで作業する場合、AGENTS.mdのような共通ルールファイルを最初に用意しておくと、どのAIに頼んでも一貫した振る舞いになりやすい。",
@@ -32,7 +81,11 @@
     "pullRequests": [],
     "relatedUrls": [],
     "nextSteps": "GitHub Pagesで公開できる静的サイトを追加する。",
-    "tags": ["AIエージェント", "GitHub", "セットアップ"]
+    "tags": [
+      "AIエージェント",
+      "GitHub",
+      "セットアップ"
+    ]
   },
   {
     "id": "2026-08-30-remote-ai-agent-diagram-page",
@@ -46,13 +99,24 @@
       "web/assets/remote-ai-agent-diagram.webp（新規、構成図画像）",
       ".github/workflows/pages.yml（新規、GitHub Pagesデプロイ）"
     ],
-    "aiUsed": ["Claude Code"],
-    "services": ["GitHub", "GitHub Pages"],
-    "tech": ["HTML", "CSS", "GitHub Actions"],
+    "aiUsed": [
+      "Claude Code"
+    ],
+    "services": [
+      "GitHub",
+      "GitHub Pages"
+    ],
+    "tech": [
+      "HTML",
+      "CSS",
+      "GitHub Actions"
+    ],
     "problems": "元のHTMLに画像がBase64で埋め込まれており、ファイルサイズが約2.3MBと大きかった。",
     "solutions": "画像をファイルとして抽出し、PNG（約1.8MB）からWebP形式（約240KB）に変換して外部ファイル化した。見た目の画質はほぼ変えずに約1/7のサイズに圧縮できた。",
     "learnings": "Base64埋め込み画像はページを重くしがちなので、外部ファイル化してWebPに変換するとスマホでの表示速度改善に効果的。",
-    "images": ["assets/remote-ai-agent-diagram.webp"],
+    "images": [
+      "assets/remote-ai-agent-diagram.webp"
+    ],
     "githubCommits": [
       {
         "label": "GitHub Pages公開用の構成を追加（リモートAIエージェント構成図ページ）",
@@ -61,10 +125,17 @@
     ],
     "pullRequests": [],
     "relatedUrls": [
-      { "label": "構成図ページ（mainマージ後に公開）", "url": "https://oosaka0123-sudo.github.io/ai-agent/diagram.html" }
+      {
+        "label": "構成図ページ（mainマージ後に公開）",
+        "url": "https://oosaka0123-sudo.github.io/ai-agent/diagram.html"
+      }
     ],
     "nextSteps": "開発記録アーカイブサイト（このサイト自体）を構築する。",
-    "tags": ["GitHub Pages", "画像最適化", "公開"]
+    "tags": [
+      "GitHub Pages",
+      "画像最適化",
+      "公開"
+    ]
   },
   {
     "id": "2026-08-30-dev-archive-site",
@@ -83,9 +154,20 @@
       "scripts/sync-site-data.sh（新規）",
       ".github/workflows/pages.yml（更新）、AGENTS.md（更新、自動記録ルール追加）、CHANGELOG.md（新規）"
     ],
-    "aiUsed": ["Claude Code"],
-    "services": ["GitHub", "GitHub Pages"],
-    "tech": ["HTML", "CSS", "JavaScript", "GitHub Actions", "JSON"],
+    "aiUsed": [
+      "Claude Code"
+    ],
+    "services": [
+      "GitHub",
+      "GitHub Pages"
+    ],
+    "tech": [
+      "HTML",
+      "CSS",
+      "JavaScript",
+      "GitHub Actions",
+      "JSON"
+    ],
     "problems": "開発記録データを編集しやすい場所（data/、docs/）に置きつつ、公開フォルダ（web/）にどう反映するかが課題だった。",
     "solutions": "scripts/sync-site-data.sh で data/ と docs/screenshots/ をビルド時に web/ へコピーする方式にし、ローカル確認とGitHub Actionsの両方から同じスクリプトを呼ぶことで二重管理を防いだ。",
     "learnings": "個人用データベースサイトは「編集する場所」と「公開される場所」を分けておくと、何年も追記し続ける運用がしやすい。",
@@ -99,7 +181,12 @@
     "pullRequests": [],
     "relatedUrls": [],
     "nextSteps": "関西サーファーKS、次バス大阪、Claude Code教室など、他の実際のプロジェクト情報を data/projects.json に追記していく。",
-    "tags": ["開発記録", "アーカイブ", "データベース", "GitHub Pages"]
+    "tags": [
+      "開発記録",
+      "アーカイブ",
+      "データベース",
+      "GitHub Pages"
+    ]
   },
   {
     "id": "2026-08-30-multi-ai-guides",
@@ -119,9 +206,20 @@
       "scripts/sync-site-data.sh、.github/workflows/pages.yml、.gitignore（更新、guides/の同期を追加）",
       "AGENTS.md（更新、複数AI比較ガイドの担当ルールを追加）"
     ],
-    "aiUsed": ["Claude Code"],
-    "services": ["GitHub", "GitHub Pages"],
-    "tech": ["HTML", "CSS", "JavaScript", "JSON", "Markdown"],
+    "aiUsed": [
+      "Claude Code"
+    ],
+    "services": [
+      "GitHub",
+      "GitHub Pages"
+    ],
+    "tech": [
+      "HTML",
+      "CSS",
+      "JavaScript",
+      "JSON",
+      "Markdown"
+    ],
     "problems": "web/直下のページとweb/guides/配下のページとで、データファイルまでの相対パスの階層が異なり、最初theme.jsonの読み込みに失敗した。",
     "solutions": "guides-data.js内でlocation.pathnameを見て、/guides/配下から呼ばれているかどうかで相対パスの基準（guides-data/ か ../guides-data/ か）を自動判定するようにした。",
     "learnings": "同じJSファイルを深さの異なる複数ページから共有する場合、相対パスをハードコードせず、呼び出し元のパスから動的に基準パスを決めると事故が減る。",
@@ -130,6 +228,11 @@
     "pullRequests": [],
     "relatedUrls": [],
     "nextSteps": "Gemini/JulesとCodexにそれぞれ guides/smartphone-website/gemini.md と codex.md へ本文を執筆してもらう。Claude Code自身の claude.md も執筆する。",
-    "tags": ["ガイド", "複数AI比較", "Gemini", "Codex"]
+    "tags": [
+      "ガイド",
+      "複数AI比較",
+      "Gemini",
+      "Codex"
+    ]
   }
 ]

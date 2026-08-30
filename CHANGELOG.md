@@ -8,6 +8,8 @@
 
 ### Added
 
+- Gemini/Julesによる「スマホだけでホームページを作る方法」のガイドページ（`guides/smartphone-website/gemini.md`）を追加。リッチな図解、比較表、ステップカード等を駆使し、スマホ最優先で直感的に理解できるデザインを実装。
+- `web/assets/js/markdown-lite.js` に `:::html ... :::` ブロックのサポートを追加。これによりMarkdownの処理をバイパスし、生のHTML/CSSコンポーネントを安全に描画できるようになった。
 - 「複数AI比較ガイド」機能を追加。同じテーマについて Claude Code・Gemini/Jules・Codex が
   独立して書いた説明を読み比べられる `web/guides/`（一覧・テーマ・説明表示ページ）を追加し、
   データを `guides/themes.json` / `guides/<テーマID>/theme.json` / `guides/<テーマID>/{claude,gemini,codex}.md`

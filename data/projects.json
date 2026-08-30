@@ -6,11 +6,22 @@
     "startDate": "2026-08-30",
     "status": "進行中",
     "summary": "Claude Code / Codex / Gemini など複数のAIエージェントが共同開発できる汎用リポジトリ。この開発記録アーカイブサイト自体も、このプロジェクトの一部として構築している。",
-    "aiUsed": ["Claude Code"],
-    "tech": ["GitHub", "GitHub Actions", "HTML", "CSS", "JavaScript"],
+    "aiUsed": [
+      "Claude Code",
+      "Gemini / Jules"
+    ],
+    "tech": [
+      "GitHub",
+      "GitHub Actions",
+      "HTML",
+      "CSS",
+      "JavaScript"
+    ],
     "github": "https://github.com/oosaka0123-sudo/ai-agent",
     "website": "https://oosaka0123-sudo.github.io/ai-agent/",
-    "screenshots": ["assets/remote-ai-agent-diagram.webp"],
+    "screenshots": [
+      "assets/remote-ai-agent-diagram.webp"
+    ],
     "notes": null
   },
   {
@@ -77,7 +88,9 @@
     "status": "情報未入力",
     "summary": "（TODO）PWA関連の実験・アプリをまとめる場合はここに追記してください。",
     "aiUsed": [],
-    "tech": ["PWA"],
+    "tech": [
+      "PWA"
+    ],
     "github": null,
     "website": null,
     "screenshots": [],
@@ -91,7 +104,9 @@
     "status": "情報未入力",
     "summary": "（TODO）Androidアプリ開発をまとめる場合はここに追記してください。",
     "aiUsed": [],
-    "tech": ["Android"],
+    "tech": [
+      "Android"
+    ],
     "github": null,
     "website": null,
     "screenshots": [],
@@ -105,7 +120,9 @@
     "status": "情報未入力",
     "summary": "（TODO）AIモデルやプロンプト、エージェントの検証・実験をまとめる場合はここに追記してください。",
     "aiUsed": [],
-    "tech": ["AI Agent"],
+    "tech": [
+      "AI Agent"
+    ],
     "github": null,
     "website": null,
     "screenshots": [],

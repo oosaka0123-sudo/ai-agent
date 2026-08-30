@@ -24,6 +24,7 @@ const MarkdownLite = (() => {
     const lines = withoutComments.split(/\r?\n/);
     let html = "";
     let listBuffer = [];
+    let inHtmlBlock = false;
 
     function flushList() {
       if (listBuffer.length) {
@@ -34,6 +35,22 @@ const MarkdownLite = (() => {
 
     lines.forEach((rawLine) => {
       const line = rawLine.trim();
+
+      if (line === ":::html") {
+        flushList();
+        inHtmlBlock = true;
+        return;
+      }
+      if (line === ":::" && inHtmlBlock) {
+        inHtmlBlock = false;
+        return;
+      }
+
+      if (inHtmlBlock) {
+        html += rawLine + "\n";
+        return;
+      }
+
       if (!line) {
         flushList();
         return;
