@@ -4,7 +4,7 @@
   "max_parallel_projects": 4,
   "projects": [
     {
-      "id": "kansai-surfer-ks",
+      "slug": "kansai-surfer-ks",
       "name": "関西サーファーKS",
       "public_url": "https://kansai.rss7.net/",
       "repository": null,
@@ -13,7 +13,7 @@
       "copilot_review": "planned"
     },
     {
-      "id": "s-league-now",
+      "slug": "s-league-now",
       "name": "SリーグNOW",
       "repository": null,
       "status": "pending-repository-connection",
@@ -21,7 +21,7 @@
       "copilot_review": "planned"
     },
     {
-      "id": "ai-agent",
+      "slug": "ai-agent",
       "name": "AIエージェントシステム",
       "repository": "oosaka0123-sudo/ai-agent",
       "status": "active",
@@ -29,7 +29,7 @@
       "copilot_review": "active"
     },
     {
-      "id": "fx-trading",
+      "slug": "fx-trading",
       "name": "FX取引",
       "repository": null,
       "status": "pending-repository-connection",
