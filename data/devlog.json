@@ -161,6 +161,29 @@
     "tags": ["品質保証", "自己評価", "自律実行", "アクセシビリティ"]
   },
   {
+    "id": "2026-08-30-gemini-jules-mobile-dev-guide",
+    "date": "2026-08-30",
+    "title": "スマホだけでAI開発ガイド作成 (Gemini/Jules)",
+    "project": "ai-agent",
+    "purpose": "複数AI比較ガイド機能の「スマホだけでホームページを作る」テーマについて、Gemini/Julesとしての説明本文を完成させる。",
+    "whatMade": "guides/smartphone-website/gemini.mdに、スマホ完結のAI開発フロー、必要なサービス、AI比較、メリット・デメリットなどをまとめた。Markdownファイル内に直接HTMLとCSSを記述することで、スマホファーストで直感的に理解できる高品質なカードUI・比較表・フロー図を実現した。",
+    "changes": [
+      "guides/smartphone-website/gemini.md（本文執筆、ステータスをcompletedに更新）"
+    ],
+    "aiUsed": ["Gemini / Jules"],
+    "services": ["GitHub", "GitHub Pages"],
+    "tech": ["HTML", "CSS", "Markdown"],
+    "problems": "純粋なMarkdownの記法だけでは、要件にある「比較表・カード・フロー図・構成図などのモダンで見やすいUI」を実現するのが難しかった。",
+    "solutions": "Markdownの仕様上許容されているHTMLの直接記述を活用し、ファイルの先頭に<style>タグを配置。内部でdivタグによるカードやFlexbox/Gridを駆使してレイアウトを構築した。",
+    "learnings": "Markdownをデータソースとして扱う際、レンダラーがHTMLタグをそのまま出力する仕様であれば、Markdownファイル自体をコンポーネントのように扱い、リッチなUIを提供できる。",
+    "images": [],
+    "githubCommits": [],
+    "pullRequests": [],
+    "relatedUrls": [],
+    "nextSteps": "Claude Code と Codex がそれぞれの担当ファイルへ本文を執筆する。",
+    "tags": ["ガイド", "複数AI比較", "Gemini", "UI設計"]
+  },
+  {
     "id": "2026-08-30-platform-foundation",
     "date": "2026-08-30",
     "title": "Claude Code担当の初期基盤完成（3AI並行運用ドキュメントの整合性確認）",

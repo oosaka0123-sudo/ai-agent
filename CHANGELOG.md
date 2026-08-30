@@ -6,6 +6,10 @@
 
 ## [Unreleased]
 
+### Added
+
+- 「複数AI比較ガイド」機能の最初のテーマ「スマホだけでホームページを作る」について、Gemini/Jules担当の説明本文（`guides/smartphone-website/gemini.md`）を追加。
+
 ### Changed
 
 - リポジトリの目的を「Claude Code・Gemini/Jules・OpenAI Codexの3AIがGitHubを
