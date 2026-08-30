@@ -19,6 +19,19 @@ Before forming a conclusion, inspect and follow the applicable repository instru
 
 Do not approve a PR from its title or description alone. Review the actual changed files.
 
+## Context freshness and base-branch awareness
+
+This repository is developed by multiple AI agents in parallel, so stale branches are common.
+
+Before flagging a behavior as unsupported, invalid, or missing:
+- Check the PR base branch and compare it with the head branch.
+- Prefer the current base-branch implementation for shared runtime behavior that the PR does not modify.
+- Do not infer current capabilities only from a stale head branch when the base has newer supporting code.
+- If the branch is substantially behind `main`, explicitly classify stale-base risk before recommending merge.
+- When reviewing guide rendering, inspect the current `web/assets/js/markdown-lite.js`. `:::html` blocks are an intentional supported mechanism when present in the current renderer.
+- When reviewing guide status values, inspect the current `web/assets/js/guides-data.js` and `theme.json` before declaring a status invalid. Do not rely on an older hard-coded status list.
+- If newer `main` already contains a replacement implementation for the same file or feature, prefer closing the stale PR as superseded rather than asking the old branch to overwrite newer work.
+
 ## Required checks
 
 ### 1. Task and specification
