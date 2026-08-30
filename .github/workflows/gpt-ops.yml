@@ -1,111 +1,91 @@
 name: GPT Ops
 
 on:
-  workflow_dispatch:
-    inputs:
-      operation:
-        description: "Operation to run"
-        required: true
-        type: choice
-        options:
-          - deploy-pages
-          - health-check
-  issues:
-    types: [opened]
+  push:
+    branches:
+      - gpt-control
+    paths:
+      - ".gpt-ops/command.txt"
 
 permissions:
   contents: read
   pages: write
   id-token: write
-  issues: write
 
 concurrency:
-  group: gpt-ops-${{ github.event.issue.number || github.run_id }}
+  group: gpt-ops
   cancel-in-progress: false
 
 jobs:
-  route:
-    if: >-
-      github.event_name == 'workflow_dispatch' ||
-      startsWith(github.event.issue.title, '[GPT-OPS] ')
+  read-command:
     runs-on: ubuntu-latest
     outputs:
-      operation: ${{ steps.operation.outputs.value }}
+      operation: ${{ steps.read.outputs.operation }}
     steps:
-      - id: operation
+      - name: Checkout control branch
+        uses: actions/checkout@v4
+
+      - name: Read operation
+        id: read
         shell: bash
-        env:
-          EVENT_NAME: ${{ github.event_name }}
-          MANUAL_OPERATION: ${{ inputs.operation }}
-          ISSUE_TITLE: ${{ github.event.issue.title }}
         run: |
           set -euo pipefail
-          if [ "$EVENT_NAME" = "workflow_dispatch" ]; then
-            op="$MANUAL_OPERATION"
-          else
-            op="${ISSUE_TITLE#'[GPT-OPS] '}"
-          fi
-          case "$op" in
+          operation="$(tr -d '\r\n ' < .gpt-ops/command.txt)"
+          case "$operation" in
             deploy-pages|health-check) ;;
             *)
-              echo "Unsupported operation: $op" >&2
+              echo "Unsupported operation: $operation" >&2
               exit 2
               ;;
           esac
-          echo "value=$op" >> "$GITHUB_OUTPUT"
+          echo "operation=$operation" >> "$GITHUB_OUTPUT"
 
   health-check:
-    needs: route
-    if: needs.route.outputs.operation == 'health-check'
+    needs: read-command
+    if: needs.read-command.outputs.operation == 'health-check'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout main
+        uses: actions/checkout@v4
         with:
           ref: main
+
       - name: Sync public site data
         run: bash scripts/sync-site-data.sh
+
       - name: Validate key files
         shell: bash
         run: |
           set -euo pipefail
           test -f web/index.html
           test -f .github/workflows/pages.yml
+          test -f .github/workflows/gpt-ops.yml
           find competitions -type f -name '*.html' -print 2>/dev/null || true
-      - name: Report success to issue
-        if: github.event_name == 'issues'
-        env:
-          GH_TOKEN: ${{ github.token }}
-          ISSUE: ${{ github.event.issue.number }}
-          REPO: ${{ github.repository }}
-        run: gh issue comment "$ISSUE" --repo "$REPO" --body "✅ GPT Ops health-check completed successfully."
 
   deploy-pages:
-    needs: route
-    if: needs.route.outputs.operation == 'deploy-pages'
+    needs: read-command
+    if: needs.read-command.outputs.operation == 'deploy-pages'
     runs-on: ubuntu-latest
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout main
+        uses: actions/checkout@v4
         with:
           ref: main
+
       - name: Configure Pages
         uses: actions/configure-pages@v5
+
       - name: Sync public site data
         run: bash scripts/sync-site-data.sh
+
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
           path: web
+
       - name: Deploy Pages
         id: deployment
         uses: actions/deploy-pages@v4
-      - name: Report success to issue
-        if: github.event_name == 'issues'
-        env:
-          GH_TOKEN: ${{ github.token }}
-          ISSUE: ${{ github.event.issue.number }}
-          REPO: ${{ github.repository }}
-          PAGE_URL: ${{ steps.deployment.outputs.page_url }}
-        run: gh issue comment "$ISSUE" --repo "$REPO" --body "✅ GPT Ops deploy-pages completed: $PAGE_URL"
