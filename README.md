@@ -91,6 +91,7 @@
 | [`CODEX.md`](CODEX.md) | OpenAI Codex向けの補足 |
 
 どのAIエージェントで作業する場合も、まず `AGENTS.md` の内容を確認してから作業してください。
+Issue経由でのJulesへの正式発注フローについては [`docs/JULES_ISSUE_DISPATCH.md`](docs/JULES_ISSUE_DISPATCH.md) を参照してください。
 
 ## サンプルプロジェクト（基盤の動作確認用）
 

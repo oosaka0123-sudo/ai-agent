@@ -154,6 +154,7 @@ AIエージェントは、作業完了前の自己レビュー（[`AGENTS.md`](A
 - **ブランチ・PRルール**: `main` へ直接pushせず作業ブランチ + PRで進める。
   秘密情報は `.env`（gitignore済み）にのみ記載する（[`AGENTS.md`](AGENTS.md)、
   [`docs/DEVELOPMENT.md`](docs/DEVELOPMENT.md) 参照）。
+- **Jules正式発注フロー**: GitHub Issue（`jules` ラベル）を作業命令の正本とし、自律実装→テスト→PR作成→Copilotレビュー対応を行う運用。詳細は [`docs/JULES_ISSUE_DISPATCH.md`](docs/JULES_ISSUE_DISPATCH.md) 参照。
 
 ## 6. サンプルプロジェクト: 3AI競争テスト（competitions/）
 
