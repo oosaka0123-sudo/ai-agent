@@ -178,8 +178,8 @@ GitHub Pagesの有効化はリポジトリの管理者権限が必要なため�
 - データ: `guides/themes.json`（テーマ一覧）、`guides/<テーマID>/theme.json`（テーマ情報）、
   `guides/<テーマID>/{claude,gemini,codex}.md`（各AIの説明本文）
 
-最初のテーマは「スマホだけでホームページを作る」です。Gemini/Jules版・Codex版は
-本文を公開済みで、Claude Code版はまだ見出し構成のみのプレースホルダーです。
+最初のテーマは「スマホだけでホームページを作る」です。Claude Code版・Gemini/Jules版・
+Codex版のすべてで本文が公開済みです。
 
 **担当ルール**: 各AIは自分の担当ファイル（`claude.md` / `gemini.md` / `codex.md`）
 だけを編集し、他AIのファイルは変更しません。共通UI（HTML/CSS/JS、`themes.json` など）

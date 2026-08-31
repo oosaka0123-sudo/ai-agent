@@ -443,5 +443,43 @@
       "PWA",
       "自動化"
     ]
+  },
+  {
+    "id": "2026-08-30-claude-code-smartphone-website-guide",
+    "date": "2026-08-30",
+    "title": "Claude Code版「スマホだけでホームページを作る」ガイドを執筆",
+    "project": "ai-agent",
+    "purpose": "複数AI比較ガイドの第1テーマで唯一未執筆だったClaude Code担当分の本文を書き、Gemini/Jules・Codexとあわせて3AIすべてが完成した状態にする。",
+    "whatMade": "guides/smartphone-website/claude.md に共通テンプレートの全14項目を執筆した。このリポジトリ自体をClaude Codeが実際にスマホ経由で構築してきた実例として紹介し、AGENTS.mdによる複数AI運用の実例にも触れた。guides/smartphone-website/theme.json のclaude-codeステータスと、guides/themes.json のテーマ全体ステータスをcompletedに更新した。",
+    "changes": [
+      "guides/smartphone-website/claude.md（本文執筆）",
+      "guides/smartphone-website/theme.json、guides/themes.json（ステータス更新）",
+      "README.md、PROJECT_SPEC.md（実装状況の記述を更新）",
+      ".gitignore（web/competitions/の除外漏れを修正）"
+    ],
+    "aiUsed": [
+      "Claude Code"
+    ],
+    "services": [
+      "GitHub",
+      "GitHub Pages"
+    ],
+    "tech": [
+      "Markdown",
+      "JSON"
+    ],
+    "problems": "作業開始前にmainを確認したところ、GitHub Copilotが4人目のエージェントとして追加され、複数プロジェクトを扱う司令塔的な仕組みが増えるなど、想定より大きく進んでいた。また、scripts/sync-site-data.shがcompetitions/もweb/へ同期するようになっていたが、.gitignoreに生成先が追加されていなかった。",
+    "solutions": "AGENTS.mdの基本ルールが変わっていないことを確認した上で、今回の指示範囲（自分の担当ガイド執筆）にスコープを絞って着手した。.gitignoreにweb/competitions/を追加して修正した。",
+    "learnings": "複数AIが並行して自律的に作業する環境では、セッションの合間にリポジトリが大きく変わることがある。作業前に主要ドキュメント（README/AGENTS.md）が変わっていないかを確認する習慣が重要。",
+    "images": [],
+    "githubCommits": [],
+    "pullRequests": [],
+    "relatedUrls": [],
+    "nextSteps": "guides/smartphone-website の3AI版がすべて完成したため、内容を読み比べる比較・評価はユーザーが行う。",
+    "tags": [
+      "ガイド",
+      "複数AI比較",
+      "Claude Code"
+    ]
   }
 ]
