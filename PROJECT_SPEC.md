@@ -108,8 +108,7 @@ AIエージェントは、作業完了前の自己レビュー（[`AGENTS.md`](A
 ### 第1テーマ: 「スマホだけでホームページを作る」
 
 - テーマID: `smartphone-website`
-- 2026-08-30時点のステータス: Gemini/Jules版・Codex版は本文を執筆済み。
-  Claude Code版は、共通テンプレートの見出し構成のみ用意したプレースホルダー。
+- ステータス: Claude Code版・Gemini/Jules版・Codex版のすべてで本文執筆が完了。
 
 ### 実装場所
 

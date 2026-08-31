@@ -8,6 +8,9 @@
 
 ### Added
 
+- 複数AI比較ガイドの第1テーマ「スマホだけでホームページを作る」に、
+  Claude Code担当の本文（`guides/smartphone-website/claude.md`）を追加。
+  これで3AI（Claude Code・Gemini/Jules・Codex）すべての本文が出揃った。
 - 「3AI競争テスト」第1回として、`competitions/01-mobile-ai-dev/claude-code.html`
   を追加。Claude Code・Gemini/Jules・OpenAI Codexを比較しながら、スマホだけで
   「調査→設計→コーディング→テスト→GitHub保存→公開」を行う実践フローをまとめた

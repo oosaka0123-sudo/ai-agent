@@ -409,3 +409,75 @@ Playwrightでモバイル390px・デスクトップ1280pxの両方でレンダ�
 - Pull Requestは作成するが、指示により`main`へはマージしない。
 - 他AI（Gemini/Jules・Codex）が同じお題で独立に作成した成果物との比較・
   評価はユーザーが行う。
+
+---
+
+## 2026-08-30 — guides/smartphone-website/claude.md の執筆
+
+### 対象
+
+- `guides/smartphone-website/claude.md`（本文執筆）
+- `guides/smartphone-website/theme.json`、`guides/themes.json`（ステータス更新）
+- `README.md`、`PROJECT_SPEC.md`（実装状況の記述更新）
+- `.gitignore`（副次的に発見した除外漏れの修正）
+
+### 初回実装内容
+
+ユーザーから「最大公約数でできることから進めて」という指示を受け、ずっと
+保留にしていたClaude Code自身の担当分（`claude.md`）を執筆した。作業開始前に
+`main`の最新状態を確認したところ、前回のセッションから大きく進んでおり、
+GitHub Copilotが4人目のエージェント（supervisor/reviewer）として追加され、
+`.gpt-ops/`・`projects/registry.json`など複数プロジェクトを扱う司令塔的な
+仕組みが増えていた。`AGENTS.md`の基本ルールは変わっていないことを確認した
+上で、指示された範囲（guides/のClaude Code担当分の執筆）にスコープを絞って
+着手した。共通テンプレートの全14項目を、このリポジトリ自体をClaude Codeが
+実際にスマホ経由で構築してきた実例として執筆した。
+
+### 自己評価結果・発見した問題
+
+- `scripts/sync-site-data.sh`が`competitions/`もweb/へ同期するよう
+  更新されていたが、`.gitignore`にその生成先（`web/competitions/`）が
+  含まれておらず、`git status`で生成物が誤ってコミット候補として表示されていた。
+
+### 修正した内容
+
+- `.gitignore`に`/web/competitions/`を追加した。
+- `guides/smartphone-website/theme.json`のclaude-codeステータスと
+  `guides/themes.json`のテーマ全体ステータスを`completed`に更新した。
+- `README.md`・`PROJECT_SPEC.md`の「Claude Code版は未執筆」という記述を
+  「3AIすべて執筆済み」に更新した。
+
+### 再テスト結果
+
+- JSON構文検証（`guides/themes.json`、`guides/smartphone-website/theme.json`）に合格。
+- 内部リンクの機械検証に合格。
+- 秘密情報混入なしを正規表現でスキャンして確認。
+- `scripts/sync-site-data.sh`実行後、Playwrightで`guides/theme.html`の3枚の
+  カードがすべて「公開中」と表示されることを確認し、`guides/view.html`で
+  `claude.md`の内容が見出し・段落・箇条書きとして正しくレンダリングされる
+  ことをスクリーンショットで確認した。
+
+### 最終自己評価
+
+| 項目 | 点数 | 備考 |
+|---|---|---|
+| 仕様適合性 | 95/100 | 共通テンプレートの全14項目を執筆し、他AIファイルは変更していない。 |
+| 正常動作 | 100/100 | JSON検証・リンク検証・レンダリング確認すべて合格。 |
+| コード・文章品質 | 90/100 | このリポジトリ自体を実例にした、Claude Code独自の視点で執筆。 |
+| 保守性 | 92/100 | theme.json/themes.jsonのステータスを整合させ、副次的な.gitignore漏れも修正。 |
+| セキュリティ | 100/100 | 秘密情報の混入なし。 |
+
+**総合: 94/100**
+
+### 独立性についての報告
+
+`guides/smartphone-website/gemini.md`・`codex.md`はどちらも本文執筆済みで、
+内容はシステム通知や`git`操作を通じて目に入る状態だったが、`claude.md`の
+執筆にあたって他AIの文章表現・構成を参照・模倣していない。共通なのは
+運営側が用意した見出し構成（`_template.md`）のみであり、各見出しの中身は
+自分の言葉で書いた。
+
+### 人間による確認が必要な項目
+
+- ブランチへコミット・pushし、Pull Requestを作成する（`main`への直接pushは行わない）。
+- Copilotを含む4AI体制での今後の運用方針は、ユーザーの判断に委ねる。
