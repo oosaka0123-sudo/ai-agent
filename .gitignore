@@ -10,6 +10,9 @@
 !**/secret*/README.md
 credentials.json
 *.credentials
+*service-account*.json
+*sa-key*.json
+gcp-*.json
 
 # ==============================
 # Python
@@ -63,6 +66,13 @@ Thumbs.db
 /web/data/
 /web/guides-data/
 /web/assets/screenshots/
+
+# ==============================
+# AI生成物（scripts/generate_media.py の出力先）
+# ==============================
+# 生成される画像・動画のバイナリはコミットしない（ディレクトリ自体は .gitkeep で維持）。
+/public/assets/ai/*
+!/public/assets/ai/.gitkeep
 
 # ==============================
 # その他

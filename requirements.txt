@@ -1,0 +1,6 @@
+# scripts/generate_media.py（Vertex AIメディア生成基盤）が使用する依存パッケージ。
+# インストール: pip install -r requirements.txt
+
+google-genai>=1.0.0   # Google Vertex AI / Gemini Developer API 公式SDK
+python-dotenv>=1.0.0  # .env ファイルの読み込み
+pytest>=8.0.0          # tests/ の自動テスト実行用

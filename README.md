@@ -199,6 +199,108 @@ Gemini・Jules / OpenAI Codexがそれぞれ完全に独立したブランチで
 早見表・実践フロー・PWAやAPI連携の解説などを1枚のページにまとめています。
 詳細は [`competitions/README.md`](competitions/README.md) を参照してください。
 
+## メディア生成（Vertex AI連携）
+
+Google Cloud Vertex AI（公式 `google-genai` SDK）を使って、画像・動画を生成するための
+共通CLI基盤です。**今回実装したのはGoogle接続部分（画像・動画生成→保存→ログ記録）のみで、
+生成物を本番Webサイトへ自動反映する仕組みはまだ実装していません。**
+
+- 実装本体: `src/media_gen/`（設定読み込み・ファイル命名・ログ記録・リトライ・
+  Google Vertex AIプロバイダ）
+- CLIエントリーポイント: `scripts/generate_media.py`
+- 生成物の保存先: `public/assets/ai/`（Gitにはコミットされない。`.gitkeep` でディレクトリのみ維持）
+- 実行ログ: `logs/media-generation.jsonl`（日時・provider・model・種類・prompt・
+  status・保存先・エラー内容を1行1件のJSON Linesで記録。`.gitignore` 済み）
+
+### 使う前の準備（初回のみ）
+
+1. 依存パッケージをインストールする。
+   ```bash
+   pip install -r requirements.txt
+   ```
+2. `.env` を作成し、Google CloudのプロジェクトIDを設定する。
+   ```bash
+   cp .env.example .env
+   ```
+   `.env` の `GOOGLE_CLOUD_PROJECT` は `rss7-ai-media`、`GOOGLE_CLOUD_LOCATION` は
+   `us-central1`（既定値のままでよい）を設定する。
+3. Google Cloudの認証情報を用意する（**APIキーや鍵ファイルの中身をコードや `.env` に
+   直接書き込まない**。Application Default Credentials、または鍵ファイルへの
+   パスのみを環境変数で指定する）。
+   - ローカル/コンテナで実行する場合:
+     ```bash
+     gcloud auth application-default login
+     ```
+   - サービスアカウント鍵を使う場合のみ、鍵ファイルをリポジトリの外に保存し、
+     `.env` の `GOOGLE_APPLICATION_CREDENTIALS` にその絶対パスを設定する
+     （鍵ファイル自体は `.gitignore` で除外済みのパターンに当てはまる場所・名前に置くこと）。
+
+### 使い方（スマホのClaude Codeから使う場合）
+
+スマホのClaude Code（claude.ai/code や Claude Code on the web など）からこのリポジトリを
+開いている場合、ターミナル操作はすべてClaude Codeに日本語で指示するだけでよい。
+Google Cloud側の準備（プロジェクト作成・API有効化・認証）は人間が事前に完了させておく必要があるが、
+それ以降は以下のように依頼すれば自動で実行される。
+
+- 「`scripts/generate_media.py` を使って `夕焼けの東京タワー` の画像を生成して」
+- 「同じ仕組みで、縦長（9:16）の動画も1本作って」
+
+Claude Codeは内部で以下のコマンドを実行する（人間が直接ターミナルを叩く必要はない）。
+
+```bash
+python3 scripts/generate_media.py --provider google --type image --prompt "夕焼けの東京タワー"
+python3 scripts/generate_media.py --provider google --type video --prompt "海辺を歩く猫" --aspect-ratio 9:16
+```
+
+主なオプション（`python3 scripts/generate_media.py --help` で一覧を確認できる）:
+
+| オプション | 説明 |
+|---|---|
+| `--provider` | 使用するプロバイダ（現時点では `google` のみ） |
+| `--type` | `image` または `video` |
+| `--prompt` | 生成内容を指示するプロンプト（必須） |
+| `--model` | 使用するモデルID（省略時はプロバイダの既定モデル） |
+| `--aspect-ratio` | アスペクト比（例: `1:1`, `16:9`, `9:16`） |
+| `--negative-prompt` | 生成物に含めたくない要素 |
+| `--count` | 生成する枚数/本数（既定値: 1） |
+| `--duration-seconds` | 動画の長さ（秒、動画生成のみ） |
+
+動画生成は非同期のロングランニングジョブとして実行され、内部で
+「ジョブ開始 → 状態確認（既定15秒間隔） → 完了 → ファイル保存」を自動的に繰り返す
+（既定のタイムアウトは600秒。`--poll-interval` / `--timeout` で調整できる）。
+
+生成に失敗した場合は自動的に1回だけ再試行し、2回失敗した時点でエラー内容を表示して停止する
+（`logs/media-generation.jsonl` にも記録される）。
+
+### 接続テスト方法
+
+Google Cloud側の設定（プロジェクト・課金・Vertex AI API有効化）と認証情報の準備ができたら、
+以下のコマンドで実際に接続できるか確認する。**画像生成は課金対象**なので、まずは最小構成
+（`--count 1`）で1枚だけ試すことを推奨する。
+
+```bash
+python3 scripts/generate_media.py --provider google --type image --prompt "connection test" --count 1
+```
+
+- 成功する場合: `生成が完了しました（1件）:` と保存先パス（`public/assets/ai/image_....png`）が
+  表示され、`logs/media-generation.jsonl` に `"status": "success"` の行が追記される。
+  実際に画像ファイルが保存されているか確認する。
+- 失敗する場合: エラーメッセージが具体的な原因を示す。よくある原因は以下の通り。
+  - `環境変数 GOOGLE_CLOUD_PROJECT が設定されていません` → `.env` を作成・設定し忘れている。
+  - `Your default credentials were not found` → `gcloud auth application-default login` を
+    実行していない、または `GOOGLE_APPLICATION_CREDENTIALS` の鍵ファイルパスが間違っている。
+  - `403` 系のエラー → Vertex AI APIが有効化されていない、または使用しているアカウント/
+    サービスアカウントに権限（`roles/aiplatform.user` など）が付与されていない。
+  - `404` やモデル未対応のエラー → `--model` で指定したモデルIDがそのプロジェクト/リージョンで
+    利用できない。Vertex AIのModel Gardenで利用可能なモデルIDを確認し、`--model` で指定し直す。
+
+動画生成も同様に、まず短い `--duration-seconds` と `--count 1` で1本だけ試すことを推奨する
+（動画生成は画像生成よりも時間・コストがかかる）。
+
+```bash
+python3 scripts/generate_media.py --provider google --type video --prompt "connection test" --count 1
+```
+
 ## セキュリティに関する重要な注意事項
 
 - **APIキー・パスワードなどの秘密情報は絶対にGitHubへコミットしないでください。**

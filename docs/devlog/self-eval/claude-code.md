@@ -409,3 +409,111 @@ Playwrightでモバイル390px・デスクトップ1280pxの両方でレンダ�
 - Pull Requestは作成するが、指示により`main`へはマージしない。
 - 他AI（Gemini/Jules・Codex）が同じお題で独立に作成した成果物との比較・
   評価はユーザーが行う。
+
+---
+
+## 2026-09-01 — Vertex AIメディア生成基盤（Google接続部分）
+
+### 対象
+
+- `scripts/generate_media.py`
+- `src/media_gen/`（`config.py`, `naming.py`, `logging_utils.py`, `retry.py`,
+  `providers/google_provider.py`）
+- `tests/media_gen/`, `public/assets/ai/`, `requirements.txt`, `.env.example`, `.gitignore`,
+  `.github/workflows/ci.yml`
+
+### 初回実装内容
+
+Google Cloud Vertex AI（プロジェクト `rss7-ai-media`）に公式 `google-genai` SDKで
+接続し、画像（Imagen）・動画（Veo）を同じCLI入口から生成できる基盤を実装した。
+動画生成は非同期のロングランニングジョブとして、ジョブ開始→状態確認→完了→
+ファイル保存の流れを実装。失敗時は自動的に1回だけ再試行し、2回失敗したら停止して
+エラー内容を表示する。生成物は `public/assets/ai/` へ日時＋種類＋乱数の重複しない
+ファイル名で保存し、実行結果を `logs/media-generation.jsonl` に記録する。
+認証情報はコードに直接書かず、Application Default Credentials または
+環境変数（`GOOGLE_APPLICATION_CREDENTIALS`）で解決する設計にした。
+
+### 自己評価結果（PROJECT_SPEC.md照合・自己レビュー・実動作テスト後）
+
+`PROJECT_SPEC.md` 第5章（Vertex AIメディア生成基盤）の必須要件と1項目ずつ照合し、
+全項目を満たしていることを確認した。以下の観点で自己レビューを行った:
+バグ / 不要・重複コード / 読みにくいコード / セキュリティ・秘密情報混入 / 保守性。
+
+実動作テストとして以下を実施した（Google Cloudの実際の認証情報は用意されていないため、
+実際の画像・動画生成そのものは確認できていない。詳細は「残っている問題」参照）。
+
+- `pytest tests/media_gen`（8件）— ファイル命名の重複回避・拡張子推定、リトライ処理
+  （1回目失敗→自動リトライ→成功、または2回失敗して停止）、JSON Linesログ出力の
+  必須フィールドをすべて自動テストし、全件成功を確認した。
+- `python3 scripts/generate_media.py --help` — オプション一覧が意図通り表示されることを確認。
+- `GOOGLE_CLOUD_PROJECT` 未設定の状態でCLIを実行し、設定不足を示す日本語エラーメッセージが
+  表示され、`logs/media-generation.jsonl` に失敗ログが記録されることを確認した。
+- `GOOGLE_CLOUD_PROJECT=rss7-ai-media` を設定した状態で画像・動画それぞれのCLIを実行し、
+  認証情報が無いことによる `Your default credentials were not found` エラーまで
+  正しく到達すること（＝リクエストの組み立て・APIクライアントの初期化・
+  `GenerateImagesConfig` / `GenerateVideosConfig` / `GenerateVideosSource` の
+  フィールド名に誤りがないこと）、1回目失敗→自動リトライ→2回目失敗→停止という
+  リトライの流れが実際に動作すること、失敗ログが正しく記録されることを確認した。
+- 実装に使った `google-genai` SDKのAPI仕様は、Web検索結果の要約だけで断定せず、
+  `pip download google-genai` で実際にインストールしたバージョン（v2.21.0）の
+  ソースコード（`client.py` / `models.py` / `types.py`）を直接読んで
+  コンストラクタ引数・メソッドシグネチャ・設定クラスのフィールド名を確認した。
+
+### 発見した問題
+
+- 検証用サンドボックス環境で、`cryptography` パッケージの実行時に `_cffi_backend`
+  が見つからずクラッシュする問題が発生した（`cffi` 未インストールによる、
+  検証環境固有の不備）。
+- `tests/media_gen/` に `__init__.py` を置いていたため、pytestのデフォルトの
+  import modeで `src/media_gen` と名前が衝突し、`src/media_gen` の方が
+  importできなくなっていた。
+- 画像生成に使用した `client.models.generate_images` は、SDK上「2027年1月以降に
+  削除予定」の非推奨扱いになっていることが判明した（現時点では動作するが将来的な
+  移行が必要）。
+
+### 修正した内容
+
+- `pip install cryptography` を実行し、サンドボックス側の `cffi` 不足を解消した
+  （リポジトリのコードやREADMEには影響しない、検証環境のみの対応）。
+- `tests/media_gen/__init__.py` を削除し、名前衝突を解消した。再度 `pytest tests/media_gen`
+  を実行し、全8件が成功することを確認した。`tests/README.md` に、同じ問題を将来
+  再発させないよう注意点を明記した。
+- `google_provider.py` の画像生成箇所に、`generate_images` が将来非推奨になる旨と
+  現時点で採用した理由をコメントとして残した。
+
+### 再テスト結果
+
+修正後、`pytest tests/media_gen`（8件全て成功）、CLIの `--help`・設定不足エラー・
+認証エラーまでの到達（画像・動画の両方）・リトライ動作・ログ記録を再確認し、
+いずれも意図通り動作した。
+
+### 最終自己評価
+
+| 項目 | 評価 | コメント |
+|---|---|---|
+| 仕様適合性 | 100/100 | `PROJECT_SPEC.md` 第5章の必須要件をすべて満たす。 |
+| 正常動作 | 90/100 | 設定不足・認証情報なしのエラーパス、リトライ、ログ記録は実機で確認済み。実際の画像・動画生成そのものは認証情報がなく未確認（下記「残っている問題」参照）。 |
+| コード品質 | 90/100 | 設定・命名・ログ・リトライ・プロバイダ実装を責務ごとに分離。将来のプロバイダ追加を想定した設計。 |
+| 保守性 | 90/100 | `providers/` にモジュールを追加し `PROVIDERS` 辞書へ登録するだけで拡張できる構成。 |
+| セキュリティ | 100/100 | 認証情報をコードに書かず、`.env.example` はキー名のみ、`.gitignore` で鍵ファイルパターンを除外、生成物・ログはコミット対象外。 |
+
+**総合: 94/100**
+
+### 残っている問題・今後の課題
+
+- **実際のGoogle Cloud認証情報を使った、本物の画像・動画生成の実行確認ができていない**
+  （このセッションには実際の認証情報が提供されていないため）。README「接続テスト方法」に
+  手順を明記したので、ユーザー本人が `gcloud auth application-default login` 等を行った上で
+  実行して確認する必要がある。
+- `generate_images`（画像生成）はSDK上将来非推奨になる予定。2027年1月が近づいたら
+  `generate_content` ベースの画像生成モデルへの移行を検討する必要がある。
+- Veo・Imagenの利用可能なモデルIDはリージョン・時期によって変わるため、
+  `--model` オプションで上書きできるようにしているが、既定モデルIDが将来使えなくなる
+  可能性がある。
+
+### 人間による確認が必要な項目
+
+- 実際のGoogle Cloud認証情報（ADCまたはサービスアカウント鍵）を用意し、README
+  「接続テスト方法」に従って画像・動画それぞれ最小構成（`--count 1`）で1回ずつ
+  実行し、正しく `public/assets/ai/` に保存されるか確認すること（課金が発生する）。
+- Pull Requestの作成・レビュー。

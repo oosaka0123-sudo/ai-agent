@@ -131,7 +131,51 @@ AIエージェントは、作業完了前の自己レビュー（[`AGENTS.md`](A
 - `.github/workflows/pages.yml` が `main` へのpushでこのスクリプトを実行し、
   GitHub Pagesへ自動デプロイする。
 
-## 5. AIチーム運用基盤（本題そのもの）
+## 5. Vertex AIメディア生成基盤（scripts/generate_media.py）
+
+> 将来的に「日本語指示だけで画像生成・動画生成・生成物保存・GitHub反映・
+> Webサイト更新まで自動化する」ための土台。今回実装したのは**Google接続部分のみ**
+> （画像・動画生成→保存→ログ記録）。生成物を本番Webサイトへ自動デプロイする仕組みは
+> まだ実装していない。
+
+### 必須要件
+
+- `scripts/generate_media.py` を、画像・動画生成を同じCLI入口から呼べる共通CLIとして実装する。
+  - 例: `python scripts/generate_media.py --provider google --type image --prompt "..."`
+  - 例: `python scripts/generate_media.py --provider google --type video --prompt "..." --aspect-ratio 9:16`
+- Google Vertex AIとの接続は公式 `google-genai` SDKを使用する。
+- 認証情報をコードに直接書かない。Application Default Credentials、または
+  環境変数（`GOOGLE_APPLICATION_CREDENTIALS`）経由で解決する。
+- Google Cloud Projectは既定で `rss7-ai-media`（`.env` の
+  `GOOGLE_CLOUD_PROJECT` で設定・変更可能）。
+- 動画生成は非同期処理（ジョブ開始 → 状態確認 → 完了 → ファイル保存）として実装する。
+- 生成物は `public/assets/ai/` に保存する（Gitにはコミットしない。`.gitkeep` で
+  ディレクトリのみ維持）。
+- ファイル名は日時＋種類＋乱数を組み合わせ、重複しないようにする（`src/media_gen/naming.py`）。
+- 失敗時は自動的に1回だけ再試行する。2回失敗した時点で停止し、エラー内容を表示する。
+- 実行結果を `logs/media-generation.jsonl` に記録する（日時・provider・model・種類・
+  prompt・status・保存先・エラー内容。`.gitignore` 済みでコミットされない）。
+- `.env.example` にキー名のみ追記し、`.gitignore` で認証ファイル（サービスアカウント鍵など）を
+  確実に除外する。
+- `requirements.txt` に依存パッケージ（`google-genai` / `python-dotenv` / `pytest`）を記載する。
+
+### 実装場所
+
+- `scripts/generate_media.py`（CLIエントリーポイント）
+- `src/media_gen/`（設定読み込み・ファイル命名・ログ記録・リトライ・
+  `providers/google_provider.py`: Google Vertex AI（Imagen / Veo）接続実装）
+- `tests/media_gen/`（ネットワーク接続不要な単体テスト: ファイル命名・リトライ・ログ記録）
+- `public/assets/ai/`（生成物の保存先、Gitには含めない）
+- `logs/media-generation.jsonl`（実行ログ、Gitには含めない）
+
+### 将来拡張（未実装・仕様のみ）
+
+- 生成物のGitHubへの反映（コミット・PR作成）
+- 生成物を使った本番Webサイトの自動更新
+- Google以外のプロバイダ（他のAI基盤）の追加
+- 日本語の自然な指示から `--type` / `--prompt` / オプションを自動組み立てする層
+
+## 6. AIチーム運用基盤（本題そのもの）
 
 サンプルプロジェクトではなく、このリポジトリの本題にあたる運用基盤。
 詳細は各ファイルを参照（ここでは一覧のみ）。
@@ -155,7 +199,7 @@ AIエージェントは、作業完了前の自己レビュー（[`AGENTS.md`](A
   秘密情報は `.env`（gitignore済み）にのみ記載する（[`AGENTS.md`](AGENTS.md)、
   [`docs/DEVELOPMENT.md`](docs/DEVELOPMENT.md) 参照）。
 
-## 6. サンプルプロジェクト: 3AI競争テスト（competitions/）
+## 7. サンプルプロジェクト: 3AI競争テスト（competitions/）
 
 > 基盤の動作確認のためのサンプルプロジェクトです。リポジトリの目的そのものではありません。
 

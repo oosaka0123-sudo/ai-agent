@@ -443,5 +443,55 @@
       "PWA",
       "自動化"
     ]
+  },
+  {
+    "id": "2026-09-01-vertex-ai-media-gen",
+    "date": "2026-09-01",
+    "title": "Vertex AIメディア生成基盤（Google接続部分）を追加",
+    "project": "ai-agent",
+    "purpose": "将来的にClaude Codeから日本語指示だけで画像生成・動画生成・生成物保存・GitHub反映・Webサイト更新まで自動化することを見据え、まずGoogle Cloud Vertex AI（プロジェクト rss7-ai-media）との接続部分だけを作る。",
+    "whatMade": "公式google-genai SDKを使い、画像（Imagen）・動画（Veo）を同じCLI入口（scripts/generate_media.py --provider google --type image|video --prompt \"...\"）から呼べる基盤を実装した。動画生成はジョブ開始→状態確認→完了→ファイル保存の非同期フローとし、失敗時は自動的に1回だけ再試行、2回失敗したら停止してエラーを表示する。生成物はpublic/assets/ai/へ日時＋種類＋乱数の重複しないファイル名で保存し、実行結果をlogs/media-generation.jsonlへ記録する。認証情報はコードに書かず、Application Default Credentials/環境変数で解決する。",
+    "changes": [
+      "scripts/generate_media.py（新規、CLIエントリーポイント）",
+      "src/media_gen/（config.py, naming.py, logging_utils.py, retry.py, providers/google_provider.py）",
+      "tests/media_gen/（naming・retry・logging_utilsの単体テスト）",
+      "public/assets/ai/.gitkeep（生成物の保存先）",
+      "requirements.txt（新規: google-genai, python-dotenv, pytest）",
+      ".env.example（Vertex AI用の環境変数を追加）",
+      ".gitignore（生成物・サービスアカウント鍵っぽいファイル名を除外）",
+      ".github/workflows/ci.yml（pytest tests/media_genを実行するジョブに更新）",
+      "README.md（メディア生成セクション: 準備手順・スマホからの使い方・接続テスト方法）",
+      "PROJECT_SPEC.md（第5章「Vertex AIメディア生成基盤」を新設）",
+      "CHANGELOG.md（Unreleasedに追記）"
+    ],
+    "aiUsed": [
+      "Claude Code"
+    ],
+    "services": [
+      "Google Cloud",
+      "Vertex AI",
+      "GitHub",
+      "GitHub Actions"
+    ],
+    "tech": [
+      "Python",
+      "AI Agent",
+      "API"
+    ],
+    "problems": "google-genai SDKのAPI（Client初期化引数、環境変数名、generate_videosの推奨呼び出し方法など）がWeb検索の要約だけでは断定しづらかった。検証用サンドボックスではcryptographyパッケージが_cffi_backend不足でクラッシュし、tests/media_gen/に__init__.pyを置くとsrc/media_genと名前が衝突してimportできなくなる問題も発生した。",
+    "solutions": "pip downloadで実際にインストールしたgoogle-genai（v2.21.0）のソースコード（client.py/models.py/types.py）を直接読み、コンストラクタ引数・メソッドシグネチャ・設定クラスのフィールド名を確認してから実装した。cryptographyの問題はpip install cryptographyで解消（検証環境固有の問題と判断）。tests/media_gen/の__init__.pyは削除して名前衝突を解消した。",
+    "learnings": "SDKのバージョン差異による実装ミスを避けるには、Web検索の要約だけでなく実際にインストールしたパッケージのソースコードを読むのが確実。pytestはテストディレクトリ名が対象パッケージ名と一致し__init__.pyを持つ場合、import解決で名前が衝突することがある。",
+    "images": [],
+    "githubCommits": [],
+    "pullRequests": [],
+    "relatedUrls": [],
+    "nextSteps": "生成物のGitHub反映・本番Webサイトへの自動デプロイ（今回は対象外）。実際のGoogle Cloud認証情報を使った接続テスト（README「接続テスト方法」参照、本人のみ実行可能）。",
+    "tags": [
+      "Vertex AI",
+      "AIエージェント",
+      "Google Cloud",
+      "Python",
+      "自動化"
+    ]
   }
 ]
