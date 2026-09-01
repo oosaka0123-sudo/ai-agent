@@ -153,6 +153,16 @@ class GitHubClient:
     def repo(self, full_name: str) -> dict:
         return self.request("GET", f"/repos/{full_name}")
 
+    def open_pulls(self, full_name: str) -> list[dict]:
+        return self.request("GET", f"/repos/{full_name}/pulls?state=open&per_page=100")
+
+    def onboarding_pr(self, full_name: str, slug: str) -> dict | None:
+        prefix = f"ai-onboarding/{slug}-"
+        for pr in self.open_pulls(full_name):
+            if pr.get("head", {}).get("ref", "").startswith(prefix):
+                return pr
+        return None
+
     def ref_sha(self, full_name: str, branch: str) -> str:
         encoded = urllib.parse.quote(f"heads/{branch}", safe="/")
         return self.request("GET", f"/repos/{full_name}/git/ref/{encoded}")["object"]["sha"]
@@ -239,10 +249,18 @@ def onboard_project(
     if not changed:
         return f"up-to-date: {project['slug']} -> {full_name}"
 
-    stamp = datetime.now(timezone.utc).strftime("%Y%m%d-%H%M%S")
-    branch = f"ai-onboarding/{project['slug']}-{stamp}"
-    base_sha = client.ref_sha(full_name, default_branch)
-    client.create_branch(full_name, branch, base_sha)
+    existing_pr = client.onboarding_pr(full_name, project["slug"])
+    if existing_pr:
+        branch = existing_pr["head"]["ref"]
+        pr_url = existing_pr.get("html_url", full_name)
+        result_prefix = "pr-updated"
+    else:
+        stamp = datetime.now(timezone.utc).strftime("%Y%m%d-%H%M%S")
+        branch = f"ai-onboarding/{project['slug']}-{stamp}"
+        base_sha = client.ref_sha(full_name, default_branch)
+        client.create_branch(full_name, branch, base_sha)
+        pr_url = ""
+        result_prefix = "pr-opened"
 
     for path, content in desired.items():
         info = client.file(full_name, path, branch)
@@ -256,6 +274,9 @@ def onboard_project(
             info.get("sha") if info else None,
         )
 
+    if existing_pr:
+        return f"{result_prefix}: {project['slug']} -> {pr_url}"
+
     pr = client.open_pr(
         full_name,
         "chore: AI control-plane onboarding",
@@ -268,7 +289,7 @@ def onboard_project(
             "publish anything and does not include credentials.\n"
         ),
     )
-    return f"pr-opened: {project['slug']} -> {pr.get('html_url', full_name)}"
+    return f"{result_prefix}: {project['slug']} -> {pr.get('html_url', full_name)}"
 
 
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
