@@ -1,7 +1,14 @@
 {
-  "version": 1,
-  "updated": "2026-08-30",
+  "version": 2,
+  "updated": "2026-09-01",
   "max_parallel_projects": 4,
+  "onboarding": {
+    "enabled": true,
+    "control_plane_repository": "oosaka0123-sudo/ai-agent",
+    "default_media_project": "rss7-ai-media",
+    "default_provider": "google",
+    "fallback_provider": "higgsfield"
+  },
   "projects": [
     {
       "slug": "kansai-surfer-ks",
@@ -10,7 +17,13 @@
       "repository": null,
       "status": "pending-repository-connection",
       "default_role": "web-pwa-production",
-      "copilot_review": "planned"
+      "copilot_review": "planned",
+      "auto_onboard": true,
+      "media": {
+        "enabled": true,
+        "provider": "auto",
+        "control_plane_project": "rss7-ai-media"
+      }
     },
     {
       "slug": "s-league-now",
@@ -18,7 +31,13 @@
       "repository": null,
       "status": "pending-repository-connection",
       "default_role": "web-app",
-      "copilot_review": "planned"
+      "copilot_review": "planned",
+      "auto_onboard": true,
+      "media": {
+        "enabled": true,
+        "provider": "auto",
+        "control_plane_project": "rss7-ai-media"
+      }
     },
     {
       "slug": "ai-agent",
@@ -26,7 +45,13 @@
       "repository": "oosaka0123-sudo/ai-agent",
       "status": "active",
       "default_role": "control-plane",
-      "copilot_review": "active"
+      "copilot_review": "active",
+      "auto_onboard": false,
+      "media": {
+        "enabled": true,
+        "provider": "auto",
+        "control_plane_project": "rss7-ai-media"
+      }
     },
     {
       "slug": "fx-trading",
@@ -35,7 +60,13 @@
       "status": "pending-repository-connection",
       "default_role": "research-backtest-paper-trading",
       "copilot_review": "planned",
-      "live_order_policy": "human-explicit-approval-required"
+      "live_order_policy": "human-explicit-approval-required",
+      "auto_onboard": true,
+      "media": {
+        "enabled": false,
+        "provider": "auto",
+        "control_plane_project": "rss7-ai-media"
+      }
     }
   ]
 }

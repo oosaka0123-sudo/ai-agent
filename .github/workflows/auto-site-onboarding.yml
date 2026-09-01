@@ -1,0 +1,51 @@
+name: Auto Site Onboarding
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "projects/registry.json"
+  workflow_dispatch:
+    inputs:
+      project:
+        description: "optional project slug; empty means all"
+        required: false
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  onboard:
+    runs-on: ubuntu-latest
+    env:
+      CONTROL_PLANE_GITHUB_TOKEN: ${{ secrets.CONTROL_PLANE_GITHUB_TOKEN }}
+      PROJECT_SLUG: ${{ inputs.project }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Validate registry and onboarding logic
+        run: |
+          python3 -m unittest discover -s tests -p 'test_project_onboarding.py'
+          if [ -n "$PROJECT_SLUG" ]; then
+            python3 scripts/onboard_projects.py --check --project "$PROJECT_SLUG"
+          else
+            python3 scripts/onboard_projects.py --check
+          fi
+
+      - name: Open onboarding PRs in connected repositories
+        run: |
+          if [ -z "$CONTROL_PLANE_GITHUB_TOKEN" ]; then
+            echo "::notice title=One-time setup required::Add CONTROL_PLANE_GITHUB_TOKEN as a repository secret to enable cross-repository onboarding PRs."
+            exit 0
+          fi
+
+          if [ -n "$PROJECT_SLUG" ]; then
+            python3 scripts/onboard_projects.py --apply --project "$PROJECT_SLUG"
+          else
+            python3 scripts/onboard_projects.py --apply
+          fi
