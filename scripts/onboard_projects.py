@@ -128,9 +128,51 @@ def merge_mcp_json(existing_content: str | None, project: dict, registry: dict) 
     return json.dumps(doc, ensure_ascii=False, indent=2) + "\n"
 
 
-def render_readme(project: dict) -> str:
+def render_readme(project: dict, mcp_json_included: bool = False) -> str:
     name = project["name"]
     slug = project["slug"]
+    if mcp_json_included:
+        mcp_bullet = (
+            "- Google Media MCP: `.mcp.json` (`mcpServers.google-media` entry only --\n"
+            "  any other MCP servers already configured in this repository are left\n"
+            "  untouched)"
+        )
+        mcp_section = (
+            "The control plane provides shared AI media generation -- Google Vertex AI\n"
+            "(Imagen / Veo) today, Higgsfield planned -- as a Remote HTTP MCP server, so\n"
+            "Claude Code in this repository can call `generate_image` / `generate_video`\n"
+            "directly. No generation code, credentials, or Google Cloud project\n"
+            "configuration is copied into this repository: `.mcp.json` only points at\n"
+            "the shared server's URL."
+        )
+        setup_section = (
+            "`.mcp.json`'s `Authorization` header reads `${GOOGLE_MEDIA_MCP_TOKEN}` from\n"
+            "the environment Claude Code runs in -- it is never committed here. Set it\n"
+            "once wherever this repository's Claude Code sessions run. See the control\n"
+            "plane's `docs/GOOGLE_MEDIA_MCP.md` for where to get the value."
+        )
+    else:
+        mcp_bullet = (
+            "- Google Media MCP: not yet added -- `.mcp.json` will arrive in a\n"
+            "  follow-up PR once the control plane's MCP server is deployed (see\n"
+            "  `docs/GOOGLE_MEDIA_MCP.md` in the control plane repository)"
+        )
+        mcp_section = (
+            "The control plane will provide shared AI media generation -- Google Vertex\n"
+            "AI (Imagen / Veo) today, Higgsfield planned -- as a Remote HTTP MCP server,\n"
+            "so Claude Code in this repository will be able to call `generate_image` /\n"
+            "`generate_video` directly, once a follow-up PR adds `.mcp.json` here. No\n"
+            "generation code, credentials, or Google Cloud project configuration will be\n"
+            "copied into this repository -- `.mcp.json` will only point at the shared\n"
+            "server's URL."
+        )
+        setup_section = (
+            "Once the follow-up PR above adds `.mcp.json`, its `Authorization` header\n"
+            "will read `${GOOGLE_MEDIA_MCP_TOKEN}` from the environment Claude Code runs\n"
+            "in -- it will never be committed here. Set it once wherever this\n"
+            "repository's Claude Code sessions run. See the control plane's\n"
+            "`docs/GOOGLE_MEDIA_MCP.md` for where to get the value."
+        )
     return f"""# AI control-plane onboarding
 
 This repository is registered with the shared AI control plane.
@@ -138,30 +180,20 @@ This repository is registered with the shared AI control plane.
 - Project: **{name}** (`{slug}`)
 - Control plane: `oosaka0123-sudo/ai-agent`
 - Managed manifest: `.ai-agent/project.json`
-- Google Media MCP: `.mcp.json` (`mcpServers.google-media` entry only --
-  any other MCP servers already configured in this repository are left
-  untouched)
+{mcp_bullet}
 - Default publishing policy: **preview first**
 - Direct push to `main`: **disabled**
 
 ## What becomes reusable automatically
 
-The control plane provides shared AI media generation -- Google Vertex AI
-(Imagen / Veo) today, Higgsfield planned -- as a Remote HTTP MCP server, so
-Claude Code in this repository can call `generate_image` / `generate_video`
-directly. No generation code, credentials, or Google Cloud project
-configuration is copied into this repository: `.mcp.json` only points at
-the shared server's URL.
+{mcp_section}
 
 Generation logs, provider routing, and future cross-project automation are
 also shared this way, without copying implementation into every site.
 
 ## One-time setup this repository may still need
 
-`.mcp.json`'s `Authorization` header reads `${{GOOGLE_MEDIA_MCP_TOKEN}}` from
-the environment Claude Code runs in -- it is never committed here. Set it
-once wherever this repository's Claude Code sessions run. See the control
-plane's `docs/GOOGLE_MEDIA_MCP.md` for where to get the value.
+{setup_section}
 
 ## Safety boundary
 
@@ -289,20 +321,25 @@ def onboard_project(
     repo_info = client.repo(full_name) if apply else {"default_branch": "main"}
     default_branch = repo_info.get("default_branch", "main")
 
-    desired = {
-        ".ai-agent/project.json": render_manifest(project, registry),
-        ".ai-agent/README.md": render_readme(project),
-    }
-
     # .mcp.json is merged, not replaced wholesale (see merge_mcp_json) -- it
     # may already contain servers this control plane knows nothing about. In
     # --check mode there is no real API call to read the current file, so
     # the merge runs against "no existing file" -- fine, --check only
     # validates registry/onboarding logic locally, same as the other files.
+    # Computed before README.md so the README can say accurately whether
+    # .mcp.json exists yet, rather than describing it as already present.
     existing_mcp_json = None
     if apply:
         existing_mcp_json = decode_content(client.file(full_name, ".mcp.json", default_branch))
     merged_mcp_json = merge_mcp_json(existing_mcp_json, project, registry)
+    mcp_json_included = merged_mcp_json is not None and "google-media" in json.loads(merged_mcp_json).get(
+        "mcpServers", {}
+    )
+
+    desired = {
+        ".ai-agent/project.json": render_manifest(project, registry),
+        ".ai-agent/README.md": render_readme(project, mcp_json_included=mcp_json_included),
+    }
     if merged_mcp_json is not None:
         desired[".mcp.json"] = merged_mcp_json
 

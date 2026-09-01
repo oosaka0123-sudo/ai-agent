@@ -7,7 +7,7 @@ repository may already have other MCP servers configured in it.
 import json
 import unittest
 
-from scripts.onboard_projects import merge_mcp_json
+from scripts.onboard_projects import merge_mcp_json, render_readme
 
 _REGISTRY_WITH_URL = {
     "onboarding": {
@@ -87,6 +87,28 @@ class McpJsonMergeTests(unittest.TestCase):
         first = merge_mcp_json(None, _MEDIA_ENABLED, _REGISTRY_WITH_URL)
         second = merge_mcp_json(first, _MEDIA_ENABLED, _REGISTRY_WITH_URL)
         self.assertEqual(first, second)
+
+
+class ReadmeMcpWordingTests(unittest.TestCase):
+    """Regression coverage for a Copilot finding on rss7-house#16: the
+    README must never describe .mcp.json as already present when this
+    onboarding pass didn't actually write one."""
+
+    def test_default_does_not_claim_mcp_json_exists(self):
+        text = render_readme({"name": "Site", "slug": "site"})
+        self.assertNotIn("`.mcp.json` only points at", text)
+        self.assertIn("not yet added", text)
+        self.assertIn("will arrive in a", text)
+
+    def test_mcp_json_included_true_describes_it_as_present(self):
+        text = render_readme({"name": "Site", "slug": "site"}, mcp_json_included=True)
+        self.assertIn("`.mcp.json` only points at", text)
+        self.assertNotIn("not yet added", text)
+
+    def test_mcp_json_included_false_is_explicit_and_matches_default(self):
+        default_text = render_readme({"name": "Site", "slug": "site"})
+        explicit_text = render_readme({"name": "Site", "slug": "site"}, mcp_json_included=False)
+        self.assertEqual(default_text, explicit_text)
 
 
 if __name__ == "__main__":
