@@ -99,11 +99,17 @@ def merge_mcp_json(existing_content: str | None, project: dict, registry: dict) 
     yet (`onboarding.google_media_mcp_url` unset in the registry) -- either
     way, a project with no existing `.mcp.json` gets no file at all rather
     than an empty one, and a project that already has one keeps it exactly
-    as-is.
+    as-is (the original bytes, not a re-serialized equivalent -- returning
+    `json.dumps(json.loads(existing_content))` here would still count as a
+    "change" to onboard_project()'s plain string-equality diff, reformatting
+    whatever the target repo's own JSON style was into a noisy no-op PR).
     """
     media = dict(project.get("media") or {})
     root = registry.get("onboarding", {})
     default_url = str(root.get("google_media_mcp_url", "")).strip()
+
+    if not media.get("enabled", True) or not default_url:
+        return existing_content if existing_content else None
 
     try:
         doc = json.loads(existing_content) if existing_content else {}
@@ -111,13 +117,9 @@ def merge_mcp_json(existing_content: str | None, project: dict, registry: dict) 
             doc = {}
     except json.JSONDecodeError:
         # A target repo's malformed .mcp.json is that repo's problem to fix,
-        # not something onboarding should crash over or silently discard.
-        doc = {}
-
-    if not media.get("enabled", True) or not default_url:
-        if not doc:
-            return None
-        return json.dumps(doc, ensure_ascii=False, indent=2) + "\n"
+        # not something onboarding should crash over or silently discard --
+        # but there's nothing safe to merge into, so leave it untouched too.
+        return existing_content
 
     servers = doc.setdefault("mcpServers", {})
     servers["google-media"] = {

@@ -109,17 +109,14 @@ def _run_generation(
 
     generation_id = uuid.uuid4().hex
     started = time.monotonic()
-    retry_count = 0
-
-    def on_attempt_failed(attempt: int, exc: Exception) -> None:
-        nonlocal retry_count
-        retry_count = attempt
 
     try:
+        # retry_result.attempts (used below, in both the failure and success
+        # audit-log entries) already carries the final attempt count --
+        # nothing else here needs a running counter of its own.
         retry_result = run_with_retry(
             call_provider,
             max_attempts=config.limits.max_retry_attempts,
-            on_attempt_failed=on_attempt_failed,
         )
 
         if not retry_result.success:

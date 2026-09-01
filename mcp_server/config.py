@@ -92,8 +92,19 @@ def get_server_config() -> ServerConfig:
         )
     # Required so the MCP endpoint itself cannot be called anonymously (Vertex AI
     # calls cost money). This is separate from Cloud Run -> Vertex AI auth, which
-    # uses ADC and is not configured here.
+    # uses ADC and is not configured here. Enforced here (not just optionally
+    # read) so a deploy that forgets to set it fails loudly -- via /readyz and
+    # via every tool call -- rather than silently serving as an open,
+    # billable endpoint. Testing without a real deploy just means setting
+    # this to any non-empty local value.
     inbound_token = os.environ.get("GOOGLE_MEDIA_MCP_TOKEN", "").strip()
+    if not inbound_token:
+        raise RuntimeError(
+            "GOOGLE_MEDIA_MCP_TOKEN is not set. This is required, not optional -- "
+            "without it the MCP endpoint would accept billable Vertex AI requests "
+            "from anyone who can reach it. Generate one (e.g. `openssl rand -hex 32`) "
+            "and set it, even for local development."
+        )
 
     # The MCP SDK's DNS-rebinding protection defaults to an *empty* allow-list,
     # which rejects every request (not just malicious ones) until the real

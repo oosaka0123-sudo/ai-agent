@@ -68,6 +68,15 @@ class McpJsonMergeTests(unittest.TestCase):
         self.assertNotIn("google-media", doc.get("mcpServers", {}))
         self.assertIn("some-other-tool", doc["mcpServers"])
 
+    def test_media_disabled_returns_original_bytes_not_a_reformatted_equivalent(self):
+        # A genuinely unchanged file must diff as unchanged in the onboarding
+        # PR -- re-serializing through json.dumps (different indentation/key
+        # order than whatever style the target repo used) would create a
+        # noisy no-op diff even though nothing semantically changed.
+        existing = '{"mcpServers":{"some-other-tool":{}},"z_key":1,"a_key":2}'
+        result = merge_mcp_json(existing, _MEDIA_DISABLED, _REGISTRY_WITH_URL)
+        self.assertEqual(result, existing)
+
     def test_no_mcp_url_configured_yet_returns_none_when_no_existing_file(self):
         # The control plane hasn't been deployed yet (human step not done),
         # so onboarding must not write a broken/placeholder URL.
@@ -78,10 +87,19 @@ class McpJsonMergeTests(unittest.TestCase):
         result = merge_mcp_json(existing, _MEDIA_ENABLED, _REGISTRY_WITHOUT_URL)
         self.assertEqual(json.loads(result), json.loads(existing))
 
-    def test_malformed_existing_json_does_not_crash_and_still_adds_entry(self):
-        result = merge_mcp_json("{not valid json", _MEDIA_ENABLED, _REGISTRY_WITH_URL)
-        doc = json.loads(result)
-        self.assertIn("google-media", doc["mcpServers"])
+    def test_no_mcp_url_configured_yet_returns_original_bytes(self):
+        existing = '{"mcpServers":{"some-other-tool":{}},"z_key":1,"a_key":2}'
+        result = merge_mcp_json(existing, _MEDIA_ENABLED, _REGISTRY_WITHOUT_URL)
+        self.assertEqual(result, existing)
+
+    def test_malformed_existing_json_does_not_crash_and_is_left_untouched(self):
+        # There's nothing safe to merge our entry into, and silently replacing
+        # a target repo's broken file with a fresh one would destroy whatever
+        # was there -- leave it exactly as found instead. (That repo will get
+        # google-media once its own .mcp.json is valid JSON again.)
+        malformed = "{not valid json"
+        result = merge_mcp_json(malformed, _MEDIA_ENABLED, _REGISTRY_WITH_URL)
+        self.assertEqual(result, malformed)
 
     def test_running_twice_is_idempotent(self):
         first = merge_mcp_json(None, _MEDIA_ENABLED, _REGISTRY_WITH_URL)

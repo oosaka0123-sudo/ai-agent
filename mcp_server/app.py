@@ -1,8 +1,8 @@
-"""ASGI app: mounts the MCP server under `/mcp`, adds an unauthenticated
+"""ASGI app: mounts the MCP server at exactly `/mcp`, adds an unauthenticated
 `/healthz` (Cloud Run startup/liveness probe) and `/readyz` (fails until
 config is loadable — catches a missing env var before it becomes a
-confusing 500 on the first real tool call), and requires a bearer token on
-everything else.
+confusing 500 on the first real tool call), and requires a bearer token
+(fail-closed — never optional) on everything else.
 """
 from __future__ import annotations
 
@@ -51,21 +51,22 @@ def configure_structured_logging() -> None:
 
 class BearerAuthMiddleware(BaseHTTPMiddleware):
     """Requires `Authorization: Bearer <token>` on every request except the
-    health/readiness probes. If GOOGLE_MEDIA_MCP_TOKEN is unset, auth is
-    disabled — intentional for local development, but get_server_config()
-    already fails closed on Cloud Run if the operator forgets to set the
-    other required env vars, and README/docs call out that leaving this
-    unset in a deployed environment means the endpoint is open."""
+    health/readiness probes. Fails closed, always: an unset/empty token
+    does not disable auth, it just means no request can ever match --
+    `config.get_server_config()` requires GOOGLE_MEDIA_MCP_TOKEN for the
+    same reason (an empty token must never mean "open"), but that check
+    only runs once a tool is actually called; this middleware is what
+    protects /mcp itself, on every request, regardless."""
 
     def __init__(self, app, token: str) -> None:
         super().__init__(app)
         self._token = token
 
     async def dispatch(self, request: Request, call_next):
-        if not self._token or request.url.path in _UNAUTHENTICATED_PATHS:
+        if request.url.path in _UNAUTHENTICATED_PATHS:
             return await call_next(request)
         header = request.headers.get("authorization", "")
-        if header != f"Bearer {self._token}":
+        if not self._token or header != f"Bearer {self._token}":
             return JSONResponse({"error": "unauthorized"}, status_code=401)
         return await call_next(request)
 
@@ -94,11 +95,14 @@ def _transport_security() -> TransportSecuritySettings:
     origins_raw = os.environ.get("GOOGLE_MEDIA_MCP_ALLOWED_ORIGINS", "").strip()
     allowed_hosts = [h.strip() for h in hosts_raw.split(",") if h.strip()]
     allowed_origins = [o.strip() for o in origins_raw.split(",") if o.strip()]
-    # The SDK's default (empty allow-list, protection on) rejects *every*
-    # request, not just malicious ones, until the real Cloud Run hostname is
-    # registered — see docs/GOOGLE_MEDIA_MCP.md for the one-time setup step.
+    # Always on: an empty allow-list means "reject every request" (the SDK's
+    # own default), not "protection off". Silently downgrading protection
+    # because the operator forgot to set GOOGLE_MEDIA_MCP_ALLOWED_HOSTS would
+    # be exactly the kind of accidental-insecure-deploy this is meant to
+    # prevent — see docs/GOOGLE_MEDIA_MCP.md for the required one-time setup
+    # step (the server will reject all traffic, loudly, until it's done).
     return TransportSecuritySettings(
-        enable_dns_rebinding_protection=bool(allowed_hosts),
+        enable_dns_rebinding_protection=True,
         allowed_hosts=allowed_hosts,
         allowed_origins=allowed_origins,
     )
@@ -110,9 +114,15 @@ def create_app() -> Starlette:
         routes=[
             Route("/healthz", _healthz),
             Route("/readyz", _readyz),
+            # Mounted at the exact documented path, not "/" -- the MCP
+            # sub-app's own internal routing already restricted it to /mcp
+            # either way (its own streamable_http_path default), but mounting
+            # narrowly here means that's not the only thing standing between
+            # an arbitrary path and the MCP handler.
             Mount(
-                "/",
+                "/mcp",
                 app=mcp.streamable_http_app(
+                    streamable_http_path="/",
                     stateless_http=True,
                     json_response=True,
                     transport_security=_transport_security(),
