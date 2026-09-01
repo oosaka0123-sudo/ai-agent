@@ -52,6 +52,15 @@
 - ディレクトリ内でのファイル命名規則
 - テストの書き方・実行コマンド
 
+### Python（src/media_gen/, scripts/generate_media.py）
+
+- Python 3.11以上を想定。依存パッケージは `requirements.txt` に記載する。
+- 秘密情報（APIキー・サービスアカウント鍵など）は環境変数（`.env`、Application Default
+  Credentials）経由で読み込み、コードに直接書かない。
+- テストは `pytest` を使い、`tests/<パッケージ名>/` に `src/` の構成を反映して配置する
+  （実行コマンド: `pytest tests/media_gen`）。実際に外部APIへ接続するテストは、
+  課金・認証情報が必要になるためCIには含めず、手動での接続確認手順をREADMEに残す。
+
 ## 7. CI/CD
 
 - `.github/workflows/ci.yml` に土台を用意しています（現時点ではシークレットスキャンのみ）。

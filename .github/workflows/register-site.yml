@@ -1,0 +1,91 @@
+name: Register Site
+
+on:
+  workflow_dispatch:
+    inputs:
+      slug:
+        description: "lowercase kebab-case project slug"
+        required: true
+        type: string
+      name:
+        description: "display name"
+        required: true
+        type: string
+      repository:
+        description: "target repository (owner/name)"
+        required: true
+        type: string
+      public_url:
+        description: "public site URL (optional)"
+        required: false
+        type: string
+      media_provider:
+        description: "default media provider"
+        required: true
+        default: auto
+        type: choice
+        options:
+          - auto
+          - google
+          - higgsfield
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  register:
+    runs-on: ubuntu-latest
+    env:
+      SITE_SLUG: ${{ inputs.slug }}
+      SITE_NAME: ${{ inputs.name }}
+      SITE_REPOSITORY: ${{ inputs.repository }}
+      SITE_PUBLIC_URL: ${{ inputs.public_url }}
+      SITE_MEDIA_PROVIDER: ${{ inputs.media_provider }}
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Validate onboarding scripts
+        run: python3 -m unittest discover -s tests -p 'test_*onboarding*.py'
+
+      - name: Register project
+        run: |
+          args=(
+            --slug "$SITE_SLUG"
+            --name "$SITE_NAME"
+            --repository "$SITE_REPOSITORY"
+            --media-provider "$SITE_MEDIA_PROVIDER"
+          )
+          if [ -n "$SITE_PUBLIC_URL" ]; then
+            args+=(--public-url "$SITE_PUBLIC_URL")
+          fi
+          python3 scripts/register_project.py "${args[@]}"
+
+      - name: Create registration branch
+        id: branch
+        run: |
+          branch="register-site/${SITE_SLUG}-${GITHUB_RUN_ID}"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -b "$branch"
+          git add projects/registry.json
+          git commit -m "chore: register site ${SITE_SLUG}"
+          git push origin "$branch"
+          echo "name=$branch" >> "$GITHUB_OUTPUT"
+
+      - name: Open registration PR
+        continue-on-error: true
+        run: |
+          gh pr create \
+            --base main \
+            --head "${{ steps.branch.outputs.name }}" \
+            --title "chore: register site ${SITE_NAME}" \
+            --body "Registers **${SITE_NAME}** (\`${SITE_SLUG}\`) with the shared AI control plane. After merge, Auto Site Onboarding will prepare the target repository."

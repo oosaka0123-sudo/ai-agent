@@ -8,6 +8,12 @@
 
 ### Added
 
+- Google Cloud Vertex AI（公式 `google-genai` SDK）に接続するメディア生成基盤を追加。
+  `scripts/generate_media.py` から `--provider google --type image|video --prompt "..."`
+  で画像・動画を生成し、`public/assets/ai/` へ保存する。動画生成はジョブ開始→状態確認→
+  完了→保存の非同期フローで実装し、失敗時は自動的に1回だけ再試行する。実行結果は
+  `logs/media-generation.jsonl` に記録する。本番Webサイトへの自動反映は未実装（今回は
+  Google接続部分のみ）。
 - 「3AI競争テスト」第1回として、`competitions/01-mobile-ai-dev/claude-code.html`
   を追加。Claude Code・Gemini/Jules・OpenAI Codexを比較しながら、スマホだけで
   「調査→設計→コーディング→テスト→GitHub保存→公開」を行う実践フローをまとめた

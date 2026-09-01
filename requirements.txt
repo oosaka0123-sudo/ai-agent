@@ -1,0 +1,14 @@
+# scripts/generate_media.py（Vertex AIメディア生成基盤）と mcp_server/
+# （Remote HTTP MCP Server）が使用する依存パッケージ。
+# インストール: pip install -r requirements.txt
+
+google-genai>=1.0.0   # Google Vertex AI / Gemini Developer API 公式SDK
+python-dotenv>=1.0.0  # .env ファイルの読み込み
+pytest>=8.0.0          # tests/ の自動テスト実行用
+
+# --- mcp_server/（Remote HTTP MCP Server, Cloud Run想定） ---
+mcp[cli]>=2.0.0            # Model Context Protocol 公式Python SDK（MCPServer / streamable HTTP）
+google-cloud-storage>=2.0.0  # 生成物の正式保存先（GCS）
+starlette>=1.0.0            # MCPをマウントするASGIアプリ（health check等を追加するため）
+uvicorn>=0.30.0              # ASGIサーバー（ローカル実行・Cloud Run双方で使用）
+httpx>=0.27.0                 # tests/mcp_server の TestClient が使用
