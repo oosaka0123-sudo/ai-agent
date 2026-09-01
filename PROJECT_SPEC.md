@@ -168,11 +168,20 @@ AIエージェントは、作業完了前の自己レビュー（[`AGENTS.md`](A
 - `public/assets/ai/`（生成物の保存先、Gitには含めない）
 - `logs/media-generation.jsonl`（実行ログ、Gitには含めない）
 
+### 全プロジェクト共通ツール化（実装済み: Remote HTTP MCP Server）
+
+このバックエンド（`src/media_gen/`）は上記CLIから直接呼ぶだけでなく、`mcp_server/`
+（Google Cloud Run想定のRemote HTTP MCP Server）からも同じ実装で再利用され、
+登録済みの全Claude Codeプロジェクトへ `generate_image` / `generate_video` ツールとして
+配布される（`scripts/onboard_projects.py` による `.mcp.json` 自動配布）。詳細は
+[`docs/GOOGLE_MEDIA_MCP.md`](docs/GOOGLE_MEDIA_MCP.md)。
+
 ### 将来拡張（未実装・仕様のみ）
 
 - 生成物のGitHubへの反映（コミット・PR作成）
 - 生成物を使った本番Webサイトの自動更新
-- Google以外のプロバイダ（他のAI基盤）の追加
+- Higgsfield（Kling / Seedance / Flux 等）プロバイダの追加
+  （`mcp_server/provider_router.py` は追加を想定した構造だが、実装自体は未着手）
 - 日本語の自然な指示から `--type` / `--prompt` / オプションを自動組み立てする層
 
 ## 6. AIチーム運用基盤（本題そのもの）

@@ -54,7 +54,7 @@ jobs:
           python-version: "3.12"
 
       - name: Validate onboarding scripts
-        run: python3 -m unittest discover -s tests -p 'test_project_onboarding.py'
+        run: python3 -m unittest discover -s tests -p 'test_*onboarding*.py'
 
       - name: Register project
         run: |

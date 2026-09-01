@@ -1,0 +1,29 @@
+# Only mcp_server/, src/media_gen/, requirements.txt, and
+# projects/registry.json are ever copied into the image (see Dockerfile) —
+# this list is a second, explicit line of defense so a secret or an
+# unrelated large directory can never end up in a build context accident.
+.git
+.venv
+.venv-clean
+.env
+.env.*
+*.credentials
+credentials.json
+*service-account*.json
+*sa-key*.json
+gcp-*.json
+__pycache__
+*.pyc
+.pytest_cache
+logs/
+public/
+web/
+guides/
+competitions/
+docs/
+data/
+tests/
+scripts/
+.github/
+.gpt-ops/
+*.md

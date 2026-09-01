@@ -22,7 +22,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   python-test:
-    name: Python テスト（media_gen）
+    name: Python テスト（media_gen / mcp_server / onboarding）
     runs-on: ubuntu-latest
     steps:
       - name: リポジトリを取得
@@ -36,5 +36,6 @@ jobs:
       - name: 依存パッケージをインストール
         run: pip install -r requirements.txt
 
-      - name: pytest 実行（tests/media_gen: ネットワーク接続不要な単体テストのみ）
-        run: pytest tests/media_gen
+      - name: pytest 実行（tests/: ネットワーク接続不要な単体テストのみ。
+          Google/GitHub の実API呼び出しはすべてfake/stubに置き換え済み）
+        run: pytest tests/

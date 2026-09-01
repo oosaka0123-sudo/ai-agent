@@ -301,6 +301,27 @@ python3 scripts/generate_media.py --provider google --type image --prompt "conne
 python3 scripts/generate_media.py --provider google --type video --prompt "connection test" --count 1
 ```
 
+### すべてのプロジェクトから使う場合（Google Media MCP Server）
+
+上記CLIはこのリポジトリの中から手動で呼ぶ場合の使い方。**すべてのClaude Codeプロジェクトから
+共通ツールとして** `generate_image` / `generate_video` を使えるようにする仕組みは
+`mcp_server/`（Remote HTTP MCP Server、Google Cloud Run想定）で、CLIと同じ
+`src/media_gen/` バックエンドをそのまま再利用している（実装の重複はない）。
+
+- アーキテクチャ、新規サイト追加時の動作、Google Cloud初回設定、トラブルシューティング:
+  [`docs/GOOGLE_MEDIA_MCP.md`](docs/GOOGLE_MEDIA_MCP.md)
+- 新規サイト追加自体は **Register Site**（`.github/workflows/register-site.yml`）で
+  登録するだけで、Google連携（`.mcp.json` の配布）まで自動オンボーディングが行う
+  （`scripts/onboard_projects.py`、詳細は上記docsを参照）。
+
+```bash
+# ローカルでMCPサーバーを起動して確認する場合
+pip install -r requirements.txt
+export GOOGLE_CLOUD_PROJECT=rss7-ai-media GOOGLE_MEDIA_GCS_BUCKET=... GOOGLE_MEDIA_MCP_TOKEN=...
+python3 -m mcp_server
+curl http://localhost:8080/healthz
+```
+
 ## セキュリティに関する重要な注意事項
 
 - **APIキー・パスワードなどの秘密情報は絶対にGitHubへコミットしないでください。**

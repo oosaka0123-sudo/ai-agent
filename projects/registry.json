@@ -7,7 +7,9 @@
     "control_plane_repository": "oosaka0123-sudo/ai-agent",
     "default_media_project": "rss7-ai-media",
     "default_provider": "google",
-    "fallback_provider": "higgsfield"
+    "fallback_provider": "higgsfield",
+    "google_media_mcp_url": "",
+    "google_media_mcp_url_note": "Set this to the Cloud Run service URL + /mcp (e.g. https://google-media-mcp-xxxxx-uc.a.run.app/mcp) after the one-time human deploy step in docs/GOOGLE_MEDIA_MCP.md. Until set, onboarding never writes a google-media entry into any project's .mcp.json -- see merge_mcp_json in scripts/onboard_projects.py."
   },
   "projects": [
     {
@@ -64,6 +66,20 @@
       "auto_onboard": true,
       "media": {
         "enabled": false,
+        "provider": "auto",
+        "control_plane_project": "rss7-ai-media"
+      }
+    },
+    {
+      "slug": "rss7-house",
+      "name": "RSS7 HOUSE",
+      "repository": "oosaka0123-sudo/rss7-house",
+      "status": "pending-auto-onboarding",
+      "default_role": "web-pwa-production",
+      "copilot_review": "planned",
+      "auto_onboard": true,
+      "media": {
+        "enabled": true,
         "provider": "auto",
         "control_plane_project": "rss7-ai-media"
       }

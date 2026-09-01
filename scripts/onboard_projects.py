@@ -87,6 +87,47 @@ def render_manifest(project: dict, registry: dict) -> str:
     return json.dumps(build_manifest(project, registry), ensure_ascii=False, indent=2) + "\n"
 
 
+def merge_mcp_json(existing_content: str | None, project: dict, registry: dict) -> str | None:
+    """Adds/updates only the `mcpServers.google-media` entry, preserving every
+    other key and every other MCP server already in the target repository's
+    own `.mcp.json` untouched -- unlike `.ai-agent/*`, this file is not
+    exclusively owned by the control plane, so it is merged, never replaced
+    wholesale.
+
+    Returns None when there is nothing to write: media generation is
+    disabled for this project, or the control plane has not been deployed
+    yet (`onboarding.google_media_mcp_url` unset in the registry) -- either
+    way, a project with no existing `.mcp.json` gets no file at all rather
+    than an empty one, and a project that already has one keeps it exactly
+    as-is.
+    """
+    media = dict(project.get("media") or {})
+    root = registry.get("onboarding", {})
+    default_url = str(root.get("google_media_mcp_url", "")).strip()
+
+    try:
+        doc = json.loads(existing_content) if existing_content else {}
+        if not isinstance(doc, dict):
+            doc = {}
+    except json.JSONDecodeError:
+        # A target repo's malformed .mcp.json is that repo's problem to fix,
+        # not something onboarding should crash over or silently discard.
+        doc = {}
+
+    if not media.get("enabled", True) or not default_url:
+        if not doc:
+            return None
+        return json.dumps(doc, ensure_ascii=False, indent=2) + "\n"
+
+    servers = doc.setdefault("mcpServers", {})
+    servers["google-media"] = {
+        "type": "http",
+        "url": "${GOOGLE_MEDIA_MCP_URL:-" + default_url + "}",
+        "headers": {"Authorization": "Bearer ${GOOGLE_MEDIA_MCP_TOKEN}"},
+    }
+    return json.dumps(doc, ensure_ascii=False, indent=2) + "\n"
+
+
 def render_readme(project: dict) -> str:
     name = project["name"]
     slug = project["slug"]
@@ -97,14 +138,30 @@ This repository is registered with the shared AI control plane.
 - Project: **{name}** (`{slug}`)
 - Control plane: `oosaka0123-sudo/ai-agent`
 - Managed manifest: `.ai-agent/project.json`
+- Google Media MCP: `.mcp.json` (`mcpServers.google-media` entry only --
+  any other MCP servers already configured in this repository are left
+  untouched)
 - Default publishing policy: **preview first**
 - Direct push to `main`: **disabled**
 
 ## What becomes reusable automatically
 
-The control plane can provide shared AI media generation (Google Vertex AI first,
-Higgsfield fallback when enabled), generation logs, provider routing, and future
-cross-project automation without copying the implementation into every site.
+The control plane provides shared AI media generation -- Google Vertex AI
+(Imagen / Veo) today, Higgsfield planned -- as a Remote HTTP MCP server, so
+Claude Code in this repository can call `generate_image` / `generate_video`
+directly. No generation code, credentials, or Google Cloud project
+configuration is copied into this repository: `.mcp.json` only points at
+the shared server's URL.
+
+Generation logs, provider routing, and future cross-project automation are
+also shared this way, without copying implementation into every site.
+
+## One-time setup this repository may still need
+
+`.mcp.json`'s `Authorization` header reads `${{GOOGLE_MEDIA_MCP_TOKEN}}` from
+the environment Claude Code runs in -- it is never committed here. Set it
+once wherever this repository's Claude Code sessions run. See the control
+plane's `docs/GOOGLE_MEDIA_MCP.md` for where to get the value.
 
 ## Safety boundary
 
@@ -236,6 +293,18 @@ def onboard_project(
         ".ai-agent/project.json": render_manifest(project, registry),
         ".ai-agent/README.md": render_readme(project),
     }
+
+    # .mcp.json is merged, not replaced wholesale (see merge_mcp_json) -- it
+    # may already contain servers this control plane knows nothing about. In
+    # --check mode there is no real API call to read the current file, so
+    # the merge runs against "no existing file" -- fine, --check only
+    # validates registry/onboarding logic locally, same as the other files.
+    existing_mcp_json = None
+    if apply:
+        existing_mcp_json = decode_content(client.file(full_name, ".mcp.json", default_branch))
+    merged_mcp_json = merge_mcp_json(existing_mcp_json, project, registry)
+    if merged_mcp_json is not None:
+        desired[".mcp.json"] = merged_mcp_json
 
     if not apply:
         return f"check: {project['slug']} -> {full_name} ({len(desired)} managed files)"

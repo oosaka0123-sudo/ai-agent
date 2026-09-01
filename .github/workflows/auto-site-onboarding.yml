@@ -30,7 +30,7 @@ jobs:
 
       - name: Validate registry and onboarding logic
         run: |
-          python3 -m unittest discover -s tests -p 'test_project_onboarding.py'
+          python3 -m unittest discover -s tests -p 'test_*onboarding*.py'
           if [ -n "$PROJECT_SLUG" ]; then
             python3 scripts/onboard_projects.py --check --project "$PROJECT_SLUG"
           else
