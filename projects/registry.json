@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "updated": "2026-09-01",
+  "updated": "2026-09-02",
   "max_parallel_projects": 4,
   "onboarding": {
     "enabled": true,
@@ -8,8 +8,8 @@
     "default_media_project": "rss7-ai-media",
     "default_provider": "google",
     "fallback_provider": "higgsfield",
-    "google_media_mcp_url": "",
-    "google_media_mcp_url_note": "Set this to the Cloud Run service URL + /mcp (e.g. https://google-media-mcp-xxxxx-uc.a.run.app/mcp) after the one-time human deploy step in docs/GOOGLE_MEDIA_MCP.md. Until set, onboarding never writes a google-media entry into any project's .mcp.json -- see merge_mcp_json in scripts/onboard_projects.py."
+    "google_media_mcp_url": "https://google-media-mcp-518404402696.us-central1.run.app/mcp",
+    "google_media_mcp_url_note": "Set by a human after deploying the Cloud Run service (docs/GOOGLE_MEDIA_MCP.md). This turns on .mcp.json distribution for every auto_onboard project -- see merge_mcp_json in scripts/onboard_projects.py."
   },
   "projects": [
     {

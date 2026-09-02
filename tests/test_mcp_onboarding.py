@@ -114,14 +114,22 @@ class ReadmeMcpWordingTests(unittest.TestCase):
 
     def test_default_does_not_claim_mcp_json_exists(self):
         text = render_readme({"name": "Site", "slug": "site"})
-        self.assertNotIn("`.mcp.json` only points at", text)
+        self.assertNotIn("`.mcp.json` only configures", text)
         self.assertIn("not yet added", text)
         self.assertIn("will arrive in a", text)
 
     def test_mcp_json_included_true_describes_it_as_present(self):
         text = render_readme({"name": "Site", "slug": "site"}, mcp_json_included=True)
-        self.assertIn("`.mcp.json` only points at", text)
+        self.assertIn("`.mcp.json` only configures", text)
         self.assertNotIn("not yet added", text)
+
+    def test_mcp_json_included_true_does_not_claim_url_only(self):
+        # Regression coverage for a Copilot finding on rss7-house#17: .mcp.json
+        # also carries an Authorization header (env-var-backed), so the README
+        # must not describe it as configuring only the URL.
+        text = render_readme({"name": "Site", "slug": "site"}, mcp_json_included=True)
+        self.assertNotIn("only points at", text)
+        self.assertIn("bearer token", text)
 
     def test_mcp_json_included_false_is_explicit_and_matches_default(self):
         default_text = render_readme({"name": "Site", "slug": "site"})
