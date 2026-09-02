@@ -1,0 +1,119 @@
+name: Client Repository Factory
+
+on:
+  issues:
+    types: [opened]
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+  actions: write
+
+jobs:
+  create:
+    if: startsWith(github.event.issue.title, '[client-site]') && github.actor == github.repository_owner
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ secrets.REPO_FACTORY_TOKEN }}
+      ISSUE_BODY: ${{ github.event.issue.body }}
+      ISSUE_NUMBER: ${{ github.event.issue.number }}
+      CONTROL_REPO: ${{ github.repository }}
+      REPO_OWNER: ${{ github.repository_owner }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Require repository-factory token
+        run: |
+          if [ -z "$GH_TOKEN" ]; then
+            echo "REPO_FACTORY_TOKEN is not configured" >&2
+            exit 20
+          fi
+
+      - name: Parse issue payload
+        run: |
+          python3 - <<'PY'
+          import os
+          from pathlib import Path
+          body = os.environ.get('ISSUE_BODY', '').strip()
+          if body.startswith('```json'):
+              body = body[len('```json'):]
+              if body.endswith('```'):
+                  body = body[:-3]
+          Path('/tmp/client-site.json').write_text(body.strip() + '\n', encoding='utf-8')
+          PY
+
+      - name: Validate factory payload
+        run: |
+          python3 - <<'PY'
+          import json
+          import sys
+          sys.path.insert(0, 'scripts')
+          from create_client_repo import validate
+          with open('/tmp/client-site.json', encoding='utf-8') as f:
+              cfg = validate(json.load(f))
+          print(f"validated: {cfg['slug']} / {cfg['name']} / {cfg['visibility']}")
+          PY
+
+      - name: Create client repository
+        id: repo
+        run: |
+          python3 scripts/create_client_repo.py \
+            --payload /tmp/client-site.json \
+            --owner "$REPO_OWNER" \
+            --token "$GH_TOKEN" \
+            --output "$GITHUB_OUTPUT"
+
+      - name: Register with AI control plane
+        run: |
+          args=(
+            --slug "${{ steps.repo.outputs.slug }}"
+            --name "${{ steps.repo.outputs.name }}"
+            --repository "${{ steps.repo.outputs.repository }}"
+            --media-provider "${{ steps.repo.outputs.media_provider }}"
+          )
+          if [ -n "${{ steps.repo.outputs.public_url }}" ]; then
+            args+=(--public-url "${{ steps.repo.outputs.public_url }}")
+          fi
+          python3 scripts/register_project.py "${args[@]}"
+
+      - name: Commit registration through PR
+        id: registration
+        run: |
+          slug="${{ steps.repo.outputs.slug }}"
+          branch="client-factory/${slug}-${GITHUB_RUN_ID}"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -b "$branch"
+          git add projects/registry.json
+          git commit -m "chore: register client site ${slug}"
+          git push origin "$branch"
+
+          pr_url="$(gh pr create \
+            --repo "$CONTROL_REPO" \
+            --base main \
+            --head "$branch" \
+            --title "chore: register client site ${{ steps.repo.outputs.name }}" \
+            --body "Created automatically by Client Repository Factory from issue #${ISSUE_NUMBER}. Repository: \`${{ steps.repo.outputs.repository }}\`.")"
+          echo "pr_url=$pr_url" >> "$GITHUB_OUTPUT"
+
+          # Use the factory PAT for the merge so the resulting push can trigger
+          # Auto Site Onboarding. This avoids GitHub's GITHUB_TOKEN event suppression.
+          gh pr merge "$pr_url" --repo "$CONTROL_REPO" --squash --delete-branch
+
+      - name: Wait briefly for onboarding dispatch
+        run: sleep 8
+
+      - name: Report success on the request issue
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh issue comment "$ISSUE_NUMBER" --repo "$CONTROL_REPO" --body "✅ Client repository created and registered.\n\n- Repository: ${{ steps.repo.outputs.url }}\n- Slug: \`${{ steps.repo.outputs.slug }}\`\n- Visibility: requested in issue payload\n- Registration PR: ${{ steps.registration.outputs.pr_url }}\n\nAuto Site Onboarding has been triggered by the registry merge."
+          gh issue close "$ISSUE_NUMBER" --repo "$CONTROL_REPO"
