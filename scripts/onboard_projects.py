@@ -143,9 +143,10 @@ def render_readme(project: dict, mcp_json_included: bool = False) -> str:
             "The control plane provides shared AI media generation -- Google Vertex AI\n"
             "(Imagen / Veo) today, Higgsfield planned -- as a Remote HTTP MCP server, so\n"
             "Claude Code in this repository can call `generate_image` / `generate_video`\n"
-            "directly. No generation code, credentials, or Google Cloud project\n"
-            "configuration is copied into this repository: `.mcp.json` only points at\n"
-            "the shared server's URL."
+            "directly. No generation code, Google Cloud project configuration, or actual\n"
+            "credential value is copied into this repository: `.mcp.json` only configures\n"
+            "how to reach the shared server -- its URL and an environment-variable-backed\n"
+            "bearer token, resolved at run time rather than stored here."
         )
         setup_section = (
             "`.mcp.json`'s `Authorization` header reads `${GOOGLE_MEDIA_MCP_TOKEN}` from\n"
@@ -164,9 +165,10 @@ def render_readme(project: dict, mcp_json_included: bool = False) -> str:
             "AI (Imagen / Veo) today, Higgsfield planned -- as a Remote HTTP MCP server,\n"
             "so Claude Code in this repository will be able to call `generate_image` /\n"
             "`generate_video` directly, once a follow-up PR adds `.mcp.json` here. No\n"
-            "generation code, credentials, or Google Cloud project configuration will be\n"
-            "copied into this repository -- `.mcp.json` will only point at the shared\n"
-            "server's URL."
+            "generation code, Google Cloud project configuration, or actual credential\n"
+            "value will be copied into this repository -- `.mcp.json` will only configure\n"
+            "how to reach the shared server (its URL and an environment-variable-backed\n"
+            "bearer token, resolved at run time rather than stored here)."
         )
         setup_section = (
             "Once the follow-up PR above adds `.mcp.json`, its `Authorization` header\n"
