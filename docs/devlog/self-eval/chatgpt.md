@@ -85,3 +85,52 @@ Pages build時に公開Repository `oosaka0123-sudo/50plus` の最新 `main` をr
 **97/100**
 
 残る制約は、50PLUS専用の `https://oosaka0123-sudo.github.io/50plus/` ではなく、一時的に `https://oosaka0123-sudo.github.io/ai-agent/50plus/` を使う点。完成後は予定どおりLolipopの `https://50plus.rss7.net` へ移行し、このbridgeを削除する。
+
+## 2026-09-05 — Google Media MCP onboarding preflight distribution
+
+### 初回実装
+
+50PLUSで実証したGoogle Media MCP接続preflightを、将来のmedia-enabled projectへcontrol-plane onboardingから自動配布できる汎用形へ整理した。
+
+- managed fileはtarget repositoryの `.ai-agent/google_media_mcp_preflight.sh` に限定
+- project slugは `.ai-agent/project.json` からruntime取得し、特定project名をhard-codeしない
+- `.mcp.json` の既存merge方式は維持
+- tokenは存在確認のみで値を出力しない
+- `/healthz` / `/readyz` はbearer tokenなしで確認
+- paid generationはpreflightから実行しない
+- generated READMEからpreflight → native MCP tool discovery → image → videoの順を案内
+- Claude Code cloud environmentには専用secret storeがない現行制約を、runtime認証とonboardingを分離する理由として文書化
+
+### 初回自己評価
+
+**95/100**
+
+- 仕様適合性: 97
+- 安全性: 98
+- 保守性: 95
+- 自動化: 97
+- 実運用確認: 88
+
+### 発見した問題と修正
+
+- target repositoryの通常 `scripts/` をcontrol-planeが所有すると衝突しやすい。
+  - `.ai-agent/` 配下をmanaged namespaceとして使用した。
+- malformedな既存 `.mcp.json` をそのまま返す既存仕様に対し、後続の `json.loads` が失敗し得た。
+  - desired-file生成を `build_desired_files()` へ分離し、malformed JSONは保持しつつGoogle Mediaが利用可能だと誤認しないよう防御した。
+- Claude cloud環境へ長期Bearerを共通保存すれば自動化できるが、現行Claude Cloudには専用secret storeがなく安全な完成形ではない。
+  - onboardingとruntime credentialを明確に分離し、将来OAuth/short-lived credentialへ移行できる設計メモを追加した。
+
+### テスト計画
+
+PR CIの既存 `pytest tests/` とgitleaksで以下を確認する。
+
+- media-enabled onboardingがmanifest / README / generic preflight / merged `.mcp.json` の4ファイルを生成
+- media-disabled projectにはMCP/preflightを配布しない
+- generic preflightに50PLUS固有slugが混入しない
+- existing MCP serverをmerge後も保持
+- secret valueをrepositoryへ追加していない
+
+### 現時点の残課題
+
+- actual Claude Code → Google Media MCP runtime smoke testは、Claude Code実行環境側の証拠が必要であり、このcontrol-plane unit testとは別。
+- bearer authenticationの長期的なOAuth/short-lived化は別の設計・レビュー対象。
