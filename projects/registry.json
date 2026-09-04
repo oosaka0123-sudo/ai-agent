@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "updated": "2026-09-02",
+  "updated": "2026-09-04",
   "max_parallel_projects": 4,
   "onboarding": {
     "enabled": true,
@@ -83,6 +83,21 @@
         "provider": "auto",
         "control_plane_project": "rss7-ai-media"
       }
+    },
+    {
+      "slug": "50plus",
+      "name": "50PLUS",
+      "repository": "oosaka0123-sudo/50plus",
+      "status": "pending-auto-onboarding",
+      "default_role": "web-pwa-production",
+      "copilot_review": "planned",
+      "auto_onboard": true,
+      "media": {
+        "enabled": true,
+        "provider": "auto",
+        "control_plane_project": "rss7-ai-media"
+      },
+      "public_url": "https://oosaka0123-sudo.github.io/50plus/"
     }
   ]
 }
