@@ -11,6 +11,8 @@ on:
       - "docs/screenshots/**"
       - "scripts/sync-site-data.sh"
       - ".github/workflows/pages.yml"
+  schedule:
+    - cron: "17 * * * *"
   workflow_dispatch:
 
 permissions:
@@ -37,6 +39,54 @@ jobs:
 
       - name: 開発記録データ・スクリーンショットをサイトへ同期
         run: bash scripts/sync-site-data.sh
+
+      - name: 50PLUSプレビューを最新mainから生成
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/50plus-preview web/50plus
+          git clone --depth 1 --branch main https://github.com/oosaka0123-sudo/50plus.git /tmp/50plus-preview
+
+          mkdir -p web/50plus
+          cp /tmp/50plus-preview/index.html \
+             /tmp/50plus-preview/activities.html \
+             /tmp/50plus-preview/listings.html \
+             /tmp/50plus-preview/guides.html \
+             /tmp/50plus-preview/about.html \
+             /tmp/50plus-preview/contact.html \
+             /tmp/50plus-preview/404.html \
+             web/50plus/
+          cp -R /tmp/50plus-preview/assets web/50plus/assets
+
+          python3 - <<'PY'
+          from pathlib import Path
+
+          preview_dir = Path('web/50plus')
+          marker = '<meta name="viewport" content="width=device-width, initial-scale=1">'
+          robots = '<meta name="robots" content="noindex,nofollow">'
+
+          html_files = sorted(preview_dir.glob('*.html'))
+          if len(html_files) != 7:
+              raise SystemExit(f'expected 7 preview HTML files, found {len(html_files)}')
+
+          for path in html_files:
+              text = path.read_text(encoding='utf-8')
+              if robots not in text:
+                  if marker not in text:
+                      raise SystemExit(f'missing viewport marker in {path}')
+                  text = text.replace(marker, marker + '\n  ' + robots, 1)
+                  path.write_text(text, encoding='utf-8')
+
+              if robots not in path.read_text(encoding='utf-8'):
+                  raise SystemExit(f'noindex injection failed for {path}')
+
+          if not (preview_dir / 'assets' / 'styles.css').is_file():
+              raise SystemExit('missing preview stylesheet')
+          if not (preview_dir / 'assets' / 'main.js').is_file():
+              raise SystemExit('missing preview JavaScript')
+
+          print('Prepared 50PLUS preview: 7 HTML pages, assets present, noindex,nofollow verified.')
+          PY
 
       - name: 公開用アーティファクトをアップロード
         uses: actions/upload-pages-artifact@v3
