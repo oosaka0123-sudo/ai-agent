@@ -238,6 +238,22 @@ CodexはCodexの成果物を評価・修正する。他AIの担当ファイル�
 このルールは、後から何年も見返せる開発記録を途切れさせないためのものです。
 面倒でも省略せず、必ず実施してください。
 
+## チャット保存 / Knowledge routing（重要）
+
+ユーザーから「このチャット内容をリポジトリに保存して」または同等の保存指示を受けた場合は、生の会話ログをそのままGitHubへ保存せず、確定した重要情報だけを既存の正本へ整理して反映する。
+
+- 保存前に、GitHubの現在のdefault branch（通常は `main`）を正として、`README.md`、本 `AGENTS.md`、`PROJECT_SPEC.md`、必要な `docs/` 内の仕様・運用文書、関連Issue / PR / Actionsを再確認する
+- 確定した機能仕様・基盤仕様・実装済みの現行要件は `PROJECT_SPEC.md` を優先して更新する
+- オンボーディング、現在の全体構成、利用者・AIが最初に読む案内は `README.md` を更新する
+- AI共通の恒久ルールは本 `AGENTS.md`、ブランチ・実装・検証等の開発手順は `docs/DEVELOPMENT.md` など既存の適切な文書を更新する
+- 長期的に重要な設計判断を既存文書だけでは適切に保持できない場合に限り `DECISIONS.md`、再利用する独立した運用・復旧手順が必要な場合に限り `RUNBOOK.md` を作成・更新する。形式だけの空ファイルは先回りで作らない
+- 未完了作業や次回復帰に必要な一時状態は、Issue / Branch / PRで十分に復元できる場合はそれらを正とし、追加の引き継ぎ文書が本当に必要な場合のみProject既定のファイル、なければ `HANDOFF.md` を作成・更新する
+- Issue / PR / Actions / Commitから復元できる差分・テスト結果・進行履歴を、チャット保存のためだけに別Markdownへ丸ごと複製しない
+- **Project固有の開発記録ルールは例外として維持する。** 通常の開発作業完了時に必要な `docs/devlog/YYYY-MM-DD.md` / `data/devlog.json` / 必要時の `CHANGELOG.md` 記録は従来どおり行う。ただし、ここにも生チャット・巨大diff・秘密値を貼らず、要約と正本/PR等への参照を中心にする
+- `PROJECT_SPEC.md` や `README.md` 等の「現在状態」はappend-onlyにせず、古い仕様や状態が現行情報として残らないよう既存記述を更新・整理する。一方、`docs/devlog/` は履歴用途なので既存ルールどおり時系列記録を維持する
+- APIキー、パスワード、Token、Secret、Webhook URL、認証情報などはチャット保存対象から除外し、Issue / PR / devlog / Markdownへも転記しない
+- 保存後は、更新した正本と、Issue/PR等で復元可能なためチャット保存対象から省略した情報を簡潔に報告する
+
 ## 複数AI比較ガイド（guides/）のルール（重要）
 
 `web/guides/` には、同じテーマについて **Claude Code / Gemini・Jules / Codex が

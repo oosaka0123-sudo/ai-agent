@@ -493,5 +493,53 @@
       "Python",
       "自動化"
     ]
+  },
+  {
+    "id": "2026-09-04-chat-persistence-knowledge-routing",
+    "date": "2026-09-04",
+    "title": "チャット保存 / Knowledge routing ルールを追加",
+    "project": "ai-agent",
+    "purpose": "GitHubを全AI共通のSSOTとして使い、ユーザーのチャット保存指示から重要情報だけを適切なProject正本へ整理して残せるようにする。",
+    "whatMade": "AGENTS.mdにProject固有のチャット保存 / Knowledge routingルールを追加し、PROJECT_SPEC.md・README.md・docs/DEVELOPMENT.md・Issue/PR/Actions等の既存責務へ情報を振り分ける方針を明文化した。既存の開発記録自動記録ルールはProject固有overrideとして維持し、生チャットや巨大diffの複製は行わないよう整理した。",
+    "changes": [
+      "AGENTS.md（チャット保存 / Knowledge routingルール追加）",
+      "docs/devlog/2026-09-04.md（開発記録追加）",
+      "data/devlog.json（構造化開発記録追加）"
+    ],
+    "aiUsed": [
+      "ChatGPT (OpenAI)"
+    ],
+    "services": [
+      "GitHub"
+    ],
+    "tech": [
+      "Markdown",
+      "JSON",
+      "GitHub"
+    ],
+    "problems": "共通DEFAULTの『Issue/PR/Actions/Commitで復元できる履歴はMarkdownへ重複保存しない』と、このProjectの必須devlog運用がそのままでは衝突する。",
+    "solutions": "通常のProject devlogは既存仕様どおり継続しつつ、チャット保存指示による生ログ・巨大diff・秘密値の保存を禁止し、要約と正本/PRへの参照を中心にするProject固有overrideとして明文化した。",
+    "learnings": "共通ルールを展開する際は、各Projectが意図的に持つ正本・履歴の役割を再確認し、既存の有用な運用を壊さない形で上書き関係を明示する必要がある。",
+    "images": [],
+    "githubCommits": [
+      {
+        "label": "AGENTS.mdへチャット保存ルールを追加",
+        "url": "https://github.com/oosaka0123-sudo/ai-agent/commit/0c0c454ef7c85087071e4356d42fc4318636e4b8"
+      }
+    ],
+    "pullRequests": [
+      {
+        "label": "docs: add chat persistence knowledge routing",
+        "url": "https://github.com/oosaka0123-sudo/ai-agent/pull/29"
+      }
+    ],
+    "relatedUrls": [],
+    "nextSteps": "PR #29のdiffとチェックを確認し、安全ならmergeする。",
+    "tags": [
+      "AIエージェント",
+      "GitHub",
+      "SSOT",
+      "Knowledge routing"
+    ]
   }
 ]
