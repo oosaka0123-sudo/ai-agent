@@ -131,6 +131,12 @@ class ProjectOnboardingTests(unittest.TestCase):
         self.assertIn("BLOCKER", preflight)
         self.assertIn("REQUIRED ACTION", preflight)
 
+        mcp = json.loads(desired[".mcp.json"])
+        self.assertEqual(
+            mcp["mcpServers"]["google-media"]["headers"]["Authorization"],
+            "Bearer ${GOOGLE_MEDIA_MCP_TOKEN}",
+        )
+
         readme = desired[".ai-agent/README.md"]
         self.assertIn("bash .ai-agent/google_media_mcp_preflight.sh", readme)
         self.assertIn("project_slug=demo-site", readme)
@@ -183,6 +189,10 @@ class ProjectOnboardingTests(unittest.TestCase):
         doc = json.loads(merged)
         self.assertIn("existing-server", doc["mcpServers"])
         self.assertIn("google-media", doc["mcpServers"])
+        self.assertEqual(
+            doc["mcpServers"]["google-media"]["headers"]["Authorization"],
+            "Bearer ${GOOGLE_MEDIA_MCP_TOKEN}",
+        )
 
     def test_preflight_template_never_contains_a_project_specific_slug(self):
         preflight = render_google_media_preflight()
