@@ -8,6 +8,7 @@
 - `main` ブランチには直接pushしない。常にPull Requestを経由する。
 - 作業ブランチは用途がわかる名前をつける。
   - 例: `feature/news-collector`, `fix/env-loading-bug`, `docs/update-readme`
+- JulesへのIssue経由の発注については [`docs/JULES_ISSUE_DISPATCH.md`](docs/JULES_ISSUE_DISPATCH.md) も参照。
 - `main` は常にビルド・起動できる状態を維持する（壊れた状態でマージしない）。
 
 ## 2. コミットメッセージ

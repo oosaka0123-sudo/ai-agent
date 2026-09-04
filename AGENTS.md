@@ -23,7 +23,8 @@
 
 ディレクトリ構成の詳細は [`docs/DIRECTORY_STRUCTURE.md`](docs/DIRECTORY_STRUCTURE.md)、
 仕様の詳細は [`PROJECT_SPEC.md`](PROJECT_SPEC.md)、
-開発ルールの詳細は [`docs/DEVELOPMENT.md`](docs/DEVELOPMENT.md) を参照してください。
+開発ルールの詳細は [`docs/DEVELOPMENT.md`](docs/DEVELOPMENT.md)、
+Issue経由のJules正式発注フローは [`docs/JULES_ISSUE_DISPATCH.md`](docs/JULES_ISSUE_DISPATCH.md) を参照してください。
 
 ## 最優先ルール（絶対に守ること）
 

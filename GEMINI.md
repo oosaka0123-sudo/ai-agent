@@ -13,6 +13,7 @@ Gemini CLI / Jules（および他のGemini系エージェント）向けの補�
   確認を挟まず最後まで完了させる。停止してよい例外は `AGENTS.md` を参照する。
 - 不明点や仕様が確定していない部分は、推測で実装を進めず、
   `docs/DEVELOPMENT.md` の方針に沿っているか確認する。
+- GitHub Issue経由の正式発注フローについては [`docs/JULES_ISSUE_DISPATCH.md`](docs/JULES_ISSUE_DISPATCH.md) を参照。
 - `guides/smartphone-website/gemini.md` など、Gemini・Julesが担当するファイルにのみ
   執筆する。他のAI（Claude Code, Codex）が担当するファイルは変更しない
   （詳細は `AGENTS.md` の「複数AI比較ガイド（guides/）のルール」を参照）。

@@ -65,6 +65,7 @@ Thumbs.db
 # 公開時にこれらへコピーするため、コピー先はコミットしない。
 /web/data/
 /web/guides-data/
+/web/competitions/
 /web/assets/screenshots/
 
 # ==============================
