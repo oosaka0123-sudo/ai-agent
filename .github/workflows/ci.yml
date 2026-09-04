@@ -33,5 +33,8 @@ jobs:
         with:
           python-version: "3.11"
 
+      - name: 依存パッケージをインストール
+        run: pip install -r requirements.txt
+
       - name: "pytest 実行（tests/: ネットワーク接続不要な単体テストのみ。Google/GitHub の実API呼び出しはすべてfake/stubに置き換え済み）"
         run: pytest tests/
