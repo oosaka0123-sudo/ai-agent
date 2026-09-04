@@ -26,6 +26,9 @@ from pathlib import Path
 from typing import Any
 
 REPO_RE = re.compile(r"^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$")
+PRELIGHT_TEMPLATE_PATH = Path(__file__).resolve().with_name(
+    "google_media_mcp_preflight_template.sh"
+)
 
 
 def load_registry(path: Path) -> dict:
@@ -87,6 +90,16 @@ def render_manifest(project: dict, registry: dict) -> str:
     return json.dumps(build_manifest(project, registry), ensure_ascii=False, indent=2) + "\n"
 
 
+def render_google_media_preflight() -> str:
+    """Return the control-plane-owned generic connectivity preflight.
+
+    The template contains no credential values and derives the target project slug
+    from `.ai-agent/project.json` at runtime, so the same managed file can be
+    distributed to every media-enabled project.
+    """
+    return PRELIGHT_TEMPLATE_PATH.read_text(encoding="utf-8")
+
+
 def merge_mcp_json(existing_content: str | None, project: dict, registry: dict) -> str | None:
     """Adds/updates only the `mcpServers.google-media` entry, preserving every
     other key and every other MCP server already in the target repository's
@@ -137,7 +150,8 @@ def render_readme(project: dict, mcp_json_included: bool = False) -> str:
         mcp_bullet = (
             "- Google Media MCP: `.mcp.json` (`mcpServers.google-media` entry only --\n"
             "  any other MCP servers already configured in this repository are left\n"
-            "  untouched)"
+            "  untouched)\n"
+            "- Google Media preflight: `.ai-agent/google_media_mcp_preflight.sh`"
         )
         mcp_section = (
             "The control plane provides shared AI media generation -- Google Vertex AI\n"
@@ -149,10 +163,21 @@ def render_readme(project: dict, mcp_json_included: bool = False) -> str:
             "bearer token, resolved at run time rather than stored here."
         )
         setup_section = (
+            "Before rebuilding or re-onboarding anything, run the managed connectivity\n"
+            "preflight from the repository root:\n\n"
+            "`bash .ai-agent/google_media_mcp_preflight.sh`\n\n"
+            "It checks the existing config, token presence (never the value), network\n"
+            "reachability, `/healthz`, and `/readyz`. If it passes, use Claude Code's\n"
+            "native MCP status/tool list, run one minimal `generate_image` call for\n"
+            f"`project_slug={slug}`, and only after image success run one minimal\n"
+            "`generate_video` call. Do not poll video separately; the shared MCP handles\n"
+            "that server-side.\n\n"
             "`.mcp.json`'s `Authorization` header reads `${GOOGLE_MEDIA_MCP_TOKEN}` from\n"
-            "the environment Claude Code runs in -- it is never committed here. Set it\n"
-            "once wherever this repository's Claude Code sessions run. See the control\n"
-            "plane's `docs/GOOGLE_MEDIA_MCP.md` for where to get the value."
+            "the Claude Code runtime environment. The value is never committed here.\n"
+            "Cloud-hosted Claude environments currently have no dedicated secrets store,\n"
+            "so credential provisioning remains a separate runtime concern; do not put\n"
+            "the bearer value in repository files. See the control plane's\n"
+            "`docs/GOOGLE_MEDIA_MCP.md` for the current authentication guidance."
         )
     else:
         mcp_bullet = (
@@ -171,11 +196,10 @@ def render_readme(project: dict, mcp_json_included: bool = False) -> str:
             "bearer token, resolved at run time rather than stored here)."
         )
         setup_section = (
-            "Once the follow-up PR above adds `.mcp.json`, its `Authorization` header\n"
-            "will read `${GOOGLE_MEDIA_MCP_TOKEN}` from the environment Claude Code runs\n"
-            "in -- it will never be committed here. Set it once wherever this\n"
-            "repository's Claude Code sessions run. See the control plane's\n"
-            "`docs/GOOGLE_MEDIA_MCP.md` for where to get the value."
+            "Once the follow-up PR above adds `.mcp.json`, onboarding will also add the\n"
+            "managed Google Media connectivity preflight under `.ai-agent/`. Runtime\n"
+            "authentication remains separate and secret values must never be committed.\n"
+            "See the control plane's `docs/GOOGLE_MEDIA_MCP.md` for the current setup."
         )
     return f"""# AI control-plane onboarding
 
@@ -201,12 +225,50 @@ also shared this way, without copying implementation into every site.
 
 ## Safety boundary
 
-This onboarding file does not contain API keys, service-account keys, passwords,
-or tokens. Credentials remain in the control plane / GitHub Secrets.
+This onboarding file and the managed preflight do not contain API keys,
+service-account keys, passwords, or token values. Runtime credentials remain
+outside repository content.
 
 The control plane opens Pull Requests for managed changes. It does not directly
 overwrite the production branch.
 """
+
+
+def build_desired_files(
+    project: dict,
+    registry: dict,
+    existing_mcp_json: str | None = None,
+) -> dict[str, str]:
+    """Build the complete target-repository onboarding payload.
+
+    Control-plane-owned files stay under `.ai-agent/`. `.mcp.json` is the sole
+    shared target file and is merged rather than replaced.
+    """
+    merged_mcp_json = merge_mcp_json(existing_mcp_json, project, registry)
+    mcp_json_included = False
+    if merged_mcp_json is not None:
+        try:
+            mcp_json_included = "google-media" in json.loads(merged_mcp_json).get(
+                "mcpServers", {}
+            )
+        except json.JSONDecodeError:
+            # Preserve malformed target JSON exactly as merge_mcp_json promises,
+            # but do not claim Google Media is usable or distribute a preflight.
+            mcp_json_included = False
+
+    desired = {
+        ".ai-agent/project.json": render_manifest(project, registry),
+        ".ai-agent/README.md": render_readme(
+            project, mcp_json_included=mcp_json_included
+        ),
+    }
+    if mcp_json_included:
+        desired[".ai-agent/google_media_mcp_preflight.sh"] = (
+            render_google_media_preflight()
+        )
+    if merged_mcp_json is not None:
+        desired[".mcp.json"] = merged_mcp_json
+    return desired
 
 
 class GitHubError(RuntimeError):
@@ -330,22 +392,12 @@ def onboard_project(
     # --check mode there is no real API call to read the current file, so
     # the merge runs against "no existing file" -- fine, --check only
     # validates registry/onboarding logic locally, same as the other files.
-    # Computed before README.md so the README can say accurately whether
-    # .mcp.json exists yet, rather than describing it as already present.
     existing_mcp_json = None
     if apply:
-        existing_mcp_json = decode_content(client.file(full_name, ".mcp.json", default_branch))
-    merged_mcp_json = merge_mcp_json(existing_mcp_json, project, registry)
-    mcp_json_included = merged_mcp_json is not None and "google-media" in json.loads(merged_mcp_json).get(
-        "mcpServers", {}
-    )
-
-    desired = {
-        ".ai-agent/project.json": render_manifest(project, registry),
-        ".ai-agent/README.md": render_readme(project, mcp_json_included=mcp_json_included),
-    }
-    if merged_mcp_json is not None:
-        desired[".mcp.json"] = merged_mcp_json
+        existing_mcp_json = decode_content(
+            client.file(full_name, ".mcp.json", default_branch)
+        )
+    desired = build_desired_files(project, registry, existing_mcp_json)
 
     if not apply:
         return f"check: {project['slug']} -> {full_name} ({len(desired)} managed files)"
@@ -394,9 +446,10 @@ def onboard_project(
         default_branch,
         (
             "This PR was opened by the shared `ai-agent` control plane.\n\n"
-            "It only installs/updates `.ai-agent/*` managed metadata so this project "
-            "can reuse shared AI media and future automation. It does not deploy or "
-            "publish anything and does not include credentials.\n"
+            "It installs/updates control-plane-owned `.ai-agent/*` metadata and, when "
+            "Google Media is enabled, safely merges only the `google-media` entry into "
+            "`.mcp.json`. It does not deploy or publish anything and does not include "
+            "credential values.\n"
         ),
     )
     return f"{result_prefix}: {project['slug']} -> {pr.get('html_url', full_name)}"
