@@ -2,7 +2,7 @@ name: Deploy Pages
 
 on:
   push:
-    branches: [main, feat/50plus-preview-bridge]
+    branches: [main]
     paths:
       - "web/**"
       - "data/**"
