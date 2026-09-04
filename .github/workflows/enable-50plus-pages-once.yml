@@ -1,0 +1,87 @@
+name: One-time enable 50PLUS GitHub Pages
+
+on:
+  push:
+    branches:
+      - ops/enable-50plus-pages
+    paths:
+      - .github/workflows/enable-50plus-pages-once.yml
+
+permissions:
+  contents: read
+
+jobs:
+  enable-pages:
+    if: github.repository == 'oosaka0123-sudo/ai-agent' && github.actor == github.repository_owner
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      ADMIN_TOKEN: ${{ secrets.REPO_FACTORY_TOKEN }}
+      PAGES_API: https://api.github.com/repos/oosaka0123-sudo/50plus/pages
+    steps:
+      - name: Require existing repository-factory credential
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ -z "${ADMIN_TOKEN:-}" ]; then
+            echo '::error::REPO_FACTORY_TOKEN is not configured in ai-agent. No Pages change was attempted.'
+            exit 20
+          fi
+          echo 'Existing repository-factory credential is available. Its value is not printed.'
+
+      - name: Enable 50PLUS Pages with GitHub Actions build type
+        shell: bash
+        run: |
+          set -euo pipefail
+          headers=(
+            -H 'Accept: application/vnd.github+json'
+            -H "Authorization: Bearer ${ADMIN_TOKEN}"
+            -H 'X-GitHub-Api-Version: 2026-03-10'
+          )
+
+          get_code="$(curl -sS -o /tmp/pages-get.json -w '%{http_code}' "${headers[@]}" "$PAGES_API")"
+
+          if [ "$get_code" = '200' ]; then
+            echo 'Pages site already exists; ensuring build_type=workflow.'
+            put_code="$(curl -sS -o /tmp/pages-put.json -w '%{http_code}' -X PUT "${headers[@]}" -H 'Content-Type: application/json' "$PAGES_API" -d '{"build_type":"workflow"}')"
+            if [ "$put_code" != '204' ]; then
+              echo "::error::Pages update failed with HTTP $put_code."
+              cat /tmp/pages-put.json || true
+              exit 1
+            fi
+            echo 'Pages site updated to workflow build type.'
+          elif [ "$get_code" = '404' ]; then
+            echo 'Pages site does not exist; creating it with build_type=workflow.'
+            post_code="$(curl -sS -o /tmp/pages-post.json -w '%{http_code}' -X POST "${headers[@]}" -H 'Content-Type: application/json' "$PAGES_API" -d '{"build_type":"workflow"}')"
+            if [ "$post_code" != '201' ]; then
+              echo "::error::Pages creation failed with HTTP $post_code."
+              cat /tmp/pages-post.json || true
+              exit 1
+            fi
+            echo 'Pages site created with workflow build type.'
+          else
+            echo "::error::Unexpected Pages lookup HTTP status: $get_code."
+            cat /tmp/pages-get.json || true
+            exit 1
+          fi
+
+      - name: Verify Pages is enabled
+        shell: bash
+        run: |
+          set -euo pipefail
+          code="$(curl -sS -o /tmp/pages-verify.json -w '%{http_code}' \
+            -H 'Accept: application/vnd.github+json' \
+            -H "Authorization: Bearer ${ADMIN_TOKEN}" \
+            -H 'X-GitHub-Api-Version: 2026-03-10' \
+            "$PAGES_API")"
+          if [ "$code" != '200' ]; then
+            echo "::error::Pages verification failed with HTTP $code."
+            exit 1
+          fi
+          python3 - <<'PY'
+          import json
+          data = json.load(open('/tmp/pages-verify.json', encoding='utf-8'))
+          print('Pages enabled:', bool(data.get('html_url')))
+          print('Build type:', data.get('build_type', 'not-reported'))
+          print('Public URL:', data.get('html_url', 'not-reported'))
+          PY
