@@ -65,6 +65,10 @@ def get_steel_config() -> SteelServerConfig:
         "STEEL_BROWSER_SESSION_INACTIVITY_TIMEOUT_MINUTES", 10
     )
     max_timeout = _positive_int_env("STEEL_BROWSER_SESSION_MAX_TIMEOUT_MINUTES", 30)
+    if max_timeout < inactivity_timeout:
+        raise RuntimeError(
+            "STEEL_BROWSER_SESSION_MAX_TIMEOUT_MINUTES must be greater than or equal to STEEL_BROWSER_SESSION_INACTIVITY_TIMEOUT_MINUTES."
+        )
 
     return SteelServerConfig(
         steel_api_key=api_key,
