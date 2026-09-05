@@ -28,14 +28,10 @@ Browser Session Lifecycle (create -> navigate -> extract/screenshot -> release)
 2. **SSRF & Private Network Defense**:
    - All navigation targets in `navigate`, `extract`, and `screenshot` undergo mandatory URL validation (`url_validator.py`).
    - Blocks non-HTTP/HTTPS schemes, `localhost`, `127.0.0.1`, `::1`, `0.0.0.0`, cloud metadata endpoints (`169.254.169.254`, `metadata.google.internal`), and RFC1918 private IPv4/IPv6 ranges.
-   - `extract` and `screenshot` require an explicit validated URL until the session has successfully navigated to an HTTP(S) page. There is no `about:blank` fallback.
 3. **Cost Safety & Session TTL Cleanup**:
    - In-memory `SessionTracker` tracks creation and last-activity timestamps for every active session.
    - Background cleanup task automatically releases sessions exceeding inactivity (`STEEL_BROWSER_SESSION_INACTIVITY_TIMEOUT_MINUTES`, default 10m) or maximum lifetime (`STEEL_BROWSER_SESSION_MAX_TIMEOUT_MINUTES`, default 30m).
-   - Explicit TTL values must be positive integers, and maximum lifetime must be greater than or equal to inactivity timeout.
    - Application shutdown (`lifespan`) automatically executes `release_all` to prevent dangling browser sessions from incurring charges.
-4. **Fail-closed Readiness**:
-   - `/readyz` returns `503` unless `STEEL_API_KEY`, `STEEL_BROWSER_MCP_TOKEN`, and at least one explicit `STEEL_BROWSER_MCP_ALLOWED_HOSTS` value are configured and timeout values are valid.
 
 ## Available MCP Tools
 
@@ -48,12 +44,12 @@ Browser Session Lifecycle (create -> navigate -> extract/screenshot -> release)
    - Parameters: `session_id` (required), `url` (required).
    - Returns: `session_id`, `url`, `title`, `status`.
 3. **`extract`**
-   - Extracts page content in `markdown`, `html`, or plain `text` format.
-   - Parameters: `session_id` (required), `url` (optional only after successful validated navigation), `format` (default `"markdown"`).
+   - Extracts page content in `markdown`, `html`, or `text` format.
+   - Parameters: `session_id` (required), `url` (optional), `format` (default `"markdown"`).
    - Returns: `session_id`, `url`, `format`, `content`.
 4. **`screenshot`**
    - Captures a base64-encoded PNG screenshot of the session page.
-   - Parameters: `session_id` (required), `url` (optional only after successful validated navigation), `full_page` (bool).
+   - Parameters: `session_id` (required), `url` (optional), `full_page` (bool).
    - Returns: `session_id`, `url`, `screenshot_base64`, `mime_type`.
 5. **`release_session`**
    - Explicitly closes and releases the Steel browser session.
@@ -66,10 +62,10 @@ Browser Session Lifecycle (create -> navigate -> extract/screenshot -> release)
 |---|---|---|---|
 | `STEEL_API_KEY` | Upstream Steel API Key for cloud browser creation and execution. | Yes | None |
 | `STEEL_BROWSER_MCP_TOKEN` | Bearer token required for clients calling the Remote HTTP MCP endpoint. | Yes | None |
-| `STEEL_BROWSER_MCP_ALLOWED_HOSTS` | Comma-separated list of explicit allowed host headers for DNS rebinding protection. | Yes | None |
+| `STEEL_BROWSER_MCP_ALLOWED_HOSTS` | Comma-separated list of allowed host headers (DNS rebinding protection). | Recommended in Cloud Run | Empty (Rejects all if unset) |
 | `STEEL_BROWSER_MCP_ALLOWED_ORIGINS` | Comma-separated list of allowed origin headers. | Optional | Empty |
-| `STEEL_BROWSER_SESSION_INACTIVITY_TIMEOUT_MINUTES` | Maximum minutes a session can remain idle before auto-release. Must be a positive integer if set. | No | `10` |
-| `STEEL_BROWSER_SESSION_MAX_TIMEOUT_MINUTES` | Maximum total lifetime minutes for a browser session. Must be a positive integer and >= inactivity timeout if set. | No | `30` |
+| `STEEL_BROWSER_SESSION_INACTIVITY_TIMEOUT_MINUTES` | Maximum minutes a session can remain idle before auto-release. | No | `10` |
+| `STEEL_BROWSER_SESSION_MAX_TIMEOUT_MINUTES` | Maximum total lifetime minutes for a browser session. | No | `30` |
 
 ## Local Development & Running
 
@@ -84,7 +80,7 @@ uvicorn mcp_server.steel_app:app --host 0.0.0.0 --port 8000
 
 Health check endpoints:
 - `GET /healthz` -> Returns `200 OK` (`ok`)
-- `GET /readyz` -> Returns `200 OK` (`{"ready": true}`) only when required fail-closed configuration is valid; otherwise `503 Service Unavailable`.
+- `GET /readyz` -> Returns `200 OK` (`{"ready": true}`) if configuration is valid; otherwise `503 Service Unavailable`.
 
 ---
 
@@ -107,7 +103,7 @@ The following manual operations are required by a human operator and cannot be c
        --set-env-vars=STEEL_BROWSER_SESSION_INACTIVITY_TIMEOUT_MINUTES=10 \
        --set-secrets=STEEL_API_KEY=steel-api-key:latest,STEEL_BROWSER_MCP_TOKEN=steel-mcp-token:latest
      ```
-   - Record the deployed Cloud Run service URL and set `STEEL_BROWSER_MCP_ALLOWED_HOSTS` to the explicit service hostname before considering the service ready.
+   - Record the deployed Cloud Run service URL and update `STEEL_BROWSER_MCP_ALLOWED_HOSTS` with the service hostname.
 3. **ChatGPT / AI Client Registration**:
    - In ChatGPT / Custom GPT / Claude Client settings, register a Remote HTTP MCP Endpoint pointing to `https://<your-cloud-run-url>/mcp`.
    - Set the `Authorization` header to `Bearer <STEEL_BROWSER_MCP_TOKEN>`.

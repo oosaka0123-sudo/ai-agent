@@ -10,18 +10,14 @@ import os
 from dataclasses import dataclass
 
 
-def _positive_int_env(name: str, default: int) -> int:
-    """Read a positive integer env var and fail closed on invalid values."""
+def _int_env(name: str, default: int) -> int:
     raw = os.environ.get(name, "").strip()
     if not raw:
         return default
     try:
-        value = int(raw)
-    except ValueError as exc:
-        raise RuntimeError(f"{name} must be a positive integer.") from exc
-    if value <= 0:
-        raise RuntimeError(f"{name} must be greater than 0.")
-    return value
+        return int(raw)
+    except ValueError:
+        return default
 
 
 def _list_env(name: str) -> list[str]:
@@ -55,20 +51,10 @@ def get_steel_config() -> SteelServerConfig:
         )
 
     allowed_hosts = _list_env("STEEL_BROWSER_MCP_ALLOWED_HOSTS")
-    if not allowed_hosts:
-        raise RuntimeError(
-            "STEEL_BROWSER_MCP_ALLOWED_HOSTS is not set. At least one explicit host is required for DNS rebinding protection."
-        )
     allowed_origins = _list_env("STEEL_BROWSER_MCP_ALLOWED_ORIGINS")
 
-    inactivity_timeout = _positive_int_env(
-        "STEEL_BROWSER_SESSION_INACTIVITY_TIMEOUT_MINUTES", 10
-    )
-    max_timeout = _positive_int_env("STEEL_BROWSER_SESSION_MAX_TIMEOUT_MINUTES", 30)
-    if max_timeout < inactivity_timeout:
-        raise RuntimeError(
-            "STEEL_BROWSER_SESSION_MAX_TIMEOUT_MINUTES must be greater than or equal to STEEL_BROWSER_SESSION_INACTIVITY_TIMEOUT_MINUTES."
-        )
+    inactivity_timeout = _int_env("STEEL_BROWSER_SESSION_INACTIVITY_TIMEOUT_MINUTES", 10)
+    max_timeout = _int_env("STEEL_BROWSER_SESSION_MAX_TIMEOUT_MINUTES", 30)
 
     return SteelServerConfig(
         steel_api_key=api_key,
