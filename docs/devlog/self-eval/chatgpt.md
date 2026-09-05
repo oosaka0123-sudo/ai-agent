@@ -86,7 +86,7 @@ Pages build時に公開Repository `oosaka0123-sudo/50plus` の最新 `main` をr
 
 残る制約は、50PLUS専用の `https://oosaka0123-sudo.github.io/50plus/` ではなく、一時的に `https://oosaka0123-sudo.github.io/ai-agent/50plus/` を使う点。完成後は予定どおりLolipopの `https://50plus.rss7.net` へ移行し、このbridgeを削除する。
 
-## 2026-09-05 — Google Media MCP onboarding preflight distribution
+## 2026-09-05 JST — Google Media MCP onboarding preflight distribution
 
 ### 初回実装
 
@@ -119,16 +119,34 @@ Pages build時に公開Repository `oosaka0123-sudo/50plus` の最新 `main` をr
   - desired-file生成を `build_desired_files()` へ分離し、malformed JSONは保持しつつGoogle Mediaが利用可能だと誤認しないよう防御した。
 - Claude cloud環境へ長期Bearerを共通保存すれば自動化できるが、現行Claude Cloudには専用secret storeがなく安全な完成形ではない。
   - onboardingとruntime credentialを明確に分離し、将来OAuth/short-lived credentialへ移行できる設計メモを追加した。
+- 既存CI workflowはpytest step名内の未引用 `tests/:` によりYAMLとして無効で、jobが開始されない状態だった。
+  - step名を引用し、依存インストールを保持したままworkflowを復旧した。
+- Copilot reviewでAuthorization header契約の回帰防止が不足していると指摘された。
+  - generated `.mcp.json` が `Bearer ${GOOGLE_MEDIA_MCP_TOKEN}` を保持することをunit testで明示固定した。
 
-### テスト計画
+### 実証結果
 
-PR CIの既存 `pytest tests/` とgitleaksで以下を確認する。
+PR上のGitHub Actionsで以下を確認した。
 
-- media-enabled onboardingがmanifest / README / generic preflight / merged `.mcp.json` の4ファイルを生成
-- media-disabled projectにはMCP/preflightを配布しない
-- generic preflightに50PLUS固有slugが混入しない
-- existing MCP serverをmerge後も保持
+- CI workflowが正常にjobを開始する状態へ復旧
+- Python依存インストール: success
+- `pytest tests/`: **83 passed / 1 warning**
+- onboarding unit tests: success
+- MCP server unit tests: success
+- media generation unit tests: success
+- Gitleaks secret scan: success
 - secret valueをrepositoryへ追加していない
+- generated Google Media Authorization headerがenvironment variable-backedであることをtestで固定
+
+### 最終自己評価
+
+**98/100**
+
+- 仕様適合性: 99
+- 安全性: 99
+- 保守性: 98
+- 自動化: 98
+- 実運用確認: 94
 
 ### 現時点の残課題
 
