@@ -541,5 +541,54 @@
       "SSOT",
       "Knowledge routing"
     ]
+  },
+  {
+    "id": "2026-09-05-steel-cloud-browser-mcp",
+    "date": "2026-09-05",
+    "title": "Steel Cloud Browser を全AI共通 Remote HTTP MCP として追加",
+    "project": "ai-agent",
+    "purpose": "PC電源OFFでもChatGPT / Claude / Gemini等のAIクライアントから共通のクラウドブラウザを利用できるように、Steel Cloud Browserをai-agent control planeの共有Remote HTTP MCPとして追加する。",
+    "whatMade": "mcp_server/steel_browser/ に create_session / navigate / extract / screenshot / release_session の最小5ツールを提供する Remote HTTP MCP を実装した。Inbound Bearer Auth と Steel Upstream API Key を分離し、SSRF対策およびセッションTTLクリーンアップを組み込んだ。",
+    "changes": [
+      "requirements.txt",
+      ".env.example",
+      "mcp_server/steel_browser/__init__.py, config.py, url_validator.py, session_manager.py, server.py, app.py",
+      "mcp_server/steel_app.py",
+      "tests/steel_browser/conftest.py, test_steel_auth.py, test_steel_session_manager.py, test_steel_tools.py, test_steel_url_validator.py",
+      "docs/STEEL_BROWSER_MCP.md",
+      "docs/devlog/2026-09-05.md",
+      "data/devlog.json",
+      "CHANGELOG.md"
+    ],
+    "aiUsed": [
+      "Gemini / Jules"
+    ],
+    "services": [
+      "Steel Cloud Browser",
+      "GitHub"
+    ],
+    "tech": [
+      "Python",
+      "Model Context Protocol",
+      "steel-sdk",
+      "Starlette",
+      "Uvicorn",
+      "Pytest"
+    ],
+    "problems": "Google Media MCPとの責務分離、MCPクライアントへのSteel API Key漏洩防止、SSRF攻撃や課金放置セッションの防止が必要であった。",
+    "solutions": "独立した mcp_server/steel_browser/ パッケージと mcp_server/steel_app.py エントリーポイントを作成し、Inbound Bearer Auth・SSRFバリデーション・セッションTTLクリーンアップタスクを統合した。",
+    "learnings": "Remote HTTP MCPサーバー設計では、アップストリームサードパーティ認証情報をサーバー側で隠蔽し、エンドポイント自体のBearer認証と組み合わせることで、セキュアなマルチクライアントインフラを構築できる。",
+    "images": [],
+    "githubCommits": [],
+    "pullRequests": [],
+    "relatedUrls": [],
+    "nextSteps": "Human Gate 手順（Cloud Secret 登録、Cloud Run デプロイ、ChatGPT Remote MCP 登録）を関係者に報告し、PRを作成する。",
+    "tags": [
+      "MCP",
+      "Steel Cloud Browser",
+      "Remote HTTP MCP",
+      "セキュリティ",
+      "SSRF対策"
+    ]
   }
 ]
