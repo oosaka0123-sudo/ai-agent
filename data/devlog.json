@@ -850,8 +850,8 @@
     "date": "2026-09-06",
     "title": "GitHub Actions経由でGoogle Media MCPのCloud Run正常稼働を確認",
     "project": "ai-agent",
-    "purpose": "PR #41マージ後、mcp-connectivity-check.ymlを実際に実行し、Claude Code実行環境からは判定できなかったGoogle Media MCPのCloud Run正常性・MCP endpoint正常性・IAM・API有効化を確認する。",
-    "whatMade": "workflow_dispatchで2回実行し、/readyzが2回とも200 {\"ready\":true}(アプリ自身の実レスポンス)を返すことを確認し、Cloud Runサービスの正常稼働とfail-closed設定検証の成功を実証した。一方/healthzは2回とも404(Googleの汎用エラーページ)で、原因不明の現象としてHYPOTHESIS記録した。docs/MOBILE_CLOUD_FIRST.mdを確定結果で更新した。",
+    "purpose": "PR #41マージ後、mcp-connectivity-check.ymlを実際に実行し、Claude Code実行環境からは到達できなかったGoogle Media MCPのCloud Run自体の生死と/readyzの応答を確認する。",
+    "whatMade": "workflow_dispatchで2回実行し、/readyzが2回とも200 {\"ready\":true}(アプリ自身の実レスポンス)を返すことを確認し、Cloud Runサービス自体が生きていることを実証した。/readyz(get_server_config())はGOOGLE_CLOUD_PROJECT/GOOGLE_MEDIA_GCS_BUCKET/サーバー側GOOGLE_MEDIA_MCP_TOKENの設定有無しか検証しないため、IAM権限・API有効化・GOOGLE_MEDIA_MCP_ALLOWED_HOSTSの設定はこの結果だけでは未確認のままである(初回記録内容をCopilotレビュー指摘により訂正)。一方/healthzは2回とも404(Googleの汎用エラーページ)で、原因不明の現象としてHYPOTHESIS記録した。docs/MOBILE_CLOUD_FIRST.mdを確定結果で更新した。",
     "changes": [
       "docs/MOBILE_CLOUD_FIRST.md",
       "docs/devlog/2026-09-06.md",

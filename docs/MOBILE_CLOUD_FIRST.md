@@ -27,7 +27,7 @@ Projectローカルの実装ドキュメント。Masterへは進捗をコピー�
 | Claude Code（実行環境） | 本セッションはClaude Code on the web（クラウド実行環境）で稼働中。ローカルデスクトップCLIも利用可能だが必須ではない | ✅ クラウド実行を使えば完結 | ローカルCLI版を使う場合はPC依存が発生する | 原則クラウド実行（Claude Code on the web）を使う。ローカルCLIはオフライン作業等の補助手段と位置づける（ADR-015 item3） | なし |
 | Claude Cowork | 本セッション（Claude Code）からは実接続・実能力を確認できていない（UNKNOWN） | 未確認（製品としてはクラウドサービス想定のため理論上は可能） | このセッションにCoworkへの実アクセス手段がなく、live evidenceがない | Coworkをクラウドオーケストレーターとして使う（ADR-015 item4） | Claude Coworkの実セッションで接続を確認し、`ai-master/CONNECT.md` へ実アクセスの結果を追記する（本タスクの範囲外） |
 | GitHub操作（Repository / PR / Actions） | GitHub MCP経由でClaude Codeから実行可能。GitHub公式モバイルアプリからもPRレビュー・承認・マージ可能 | ✅ 完結（本タスクで実際にPR作成・レビュー対応・マージ可能状態までクラウドのみで完了した） | 特になし | 現状維持 | なし |
-| Google Media MCP（画像・動画生成） | **Cloud Run自体は正常稼働を確認済み。** GitHub Actions（`mcp-connectivity-check.yml`、Claude Codeのegress制約を経由しない）から`/readyz`を2回実行し、いずれも`200 {"ready":true}`（アプリ自身が返す実レスポンス）を確認した — Cloud Runサービスが生きており、fail-closed設定検証（Secret/GCSバケット/許可ホスト等）にも通っている。一方 `/healthz` は同じ2回とも`404`（Googleの汎用エラーページ、アプリの応答ではない）で、原因は未特定（下記参照）。**このClaude Code実行環境からの接続のみ**が、`GOOGLE_MEDIA_MCP_TOKEN`未設定とegress policy拒否によりブロックされている | ⚠️ Cloud Run側は完結・準備完了。この実行環境からの接続のみ未完結 | (1) この実行環境のegress policyがCloud Runホストを許可していない（環境設定の問題。コード側では解決不可） (2) `GOOGLE_MEDIA_MCP_TOKEN` が本実行環境に未設定（環境変数の問題。コード側では解決不可） (3) `/healthz`だけがGoogle側の汎用404を返す原因不明の現象（`/readyz`は正常。MCP呼び出し自体は`/mcp`エンドポイントを使うため実用上のブロッカーではないが要調査） | Remote HTTP MCP構成自体は維持する（ADR-015と整合）。(1)(2)とも環境設定側の変更で解消する、コード修正は不要。(3)は人間がCloud Runのingress/ロードバランサー設定を確認 | 今回 `.mcp.json` をこのリポジトリ直下へ追加し、GitHub Actions経由でCloud Run自体の到達性を実証した。(1)(2)の具体的な設定手順は下記「切り分け結果」参照 |
+| Google Media MCP（画像・動画生成） | **Cloud Runサービス自体は生きていることを確認済み。** GitHub Actions（`mcp-connectivity-check.yml`、Claude Codeのegress制約を経由しない）から`/readyz`を2回実行し、いずれも`200 {"ready":true}`（アプリ自身が返す実レスポンス）を確認した。`/readyz`（`mcp_server/app.py`の`_readyz`→`get_server_config()`）は`GOOGLE_CLOUD_PROJECT`・`GOOGLE_MEDIA_GCS_BUCKET`・サーバー側`GOOGLE_MEDIA_MCP_TOKEN`が設定済みであることしか検証しない。**IAM権限・API有効化・`GOOGLE_MEDIA_MCP_ALLOWED_HOSTS`の設定はこの結果だけでは未確認のまま**（Copilotレビュー指摘により表現を訂正）。一方 `/healthz` は同じ2回とも`404`（Googleの汎用エラーページ、アプリの応答ではない）で、原因は未特定（下記参照）。**このClaude Code実行環境からの接続のみ**が、`GOOGLE_MEDIA_MCP_TOKEN`未設定とegress policy拒否によりブロックされている | ⚠️ Cloud Runサービス自体は生存確認済みだが、IAM/API有効化/許可ホストは未検証。この実行環境からの接続は未完結 | (1) この実行環境のegress policyがCloud Runホストを許可していない（環境設定の問題。コード側では解決不可） (2) `GOOGLE_MEDIA_MCP_TOKEN` が本実行環境に未設定（環境変数の問題。コード側では解決不可） (3) `/healthz`だけがGoogle側の汎用404を返す原因不明の現象（`/readyz`は正常。MCP呼び出し自体は`/mcp`エンドポイントを使うため実用上のブロッカーではないが要調査） (4) IAM権限・API有効化・許可ホスト設定は`/readyz`では検証されず未確認 | Remote HTTP MCP構成自体は維持する（ADR-015と整合）。(1)(2)とも環境設定側の変更で解消する、コード修正は不要。(3)は人間がCloud Runのingress/ロードバランサー設定を確認。(4)は実際に`generate_image`等を呼んで初めて確認できる | 今回 `.mcp.json` をこのリポジトリ直下へ追加し、GitHub Actions経由でCloud Runサービス自体の到達性を実証した。(1)(2)の具体的な設定手順は下記「切り分け結果」参照 |
 | Steel Browser MCP（クラウドブラウザ） | 実装済みだがCloud Runへの実デプロイは未実施。**コード側のブロッカーを発見・修正した**: `gcloud run deploy --source=.` は常にリポジトリ直下の `Dockerfile`（無関係のGoogle Media MCP用）を拾ってしまい、Steel Browser MCPを正しくデプロイできない構成になっていた。専用の `Dockerfile.steel-browser` と `cloudbuild.steel-browser.yaml` を追加し、ローカルで依存関係インストール→起動→`/healthz`・`/readyz`が200を返すことまで確認した（実際のデプロイはCloud Run/gcloud認証情報がこの環境にないため未実施） | ❌ 未完結（稼働中のエンドポイントが存在しない。コード側の準備は完了） | 実デプロイには人間の操作が必要（Human Gate: gcloud認証・課金確認） | デプロイ自体はADR-015に沿ってCloud Run（Remote HTTP MCP）で行う。PCを使わず**Google Cloud Shell**（ブラウザだけで動くターミナル、スマホ対応）から実行できる手順を用意した | `docs/STEEL_BROWSER_MCP.md`「Human Gate Instructions」の手順（APIの有効化 → Steel API Key取得 → Cloud Shellでclone → Secret登録 → `cloudbuild.steel-browser.yaml`でビルド・デプロイ → 許可ホスト設定 → 到達性確認 → AIクライアント登録）を人間が実施する |
 | メディア生成CLI（`scripts/generate_media.py`） | Claude Codeのクラウド実行環境内でPythonスクリプトとして実行可能（ローカルPC不要）。ただしGoogle Cloud認証（ADC）の初回セットアップが必要 | △ 部分的（クラウド実行環境内では動くが、初回のgcloud認証セットアップに手間がかかる） | Google Media MCPが使えない間は、このCLIが唯一の生成手段になり認証セットアップの手間が残る | 通常利用はGoogle Media MCP経由に一本化し、CLIは開発者向けデバッグ手段として位置づける（既に `docs/GOOGLE_MEDIA_MCP.md` に同種の位置づけあり） | なし（Google Media MCP接続が復旧すればこの経路への依存は自然に下がる） |
 | テスト・CI（pytest / gitleaks） | `.github/workflows/ci.yml` でPRごとに自動実行、GitHub Actions（クラウド）で完結 | ✅ 完結（本PRで実際にCI緑を確認済み） | 特になし | 現状維持 | なし |
@@ -112,9 +112,13 @@ Claude Code cloud実行環境から到達できない項目（Cloud Run自体の
 （GitHub-hosted runner、Claude Codeのegress制約を経由しない）から2回実行した。
 
 - `/readyz`: 2回とも `200 {"ready":true}`（アプリ自身が返す実際のレスポンス）。
-  → **Cloud Runサービスは正常稼働しており、fail-closed起動時検証（必須Secret・GCS
-  バケット・許可ホスト等の設定）にも通っている**。IAM・API有効化（チェックリスト5・6）も
-  この結果から間接的に「問題なし」と判断できる（設定不備があれば`/readyz`は`503`を返す）。
+  → **Cloud Runサービス自体は生きており、起動している**。ただし`_readyz`の実装
+  （`mcp_server/app.py` → `get_server_config()`）は `GOOGLE_CLOUD_PROJECT` /
+  `GOOGLE_MEDIA_GCS_BUCKET` / サーバー側 `GOOGLE_MEDIA_MCP_TOKEN` が空でなく
+  読み込めることしか検証しない。**IAM権限・API有効化（`aiplatform.googleapis.com`等）・
+  `GOOGLE_MEDIA_MCP_ALLOWED_HOSTS`の設定はこの検証の対象外であり、この結果だけでは
+  確認できていない**（初出時「間接的に問題なしと判断できる」と記載していたが誤りで、
+  Copilotレビューの指摘により訂正した）。
 - `/healthz`: 2回とも `404`（Googleの汎用エラーページ、アプリの`_healthz`ハンドラの
   応答ではない）。`/readyz`が同じホスト・同じアプリで正常に応答している以上、
   Cloud Runサービス自体が存在しないという意味ではない。原因はCloud Run手前の
@@ -122,10 +126,12 @@ Claude Code cloud実行環境から到達できない項目（Cloud Run自体の
   （HYPOTHESIS）。MCP呼び出し自体は`/mcp`エンドポイントを使うため、この現象自体は
   実際のツール呼び出しをブロックしないと考えられるが、人間による調査を推奨する。
 
-これにより、**チェックリストの1（Cloud Run正常性）・2（MCP endpoint正常性、`/mcp`自体は
-未確認だが`/readyz`は確認）・5（IAM）・6（API有効化）はいずれも「問題なし」と判定できた**。
-残るブロッカーは4（このClaude Code実行環境からのegress拒否）と、client側の
-`GOOGLE_MEDIA_MCP_TOKEN`未設定のみである。
+これにより、**チェックリストの1（Cloud Run正常性）は「サービス自体は生存」まで確認できた**。
+2（MCP endpoint正常性）は`/readyz`のみ確認、`/mcp`自体は未確認。**5（IAM）・6（API有効化）は
+`/readyz`では検証されないため、依然として未確認**。実際にIAM・API有効化まで確認するには
+`generate_image`等のツールを実際に呼び出す必要があり、それはこのClaude Code実行環境からの
+接続が確立してから初めて可能になる。残るブロッカーは4（このClaude Code実行環境からの
+egress拒否）と、client側の`GOOGLE_MEDIA_MCP_TOKEN`未設定である。
 
 ## 今回実装したこと
 
