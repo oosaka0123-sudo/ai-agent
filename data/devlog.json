@@ -759,5 +759,44 @@
       "MCP",
       "トラブルシューティング"
     ]
+  },
+  {
+    "id": "2026-09-06-mcp-connectivity-check-workflow",
+    "date": "2026-09-06",
+    "title": "Google Media MCP接続テストの切り分けを継続、GitHub Actions経由の到達性確認手段を追加",
+    "project": "ai-agent",
+    "purpose": "Google Media MCPの接続状況をチェックリストに沿って実接続テストで切り分ける。Claude Code cloud実行環境から到達できない項目(Cloud Run正常性・IAM・API有効化)を、GitHub Actionsという別のクラウド実行基盤経由で確認できるようにする。",
+    "whatMade": "curl/環境変数確認で403拒否とトークン未設定を再確認。比較のためstorage.googleapis.com等への到達を試し、既知のGoogle Cloud APIドメインは許可され、Cloud Runのrun.appのような任意ドメインは許可されないというドメイン単位の許可リスト方式であると判明した。GitHub Actionsのworkflow_dispatchで/healthzと/readyzを叩く.github/workflows/mcp-connectivity-check.ymlを新設した。",
+    "changes": [
+      ".github/workflows/mcp-connectivity-check.yml",
+      "docs/devlog/2026-09-06.md",
+      "data/devlog.json"
+    ],
+    "aiUsed": [
+      "Claude Code"
+    ],
+    "services": [
+      "GitHub Actions",
+      "Google Cloud Run"
+    ],
+    "tech": [
+      "GitHub Actions",
+      "Bash",
+      "curl"
+    ],
+    "problems": "Claude Code cloud実行環境からはCloud Runへ到達できないため、Cloud Run自体が正常かどうか、Google Cloud側のIAM/API有効化が原因かどうかを、この環境だけでは判定できなかった。",
+    "solutions": "無制限のネットワークアクセスを持つGitHub Actionsランナーを使い、認証不要な/healthz・/readyzのみを叩くread-onlyなworkflow_dispatchワークフローを追加することで、Claude Code側のネットワーク制約を経由しない独立した診断手段を用意した。",
+    "learnings": "このセッションのegress許可リストは、googleapis.comのような既知のGoogle Cloud APIドメインは許可しつつ、Cloud Runのrun.appのような任意のカスタムドメインは許可しない、ドメイン単位の許可方式である可能性が高い。ネットワーク到達性の限界に突き当たった場合、GitHub Actions等の別のクラウド実行基盤を経由すれば同じ診断を代替できる場合がある。",
+    "images": [],
+    "githubCommits": [],
+    "pullRequests": [],
+    "relatedUrls": [],
+    "nextSteps": "mcp-connectivity-check.ymlをマージ後、実際にworkflow_dispatchで実行し、Cloud Run自体の生死を確認する。結果に応じてIAM/API有効化の確認、またはenvironmentのnetwork policy変更の必要性を判断する。",
+    "tags": [
+      "AIエージェント",
+      "MCP",
+      "GitHub Actions",
+      "トラブルシューティング"
+    ]
   }
 ]

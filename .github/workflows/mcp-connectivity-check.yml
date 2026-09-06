@@ -1,0 +1,62 @@
+name: MCP Connectivity Check
+
+on:
+  workflow_dispatch:
+    inputs:
+      steel_browser_mcp_url:
+        description: >-
+          Steel Browser MCPのデプロイ済みCloud Run URL（未デプロイなら空欄のままでよい。
+          空欄の場合はこのチェックをスキップする）
+        required: false
+        default: ""
+
+permissions:
+  contents: read
+
+jobs:
+  check-google-media-mcp:
+    name: Google Media MCP 到達性確認
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: 公開URLをregistryから取得
+        id: url
+        run: |
+          url=$(python3 -c "import json; print(json.load(open('projects/registry.json'))['onboarding']['google_media_mcp_url'])")
+          base="${url%/mcp}"
+          echo "base=$base" >> "$GITHUB_OUTPUT"
+
+      - name: /healthz を確認（認証不要エンドポイント）
+        run: |
+          set -x
+          curl -sS -o /tmp/healthz.txt -w "\nHTTP_STATUS:%{http_code}\n" "${{ steps.url.outputs.base }}/healthz" || true
+          echo "--- body ---"
+          cat /tmp/healthz.txt || true
+
+      - name: /readyz を確認（認証不要エンドポイント、Secret設定状況を反映）
+        run: |
+          set -x
+          curl -sS -o /tmp/readyz.txt -w "\nHTTP_STATUS:%{http_code}\n" "${{ steps.url.outputs.base }}/readyz" || true
+          echo "--- body ---"
+          cat /tmp/readyz.txt || true
+
+  check-steel-browser-mcp:
+    name: Steel Browser MCP 到達性確認（URL指定時のみ）
+    runs-on: ubuntu-latest
+    if: ${{ github.event.inputs.steel_browser_mcp_url != '' }}
+    steps:
+      - name: /healthz を確認（認証不要エンドポイント）
+        run: |
+          set -x
+          curl -sS -o /tmp/healthz.txt -w "\nHTTP_STATUS:%{http_code}\n" "${{ github.event.inputs.steel_browser_mcp_url }}/healthz" || true
+          echo "--- body ---"
+          cat /tmp/healthz.txt || true
+
+      - name: /readyz を確認（認証不要エンドポイント）
+        run: |
+          set -x
+          curl -sS -o /tmp/readyz.txt -w "\nHTTP_STATUS:%{http_code}\n" "${{ github.event.inputs.steel_browser_mcp_url }}/readyz" || true
+          echo "--- body ---"
+          cat /tmp/readyz.txt || true
