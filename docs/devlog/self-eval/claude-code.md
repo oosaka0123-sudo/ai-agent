@@ -517,3 +517,108 @@ Google Cloud Vertex AI（プロジェクト `rss7-ai-media`）に公式 `google-
   「接続テスト方法」に従って画像・動画それぞれ最小構成（`--count 1`）で1回ずつ
   実行し、正しく `public/assets/ai/` に保存されるか確認すること（課金が発生する）。
 - Pull Requestの作成・レビュー。
+
+## 2026-09-06 — Claude製品ファミリー（Claude / Claude Cowork / Claude Code）の役割分担とMCP分類
+
+### 対象
+
+- `docs/CLAUDE_FAMILY_ROLES.md`（新規）
+- `docs/HANDOFF_TEMPLATE.md`（新規）
+- `AGENTS.md` / `CLAUDE.md` / `README.md` / `PROJECT_SPEC.md`（クロスリファレンス追加）
+- `docs/devlog/2026-09-06.md` / `data/devlog.json` / `CHANGELOG.md`
+
+### 初回実装内容（このタスクでの作業）
+
+ユーザーから「Claude / Claude Cowork / Claude Code / GitHub / MCP / API / Plugins /
+Google系サービス等を確認し、最も合理的で保守しやすいAI開発環境を設計・実装してほしい。
+Master Repositoryは `oosaka0123-sudo/ai-master`」という依頼を受けた。以下を実施した。
+
+1. `ai-agent`（本リポジトリ）の既存基盤（`AGENTS.md`, `mcp_server/`,
+   `docs/GOOGLE_MEDIA_MCP.md`, `docs/STEEL_BROWSER_MCP.md`,
+   `docs/MULTI_PROJECT_ORCHESTRATION.md`, `docs/GPT_GITHUB_CONTROL.md`）を棚卸しした。
+2. `oosaka0123-sudo/ai-master` を実アクセス（`add_repo` → clone → 全ファイル読了）で棚卸しし、
+   README/AGENTS/CONNECT/PROJECTS/DECISIONSの最小5ファイル構成、ADR-002/003
+   （上位ルールファイルを増やさない）、ADR-012（製品名を役割に固定しない
+   Capability-based Routing）を確認した。
+3. 依頼文が提案する `agents/` `mcp/` `docs/architecture/` `templates/` `security/` という
+   重量級ディレクトリ構成を `ai-master` へそのまま実装すると、上記ADRおよび
+   `ai-master/AGENTS.md` GLOBAL MUST NOT 8（根幹方針の無断変更禁止）と衝突すると判断し、
+   `ai-master` 側には変更を加えないことにした。
+4. `ai-master/AGENTS.md` の「Projectローカル運用ルールがMasterのDEFAULTをそのProject内だけ
+   上書きできる」という優先順位ルールに従い、Claude / Claude Cowork / Claude Codeの
+   役割分担、MCP3分類（Development / Knowledge-Work / Media）、MCPとAPIの使い分け、
+   Secret・最小権限、Agent間引き継ぎテンプレートを `ai-agent` 側にDEFAULTの推奨パターンとして
+   実装した（`docs/CLAUDE_FAMILY_ROLES.md`, `docs/HANDOFF_TEMPLATE.md`）。
+5. `AGENTS.md` / `CLAUDE.md` / `README.md` / `PROJECT_SPEC.md` から新規ドキュメントへの
+   クロスリファレンスを追加した。
+6. 開発記録・自己評価ログを記録した。
+
+### 自己評価結果（PROJECT_SPEC.md照合・自己レビュー）
+
+- 依頼された要素（Claude/Cowork/Codeの役割分離、MCP分類、MCP vs API、Secret管理、
+  最小権限、Agent間引き継ぎ、部分接続時の継続、重複作業防止）を
+  `docs/CLAUDE_FAMILY_ROLES.md` 1ファイルに詰め込みすぎていないか確認した →
+  既存文書（`AGENTS.md`, `docs/GOOGLE_MEDIA_MCP.md`, `docs/STEEL_BROWSER_MCP.md`,
+  `docs/MULTI_PROJECT_ORCHESTRATION.md`）が既にカバーしている項目は再掲せず、
+  リンクで参照する構成にした（`AGENTS.md`の「同じ内容を複数箇所に重複させない」
+  という既存方針との整合性を優先）。
+- 全内部リンクが実在するファイルを指しているか確認した（`docs/CLAUDE_FAMILY_ROLES.md`,
+  `docs/HANDOFF_TEMPLATE.md`, `docs/GOOGLE_MEDIA_MCP.md`, `docs/STEEL_BROWSER_MCP.md`,
+  `docs/DEVELOPMENT.md`, `docs/GPT_GITHUB_CONTROL.md`, `AGENTS.md`, `CLAUDE.md`,
+  `README.md` — いずれも存在を確認済み）。
+- `AGENTS.md` の「開発記録の自動記録ルール」（devlog Markdown + devlog.json +
+  CHANGELOG）、「自己評価・品質保証」（本ログ）に従って記録した。
+- `data/devlog.json` への追記後、既存13件との整合（フィールド構成、JSON構文）を
+  `python3 -m json.tool` 相当の読み込みで確認した。
+
+### 発見した問題
+
+1. 依頼文の具体的なディレクトリ構成案（`agents/claude.md` 等）と、`ai-master` が
+   既に持つADR（最小5ファイル構成・製品名非固定）が矛盾していた。
+2. `scripts/sync-site-data.sh` 実行時、`web/competitions/` が `.gitignore` に
+   含まれておらず未追跡ディレクトリとして生成されることに気づいたが、
+   これは既存の（本タスクと無関係な）ギャップであり、本タスクのスコープ外と判断し、
+   コミット対象から除外した（`web/data/` `web/guides-data/` `web/assets/screenshots/`
+   と同様に生成物であり、リポジトリへコミットする対象ではないため）。
+
+### 修正した内容
+
+- 上記1については、`ai-master` への変更を行わず、Projectローカル
+  （`ai-agent`）側でMasterの優先順位ルールに沿った実装に切り替えることで解決した。
+- 上記2については、`git add` 時に `web/competitions/` を対象外とし、
+  意図した差分（ドキュメント・devlog関連ファイルのみ）だけをコミットした。
+
+### 再テスト結果
+
+- `bash scripts/sync-site-data.sh` を実行し、エラーなく完了することを確認した。
+- 追加した内部リンクのリンク先ファイルがすべて存在することを確認した。
+- `data/devlog.json` が有効なJSONとして読み込めることを確認した（Python標準ライブラリで
+  読み込み・追記・書き出しを実施し、既存13件+新規1件=14件になることを確認）。
+
+### 最終自己評価
+
+| 項目 | 評価 | コメント |
+|---|---|---|
+| 仕様適合性 | 95/100 | 依頼された要素（役割分担・MCP分類・Secret・最小権限・引き継ぎ・部分接続耐性・重複防止）はすべて文書化した。ただし `ai-master` 側の直接改修は意図的に見送っており、依頼文の字面どおりの実装ではない（理由は上記参照）。 |
+| 正常動作 | 90/100 | ドキュメント変更のみでビルド・テスト対象コードはない。`sync-site-data.sh` の実行確認、JSON整合性確認は実施済み。 |
+| コード品質 | — | 対象外（コード変更なし）。 |
+| 保守性 | 90/100 | 既存文書との重複を避け、リンクで参照する構成にしたため、将来の更新箇所が単一化されている。 |
+| セキュリティ | 100/100 | 秘密情報・認証情報は一切扱っていない。`ai-master` の秘密情報保護方針（Public Master境界）にも抵触しない。 |
+
+**総合: 93/100**
+
+### 残っている問題・今後の課題
+
+- `ai-master` 側でClaude / Claude Coworkの実接続・実能力を確認できていない
+  （本セッションはClaude Codeのみ）。実際に接続・動作確認ができた時点で、
+  ユーザーまたは該当セッションが `ai-master/CONNECT.md` へ実アクセスの結果を
+  追記する必要がある（本タスクでは未確認のため追記していない）。
+- `web/competitions/` が `.gitignore` に含まれていない件は、本タスクのスコープ外として
+  未修正のまま残した。
+
+### 人間による確認が必要な項目
+
+- `ai-master` 側のADR-002/003/012（最小5ファイル構成、製品名を役割に固定しない方針）を
+  見直したい場合は、その方針転換をユーザーが明示したうえで別途対応する。
+- Pull Request作成済み: https://github.com/oosaka0123-sudo/ai-agent/pull/39
+  （ユーザー承認後にPR作成を依頼され、対応した。追記日: 2026-09-06）

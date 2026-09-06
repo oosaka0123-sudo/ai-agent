@@ -92,6 +92,12 @@
 
 どのAIエージェントで作業する場合も、まず `AGENTS.md` の内容を確認してから作業してください。
 
+同じベンダーのClaude製品（Claude / Claude Cowork / Claude Code）を併用する場合の
+役割分担・MCP分類・Secret管理・Agent間引き継ぎは
+[`docs/CLAUDE_FAMILY_ROLES.md`](docs/CLAUDE_FAMILY_ROLES.md) を参照してください。
+ChatGPT/GPTのGitHub操作については [`docs/GPT_GITHUB_CONTROL.md`](docs/GPT_GITHUB_CONTROL.md)
+を参照してください。
+
 ## サンプルプロジェクト（基盤の動作確認用）
 
 この基盤が実際に機能するかを確認するために、これまで以下の2つのサンプルを

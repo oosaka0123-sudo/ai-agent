@@ -15,3 +15,7 @@ Claude Code 向けの補足ファイルです。共通ルールは [`AGENTS.md`]
   執筆する。他のAI（Gemini・Jules, Codex）が担当するファイルは変更しない
   （詳細は `AGENTS.md` の「複数AI比較ガイド（guides/）のルール」を参照）。
 - リポジトリ固有の開発ルールは [`docs/DEVELOPMENT.md`](docs/DEVELOPMENT.md) を参照する。
+- Claude（chat）・Claude Coworkとの役割分担、MCP分類（Development / Knowledge-Work /
+  Media）は [`docs/CLAUDE_FAMILY_ROLES.md`](docs/CLAUDE_FAMILY_ROLES.md) を参照する。
+  Claude Coworkから実装を委譲された場合、既存のOpen Issue/Branch/PRと重複しないか
+  確認してから着手する。

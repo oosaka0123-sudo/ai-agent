@@ -8,6 +8,11 @@
 
 ### Added
 
+- Claude製品ファミリー（Claude / Claude Cowork / Claude Code）の役割分担、MCPサーバーの
+  3分類（Development / Knowledge-Work / Media）と接続先判断基準、MCPとAPIの使い分け、
+  Agent間引き継ぎテンプレートをまとめた `docs/CLAUDE_FAMILY_ROLES.md` と
+  `docs/HANDOFF_TEMPLATE.md` を追加。`oosaka0123-sudo/ai-master` のCapability-based
+  Routing方針と矛盾しない、Projectローカルの推奨デフォルトとして位置づけた。
 - Steel Cloud Browser Remote HTTP MCP サーバー（`mcp_server.steel_app:app`）を追加。
   全AIクライアント共通のクラウドブラウザ基盤として `create_session` / `navigate` / `extract` /
   `screenshot` / `release_session` の最小5ツールを提供。インバウンド Bearer トークン認証と

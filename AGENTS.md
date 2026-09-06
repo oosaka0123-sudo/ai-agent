@@ -183,6 +183,14 @@ CodexはCodexの成果物を評価・修正する。他AIの担当ファイル�
 （`docs/devlog/YYYY-MM-DD.md` の日々の開発日記とは別に、AIごとの
 品質保証の履歴として時系列で積み上げていくログです。）
 
+## Claude製品ファミリー（Claude / Claude Cowork / Claude Code）の役割分担
+
+Claude Code / Gemini・Jules / Codexという「3AI」の枠組みとは別に、同じベンダーの
+Claude製品（Claude / Claude Cowork / Claude Code）を併用する場合の役割分担・
+MCP分類・Secret管理・Agent間引き継ぎは
+[`docs/CLAUDE_FAMILY_ROLES.md`](docs/CLAUDE_FAMILY_ROLES.md) にまとめている。
+Claude Cowork等でこのリポジトリを開いた場合は、作業前にそちらも確認すること。
+
 ## AIエージェントが作業する際の基本フロー
 
 1. `main` を最新化してから作業ブランチを作成する。

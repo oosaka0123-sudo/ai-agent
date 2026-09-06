@@ -590,5 +590,60 @@
       "セキュリティ",
       "SSRF対策"
     ]
+  },
+  {
+    "id": "2026-09-06-claude-family-roles-mcp-classification",
+    "date": "2026-09-06",
+    "title": "Claude製品ファミリー（Claude / Claude Cowork / Claude Code）の役割分担とMCP分類を整理",
+    "project": "ai-agent",
+    "purpose": "Claude / Claude Cowork / Claude Codeという同じベンダーの3製品を、GitHubを共通記憶とするこのリポジトリの基盤上でどう役割分担させ、MCPサーバーをどう分類・配線するかを明確にする。",
+    "whatMade": "docs/CLAUDE_FAMILY_ROLES.md（役割分担表、MCP3分類、MCPとAPIの使い分け、Secret/最小権限、引き継ぎへのポインタ）と docs/HANDOFF_TEMPLATE.md（ai-masterのContext Handoff Protocolと対になるProjectローカルの引き継ぎ雛形）を追加し、AGENTS.md/CLAUDE.md/README.md/PROJECT_SPEC.mdから参照させた。あわせて oosaka0123-sudo/ai-master を実アクセスで棚卸しし、既存のADR（最小5ファイル構成、Capability-based Routing）と衝突する変更は加えないという判断をした。",
+    "changes": [
+      "docs/CLAUDE_FAMILY_ROLES.md",
+      "docs/HANDOFF_TEMPLATE.md",
+      "AGENTS.md",
+      "CLAUDE.md",
+      "README.md",
+      "PROJECT_SPEC.md",
+      "docs/devlog/2026-09-06.md",
+      "data/devlog.json",
+      "CHANGELOG.md",
+      "docs/devlog/self-eval/claude-code.md"
+    ],
+    "aiUsed": [
+      "Claude Code"
+    ],
+    "services": [
+      "GitHub"
+    ],
+    "tech": [
+      "Markdown",
+      "Model Context Protocol"
+    ],
+    "problems": "依頼文が提案する重量級ディレクトリ構成（agents/, mcp/, docs/architecture/, templates/, security/）を ai-master へそのまま実装すると、ai-masterが既に持つADR-002/003（最小5ファイル構成）・ADR-012（製品名を役割に固定しないCapability-based Routing）と衝突する。",
+    "solutions": "ai-master側は変更を加えず、ai-masterのAGENTS.mdが定める『Projectローカル運用ルールがMasterのDEFAULTをそのProject内だけ上書きできる』という優先順位に従い、役割分担・MCP分類の実質的な内容はすべてai-agent（Projectローカル）側にDEFAULTの推奨パターンとして実装した。",
+    "learnings": "複数リポジトリにまたがるAI運用基盤の設計依頼では、提示された具体的なディレクトリ構成をそのまま実装する前に、対象リポジトリが既に持つ設計判断（ADR等）を確認し、根幹方針の変更が必要な場合はリポジトリ側のガバナンスルールに従うべきである。",
+    "images": [],
+    "githubCommits": [
+      {
+        "label": "docs: Claude製品ファミリー(Claude/Cowork/Code)の役割分担とMCP分類を整理",
+        "url": "https://github.com/oosaka0123-sudo/ai-agent/commit/b9f5648978437b50e2567a7198891ce7ade36512"
+      }
+    ],
+    "pullRequests": [
+      {
+        "label": "docs: Claude製品ファミリー(Claude/Cowork/Code)の役割分担とMCP分類を整理",
+        "url": "https://github.com/oosaka0123-sudo/ai-agent/pull/39"
+      }
+    ],
+    "relatedUrls": [],
+    "nextSteps": "Claude Cowork・Claude（chat）からの実際の接続・実行が確認できたら ai-master/CONNECT.md へ実アクセスの結果を追記する。ユーザーがai-master側の構造変更を明示的に望む場合は別途方針を確認する。",
+    "tags": [
+      "AIエージェント",
+      "MCP",
+      "Claude Cowork",
+      "Claude Code",
+      "ガバナンス"
+    ]
   }
 ]
