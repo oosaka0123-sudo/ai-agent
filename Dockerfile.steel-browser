@@ -1,0 +1,48 @@
+# Steel Cloud Browser Remote HTTP MCP Server — exposes Steel Cloud Browser
+# (create_session / navigate / extract / screenshot / release_session) as
+# MCP tools to AI clients. Built for Google Cloud Run.
+#
+# Build:  docker build -f Dockerfile.steel-browser -t steel-browser-mcp .
+# Run:    docker run -p 8080:8080 --env-file .env steel-browser-mcp
+#
+# This is a separate image from the root `Dockerfile` (which serves the
+# unrelated Google Media MCP server, `mcp_server.app:app`). Both entrypoints
+# live in the same `mcp_server/` package (see `mcp_server/steel_app.py`),
+# so `gcloud run deploy --source=.` alone cannot pick one over the other —
+# it always finds the root `Dockerfile` first. Deploying Steel Browser MCP
+# must pin the build to this file explicitly. `cloudbuild.steel-browser.yaml`
+# (repo root) does exactly that:
+#   gcloud builds submit --config=cloudbuild.steel-browser.yaml \
+#     --substitutions=_IMAGE=<region>-docker.pkg.dev/<project>/<repo>/steel-browser-mcp:latest .
+#   gcloud run deploy steel-browser-mcp --image=<that image> ...
+# Full walkthrough (Cloud Shell, no local PC/Docker needed):
+# docs/STEEL_BROWSER_MCP.md → "Human Gate Instructions".
+#
+# No Steel API key is baked into this image. Cloud Run resolves
+# `STEEL_API_KEY` / `STEEL_BROWSER_MCP_TOKEN` from Secret Manager or Cloud
+# Run environment variables — see docs/STEEL_BROWSER_MCP.md.
+
+FROM python:3.12-slim AS base
+
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+COPY requirements.txt ./
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Only mcp_server/ (this entrypoint's package). Steel Browser MCP does not
+# import src/media_gen or projects/registry.json.
+COPY mcp_server/ ./mcp_server/
+
+RUN useradd --create-home --uid 10001 appuser
+USER appuser
+
+# Cloud Run injects PORT and expects the container to listen on it; shell
+# form (not exec form) so ${PORT} actually expands, matching the root
+# Dockerfile's mcp_server/__main__.py behavior for the other service.
+ENV PYTHONUNBUFFERED=1
+EXPOSE 8080
+CMD uvicorn mcp_server.steel_app:app --host 0.0.0.0 --port ${PORT:-8080}

@@ -8,6 +8,14 @@
 
 ### Added
 
+- Steel Browser MCP専用の `Dockerfile.steel-browser` / `cloudbuild.steel-browser.yaml` を追加。
+  既存の `gcloud run deploy --source=.` がリポジトリ直下の `Dockerfile`（無関係のGoogle Media
+  MCP用）を拾ってしまい、Steel Browser MCPを正しくデプロイできなかったコード側の問題を修正した。
+  `docs/STEEL_BROWSER_MCP.md` のデプロイ手順を、PC不要のGoogle Cloud Shell経由に書き直した。
+- GitHub Actions `workflow_dispatch` で実行できるMCP到達性確認ワークフロー
+  （`.github/workflows/mcp-connectivity-check.yml`）を追加。Claude Code cloud実行環境の
+  ネットワーク制約に依存せず、Google Media MCP / Steel Browser MCPの`/healthz`・`/readyz`を
+  確認できる。
 - Mobile First / Cloud First 方針（`oosaka0123-sudo/ai-master` ADR-015）に基づき、
   このリポジトリでのローカル依存箇所の棚卸し表（機能 / 現在 / スマホ完結 / 問題 /
   推奨構成 / 次の作業）を `docs/MOBILE_CLOUD_FIRST.md` として追加。あわせて
