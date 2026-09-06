@@ -844,5 +844,45 @@
       "Cloud Run",
       "Mobile First"
     ]
+  },
+  {
+    "id": "2026-09-06-google-media-mcp-cloudrun-confirmed-healthy",
+    "date": "2026-09-06",
+    "title": "GitHub Actions経由でGoogle Media MCPのCloud Run正常稼働を確認",
+    "project": "ai-agent",
+    "purpose": "PR #41マージ後、mcp-connectivity-check.ymlを実際に実行し、Claude Code実行環境からは判定できなかったGoogle Media MCPのCloud Run正常性・MCP endpoint正常性・IAM・API有効化を確認する。",
+    "whatMade": "workflow_dispatchで2回実行し、/readyzが2回とも200 {\"ready\":true}(アプリ自身の実レスポンス)を返すことを確認し、Cloud Runサービスの正常稼働とfail-closed設定検証の成功を実証した。一方/healthzは2回とも404(Googleの汎用エラーページ)で、原因不明の現象としてHYPOTHESIS記録した。docs/MOBILE_CLOUD_FIRST.mdを確定結果で更新した。",
+    "changes": [
+      "docs/MOBILE_CLOUD_FIRST.md",
+      "docs/devlog/2026-09-06.md",
+      "data/devlog.json",
+      "(マージのみ) oosaka0123-sudo/ai-agent PR #41"
+    ],
+    "aiUsed": [
+      "Claude Code"
+    ],
+    "services": [
+      "GitHub Actions",
+      "Google Cloud Run"
+    ],
+    "tech": [
+      "GitHub Actions",
+      "curl"
+    ],
+    "problems": "/healthzが404、/readyzが200という一見矛盾する結果が出て、Cloud Runサービス自体の健全性判断が一時的に曖昧になった。",
+    "solutions": "同一ホスト・同一アプリで応答が分かれている以上サービス不在ではないと判断し、/readyzの成功を主たる健全性の証拠として採用した。/healthzの404は原因不明のHYPOTHESISとして明記し、過度な断定を避けた。",
+    "learnings": "ヘルスチェック用の複数エンドポイントが同一アプリ内にあっても、Cloud Run手前のインフラ層によってパスごとに異なる挙動を示すことがある。1つのエンドポイントの失敗だけでサービス全体が死んでいると即断せず、複数エンドポイントを確認することが重要。",
+    "images": [],
+    "githubCommits": [],
+    "pullRequests": [],
+    "relatedUrls": [],
+    "nextSteps": "人間がClaude Code実行環境のnetwork policy・GOOGLE_MEDIA_MCP_TOKENを設定する。/healthzが404を返す原因をGCPコンソールから調査する(任意)。Steel Browser MCPのCloud Runデプロイ。",
+    "tags": [
+      "AIエージェント",
+      "Google Media MCP",
+      "Cloud Run",
+      "GitHub Actions",
+      "Mobile First"
+    ]
   }
 ]
