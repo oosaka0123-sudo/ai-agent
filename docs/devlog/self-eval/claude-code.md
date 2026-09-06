@@ -930,3 +930,94 @@ Master Repositoryは `oosaka0123-sudo/ai-master`」という依頼を受けた�
   `GOOGLE_MEDIA_MCP_TOKEN`を設定する。
 - `docs/STEEL_BROWSER_MCP.md`「Human Gate Instructions」に従い、Google Cloud ShellからSteel
   Browser MCPをデプロイする。
+
+---
+
+## 2026-09-06 — Google Media MCP: X-Forwarded-Protoコード側バグの発見・修正
+
+### 対象
+
+- `mcp_server/__main__.py`, `tests/mcp_server/test_main.py`,
+  `docs/GOOGLE_MEDIA_MCP.md`
+
+### 初回実装内容
+
+- ユーザーが新しいenvironment「MCP-Cloud」を作成し、指示のチェックリスト
+  （環境ID確認 → 到達確認 → network policy確認 → トークン確認 → MCP接続確認 →
+  tool一覧 → 実呼び出しテスト）に沿って実接続で切り分けた。
+- 直接`curl`でCloud Runホストへの到達を確認し（`401`応答、agent proxyでの
+  拒否なし）、`network policy denied`（403/407）が新environmentでは解消済みと
+  確認した。`GOOGLE_MEDIA_MCP_TOKEN`も設定済みと確認した（値は非表示）。
+- それでも`.mcp.json`経由のMCP接続自体は`405`で失敗し続けたため、`curl`で
+  サーバーの生応答を直接確認したところ、`POST /mcp`への`307`リダイレクトの
+  `Location`が`https://`ではなく`http://`になっていることを発見した。
+- 原因を`uvicorn.run()`のデフォルト`forwarded_allow_ips="127.0.0.1"`が
+  Cloud Runの内部転送元アドレスを信頼しないため`X-Forwarded-Proto`を無視する
+  ことと特定し、ローカルのuvicornサーバーで意図的に信頼リスト外のIPを設定して
+  同じ症状を再現、`forwarded_allow_ips="*"`で解消することを実機で確認した。
+- `mcp_server/__main__.py`を修正し、回帰防止テスト
+  `tests/mcp_server/test_main.py`を追加、`docs/GOOGLE_MEDIA_MCP.md`の
+  Troubleshootingに追記した。
+
+### 自己評価結果（PROJECT_SPEC.md照合・自己レビュー）
+
+- チェックリストの手順を1〜4まで順に実施し、途中の切り分け結果（network policy
+  解消・トークン設定済み）を確認できた → 満たしている。
+- 「まだ接続できない」で終わらせず、実際のHTTPレスポンス（307のLocation
+  ヘッダー）を確認してコード側の根本原因まで特定した → 表面的な原因（環境要因と
+  誤認しがちな状況）で止まらず、実機再現による検証まで行えた。
+- セキュリティ（秘密情報を出力・ログに含めない）の観点で、診断中に
+  `curl -v`でBearerトークン実値を1回露出させてしまった → **重大な問題**として
+  下記に記録し、ユーザーへ即座に報告・ローテーションを推奨した。
+
+### 発見した問題
+
+1. `mcp_server/__main__.py`: Cloud Run配下で`/mcp`への末尾スラッシュ自動
+   リダイレクトが`http://`の絶対URLになり、HTTPS限定のクライアントが
+   接続できないコード側のバグ。
+2. **診断作業のミス**: `curl -v`で実際の`GOOGLE_MEDIA_MCP_TOKEN`を含む
+   リクエストを送信し、詳細出力にトークンの生値がそのまま表示され、
+   本セッションの記録に残ってしまった。
+
+### 修正した内容
+
+- 上記1: `uvicorn.run(...)`に`proxy_headers=True, forwarded_allow_ips="*"`を
+  追加して修正し、単体テスト・ドキュメントを追加した。
+- 上記2: コードやコミット・PRには一切含めていないが、値そのものは本セッションの
+  ログに残ってしまったため修正不能（事後対応として、ユーザーへ速やかな
+  ローテーションを推奨する報告を行った）。以降の診断では`-v`と実トークンを
+  併用しないよう手順を改めた。
+
+### 再テスト結果
+
+- `tests/mcp_server/`（50件）・リポジトリ全体の`pytest`（120件）がすべて
+  成功することを確認した。
+- 修正前後のuvicornサーバーをローカルで実際に起動し、`forwarded_allow_ips`が
+  信頼リストに含まれない場合は`http://`、`"*"`にすると`https://`への
+  リダイレクトになることを`curl`で再現・確認した。
+
+### 最終自己評価
+
+| 項目 | 評価 | コメント |
+|---|---|---|
+| 仕様適合性 | 80/100 | チェックリストの1〜4は完了し根本原因も特定・修正したが、5〜7（MCP接続・tool一覧・実呼び出し）と後続の画像/動画生成タスクは未達成（正当な外部要因により停止）。 |
+| 正常動作 | 95/100 | 修正はローカル実機再現で確定的に検証済み。ただし本番Cloud Runへの再デプロイは未実施のため、本番での最終確認はできていない。 |
+| コード品質 | 90/100 | 変更は最小限（1関数への2キーワード引数追加）で、Cloud Run+uvicornの標準的な推奨設定に沿っている。 |
+| 保守性 | 90/100 | 原因をコード内コメントとdocsのTroubleshooting両方に記録し、同種の再発時に迅速に診断できるようにした。 |
+| セキュリティ | 40/100 | 診断中にBearerトークンの実値を`-v`出力で露出させてしまった。実害（外部漏洩）は確認されていないが、即座に報告しローテーションを推奨する以外の完全な原状回復はできない重大な運用ミスである。 |
+
+**総合: 79/100**（セキュリティ項目の減点を反映）
+
+### 残っている問題・今後の課題
+
+- `GOOGLE_MEDIA_MCP_TOKEN`のローテーションが完了するまで、露出した値は
+  有効なままである。
+- 修正済みコードのCloud Runへの再デプロイ、および
+  `GOOGLE_MEDIA_MCP_ALLOWED_HOSTS`の設定確認が完了するまで、実際のMCP接続・
+  画像/動画生成タスクには着手できない。
+
+### 人間による確認が必要な項目
+
+- `GOOGLE_MEDIA_MCP_TOKEN`を速やかにローテーションする（最優先）。
+- `google-media-mcp` Cloud Runサービスを本修正を含む最新コードで再デプロイする。
+- `GOOGLE_MEDIA_MCP_ALLOWED_HOSTS`が実際のホスト名を含んでいるか確認・設定する。
