@@ -1,0 +1,27 @@
+# Cloud Build config for Steel Browser MCP only.
+#
+# `gcloud run deploy --source=.` on its own always picks up the *root*
+# `Dockerfile` (the unrelated Google Media MCP server) because both
+# entrypoints live under the same `mcp_server/` package. This config pins
+# the build to `Dockerfile.steel-browser` explicitly so Steel Browser MCP
+# gets built and deployed instead.
+#
+# Usage (from repo root, e.g. in Google Cloud Shell — no local Docker or
+# gcloud install needed):
+#   gcloud builds submit --config=cloudbuild.steel-browser.yaml \
+#     --substitutions=_IMAGE=us-central1-docker.pkg.dev/<PROJECT>/<REPO>/steel-browser-mcp:latest \
+#     .
+# See docs/STEEL_BROWSER_MCP.md for the full deploy walkthrough.
+
+steps:
+  - name: "gcr.io/cloud-builders/docker"
+    args: ["build", "-f", "Dockerfile.steel-browser", "-t", "${_IMAGE}", "."]
+
+images:
+  - "${_IMAGE}"
+
+substitutions:
+  _IMAGE: "steel-browser-mcp:latest"
+
+options:
+  logging: CLOUD_LOGGING_ONLY

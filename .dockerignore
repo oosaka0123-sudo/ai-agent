@@ -1,7 +1,8 @@
 # Only mcp_server/, src/media_gen/, requirements.txt, and
-# projects/registry.json are ever copied into the image (see Dockerfile) —
-# this list is a second, explicit line of defense so a secret or an
-# unrelated large directory can never end up in a build context accident.
+# projects/registry.json are ever copied into an image (see Dockerfile and
+# Dockerfile.steel-browser, which copies a subset of this) — this list is a
+# second, explicit line of defense so a secret or an unrelated large
+# directory can never end up in a build context accident.
 .git
 .venv
 .venv-clean

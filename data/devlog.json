@@ -759,5 +759,90 @@
       "MCP",
       "トラブルシューティング"
     ]
+  },
+  {
+    "id": "2026-09-06-mcp-connectivity-check-workflow",
+    "date": "2026-09-06",
+    "title": "Google Media MCP接続テストの切り分けを継続、GitHub Actions経由の到達性確認手段を追加",
+    "project": "ai-agent",
+    "purpose": "Google Media MCPの接続状況をチェックリストに沿って実接続テストで切り分ける。Claude Code cloud実行環境から到達できない項目(Cloud Run正常性・IAM・API有効化)を、GitHub Actionsという別のクラウド実行基盤経由で確認できるようにする。",
+    "whatMade": "curl/環境変数確認で403拒否とトークン未設定を再確認。比較のためstorage.googleapis.com等への到達を試し、既知のGoogle Cloud APIドメインは許可され、Cloud Runのrun.appのような任意ドメインは許可されないというドメイン単位の許可リスト方式であると判明した。GitHub Actionsのworkflow_dispatchで/healthzと/readyzを叩く.github/workflows/mcp-connectivity-check.ymlを新設した。",
+    "changes": [
+      ".github/workflows/mcp-connectivity-check.yml",
+      "docs/devlog/2026-09-06.md",
+      "data/devlog.json"
+    ],
+    "aiUsed": [
+      "Claude Code"
+    ],
+    "services": [
+      "GitHub Actions",
+      "Google Cloud Run"
+    ],
+    "tech": [
+      "GitHub Actions",
+      "Bash",
+      "curl"
+    ],
+    "problems": "Claude Code cloud実行環境からはCloud Runへ到達できないため、Cloud Run自体が正常かどうか、Google Cloud側のIAM/API有効化が原因かどうかを、この環境だけでは判定できなかった。",
+    "solutions": "無制限のネットワークアクセスを持つGitHub Actionsランナーを使い、認証不要な/healthz・/readyzのみを叩くread-onlyなworkflow_dispatchワークフローを追加することで、Claude Code側のネットワーク制約を経由しない独立した診断手段を用意した。",
+    "learnings": "このセッションのegress許可リストは、googleapis.comのような既知のGoogle Cloud APIドメインは許可しつつ、Cloud Runのrun.appのような任意のカスタムドメインは許可しない、ドメイン単位の許可方式である可能性が高い。ネットワーク到達性の限界に突き当たった場合、GitHub Actions等の別のクラウド実行基盤を経由すれば同じ診断を代替できる場合がある。",
+    "images": [],
+    "githubCommits": [],
+    "pullRequests": [],
+    "relatedUrls": [],
+    "nextSteps": "mcp-connectivity-check.ymlをマージ後、実際にworkflow_dispatchで実行し、Cloud Run自体の生死を確認する。結果に応じてIAM/API有効化の確認、またはenvironmentのnetwork policy変更の必要性を判断する。",
+    "tags": [
+      "AIエージェント",
+      "MCP",
+      "GitHub Actions",
+      "トラブルシューティング"
+    ]
+  },
+  {
+    "id": "2026-09-06-steel-browser-dockerfile-fix",
+    "date": "2026-09-06",
+    "title": "Steel Browser MCPのCloud Runデプロイを阻害するコード側の問題を発見・修正",
+    "project": "ai-agent",
+    "purpose": "Steel Browser MCPのクラウドデプロイをローカルPC不要で完結できるようにする。まずデプロイ手順自体にコード側の問題がないか検証する。",
+    "whatMade": "既存のデプロイ手順(gcloud run deploy --source=.)が、mcp_server/パッケージ内に同居する2つのエントリーポイント(Google Media MCPとSteel Browser MCP)のうち、常にリポジトリ直下のDockerfile(Google Media MCP用)を拾ってしまうバグを発見した。専用のDockerfile.steel-browserとcloudbuild.steel-browser.yamlを新規作成し、venv上でrequirements.txtインストール→uvicorn起動→/healthz・/readyzが200を返すことを確認して構成を検証した。docs/STEEL_BROWSER_MCP.mdのHuman Gate InstructionsをGoogle Cloud Shell経由の10ステップ手順として書き直した。",
+    "changes": [
+      "Dockerfile.steel-browser",
+      "cloudbuild.steel-browser.yaml",
+      "docs/STEEL_BROWSER_MCP.md",
+      ".dockerignore",
+      "docs/MOBILE_CLOUD_FIRST.md",
+      "docs/devlog/2026-09-06.md",
+      "data/devlog.json"
+    ],
+    "aiUsed": [
+      "Claude Code"
+    ],
+    "services": [
+      "Google Cloud Run",
+      "Google Cloud Build",
+      "Steel Cloud Browser"
+    ],
+    "tech": [
+      "Docker",
+      "Google Cloud Build",
+      "Python",
+      "Bash"
+    ],
+    "problems": "既存のSteel Browser MCPデプロイ手順が、実際には無関係なGoogle Media MCPのコードをビルド・デプロイしてしまうコード側のバグがあった。またこのサンドボックスにDockerデーモンもgcloud認証情報も存在せず、実際のビルド・デプロイを直接検証できなかった。",
+    "solutions": "専用のDockerfile.steel-browserとそれを明示的に指定するcloudbuild.steel-browser.yamlを追加してバグを修正した。Dockerビルドの代わりに、Dockerfileが内部で行う手順(依存インストール→アプリ起動→ヘルスチェック)をvenvで直接再現し、構成の正しさを検証した。実デプロイはGoogle Cloud Shell(ブラウザだけで動くターミナル、PC不要)から実行する手順として人間向けにドキュメント化した。",
+    "learnings": "同じPythonパッケージ内に複数のCloud Runサービス用エントリーポイントを同居させる構成では、gcloud run deploy --source=.がリポジトリ直下のDockerfileを無条件で拾うというデフォルト挙動が罠になりやすい。実行環境にDockerデーモンがなくても、Dockerfileの手順をvenv等で直接再現すれば構成の正しさをかなりの精度で検証できる。",
+    "images": [],
+    "githubCommits": [],
+    "pullRequests": [],
+    "relatedUrls": [],
+    "nextSteps": "人間がdocs/STEEL_BROWSER_MCP.mdの手順に従い、Google Cloud ShellからSteel Browser MCPを実際にデプロイする。デプロイ後、mcp-connectivity-check.ymlのsteel_browser_mcp_url入力から到達性を確認する。",
+    "tags": [
+      "AIエージェント",
+      "Steel Browser MCP",
+      "Docker",
+      "Cloud Run",
+      "Mobile First"
+    ]
   }
 ]

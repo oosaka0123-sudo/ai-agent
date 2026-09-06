@@ -28,7 +28,7 @@ Projectローカルの実装ドキュメント。Masterへは進捗をコピー�
 | Claude Cowork | 本セッション（Claude Code）からは実接続・実能力を確認できていない（UNKNOWN） | 未確認（製品としてはクラウドサービス想定のため理論上は可能） | このセッションにCoworkへの実アクセス手段がなく、live evidenceがない | Coworkをクラウドオーケストレーターとして使う（ADR-015 item4） | Claude Coworkの実セッションで接続を確認し、`ai-master/CONNECT.md` へ実アクセスの結果を追記する（本タスクの範囲外） |
 | GitHub操作（Repository / PR / Actions） | GitHub MCP経由でClaude Codeから実行可能。GitHub公式モバイルアプリからもPRレビュー・承認・マージ可能 | ✅ 完結（本タスクで実際にPR作成・レビュー対応・マージ可能状態までクラウドのみで完了した） | 特になし | 現状維持 | なし |
 | Google Media MCP（画像・動画生成） | Cloud Run（`rss7-ai-media`）にデプロイ済み、Remote HTTP MCPとして公開URLあり。**切り分け済み（コード側の問題ではない）**: このClaude Code cloud実行環境（environment `Default` / `env_01CYPndo4QJ8xTExPzhz5asg`、「trusted network access」）からのCONNECTがagent proxyでHTTP 403（policy denial）として拒否されることを本日2回再現し、`GOOGLE_MEDIA_MCP_TOKEN` が同環境に未設定であることも確認した（下記「切り分け結果」参照） | ❌ 現状未完結（Cloud Run自体はクラウド完結設計だが、この実行環境からの経路がブロックされている） | (1) この実行環境のegress policyがCloud Runホストを許可していない（環境設定の問題。コード側では解決不可） (2) `GOOGLE_MEDIA_MCP_TOKEN` が本実行環境に未設定（環境変数の問題。コード側では解決不可） | Remote HTTP MCP構成自体は維持する（ADR-015と整合）。(1)(2)とも環境設定側の変更で解消する、コード修正は不要 | 今回 `.mcp.json` をこのリポジトリ直下へ追加した（`google-media` エントリ、トークンは環境変数参照のみで実値は含まない）。(1)(2)の具体的な設定手順は下記「切り分け結果」参照 |
-| Steel Browser MCP（クラウドブラウザ） | 実装済みだがCloud Runへの実デプロイは未実施（Human Gate: gcloud操作・課金が発生するため人間承認が必要）。現状ローカル起動でのみ動作確認可能 | ❌ 未完結（稼働中のエンドポイントが存在しない） | デプロイ未実施 | デプロイ自体はADR-015に沿ってCloud Run（Remote HTTP MCP）で行う。デプロイ操作は課金を伴うため引き続き人間承認が必要（`AGENTS.md` 自律実行ルールの例外） | 人間が `docs/STEEL_BROWSER_MCP.md` の手順でデプロイし、`STEEL_API_KEY` 等をCloud Run Secretへ登録する。デプロイ後、公開URLを `.mcp.json` へ追記する |
+| Steel Browser MCP（クラウドブラウザ） | 実装済みだがCloud Runへの実デプロイは未実施。**コード側のブロッカーを発見・修正した**: `gcloud run deploy --source=.` は常にリポジトリ直下の `Dockerfile`（無関係のGoogle Media MCP用）を拾ってしまい、Steel Browser MCPを正しくデプロイできない構成になっていた。専用の `Dockerfile.steel-browser` と `cloudbuild.steel-browser.yaml` を追加し、ローカルで依存関係インストール→起動→`/healthz`・`/readyz`が200を返すことまで確認した（実際のデプロイはCloud Run/gcloud認証情報がこの環境にないため未実施） | ❌ 未完結（稼働中のエンドポイントが存在しない。コード側の準備は完了） | 実デプロイには人間の操作が必要（Human Gate: gcloud認証・課金確認） | デプロイ自体はADR-015に沿ってCloud Run（Remote HTTP MCP）で行う。PCを使わず**Google Cloud Shell**（ブラウザだけで動くターミナル、スマホ対応）から実行できる手順を用意した | `docs/STEEL_BROWSER_MCP.md`「Human Gate Instructions」の手順（APIの有効化 → Steel API Key取得 → Cloud Shellでclone → Secret登録 → `cloudbuild.steel-browser.yaml`でビルド・デプロイ → 許可ホスト設定 → 到達性確認 → AIクライアント登録）を人間が実施する |
 | メディア生成CLI（`scripts/generate_media.py`） | Claude Codeのクラウド実行環境内でPythonスクリプトとして実行可能（ローカルPC不要）。ただしGoogle Cloud認証（ADC）の初回セットアップが必要 | △ 部分的（クラウド実行環境内では動くが、初回のgcloud認証セットアップに手間がかかる） | Google Media MCPが使えない間は、このCLIが唯一の生成手段になり認証セットアップの手間が残る | 通常利用はGoogle Media MCP経由に一本化し、CLIは開発者向けデバッグ手段として位置づける（既に `docs/GOOGLE_MEDIA_MCP.md` に同種の位置づけあり） | なし（Google Media MCP接続が復旧すればこの経路への依存は自然に下がる） |
 | テスト・CI（pytest / gitleaks） | `.github/workflows/ci.yml` でPRごとに自動実行、GitHub Actions（クラウド）で完結 | ✅ 完結（本PRで実際にCI緑を確認済み） | 特になし | 現状維持 | なし |
 | サイトデプロイ（GitHub Pages） | `main` へのpushで `.github/workflows/pages.yml` が自動デプロイ | ✅ 完結 | 特になし | 現状維持 | なし |
@@ -126,8 +126,12 @@ Claude Code on the webの環境設定（<https://code.claude.com/docs/en/claude-
 1. **Claude Code cloud実行環境（`Default` / `env_01CYPndo4QJ8xTExPzhz5asg`）のnetwork policy変更**
    — 上記「切り分け結果」参照。コード側では解決できない。
 2. **`GOOGLE_MEDIA_MCP_TOKEN` の当該環境への設定** — 上記「切り分け結果」参照。
-3. **Steel Browser MCPのCloud Runデプロイ** — 課金を伴う人間承認が必要な操作（`AGENTS.md`
-   自律実行ルールの例外条件に該当）。`docs/STEEL_BROWSER_MCP.md` の手順に従って人間が実施する。
+3. **Steel Browser MCPのCloud Runデプロイ** — この実行環境にはgcloud CLI自体が存在せず、
+   Google Cloudの認証情報も一切ない（`which gcloud`で確認済み）ため、コード側では
+   実行不可能。加えて課金を伴う人間承認が必要な操作（`AGENTS.md` 自律実行ルールの例外条件に
+   該当）。コード側の準備（`Dockerfile.steel-browser`, `cloudbuild.steel-browser.yaml`,
+   ローカルでの起動確認）は完了しており、`docs/STEEL_BROWSER_MCP.md` の手順（Google Cloud
+   Shellから実行可能、PC不要）に従って人間が実施する。
 
 これらは `AGENTS.md` の「未接続でも全体を停止しない」方針に従い、GitHub Issueまたは
 今後のdevlog/引き継ぎで追跡し、全体の作業は停止しない。
