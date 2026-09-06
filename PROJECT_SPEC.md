@@ -207,6 +207,13 @@ AIエージェントは、作業完了前の自己レビュー（[`AGENTS.md`](A
 - **ブランチ・PRルール**: `main` へ直接pushせず作業ブランチ + PRで進める。
   秘密情報は `.env`（gitignore済み）にのみ記載する（[`AGENTS.md`](AGENTS.md)、
   [`docs/DEVELOPMENT.md`](docs/DEVELOPMENT.md) 参照）。
+- **Claude製品ファミリーの役割分担とMCP分類**: Claude（設計・レビュー）/
+  Claude Cowork（オーケストレーション・横断作業）/ Claude Code（実装・Repository操作）の
+  役割分担、MCPサーバーの3分類（Development / Knowledge-Work / Media）と接続先の判断基準、
+  MCPとAPIの使い分け、Agent間引き継ぎテンプレートを
+  [`docs/CLAUDE_FAMILY_ROLES.md`](docs/CLAUDE_FAMILY_ROLES.md) にまとめている
+  （`oosaka0123-sudo/ai-master` のCapability-based Routing方針と矛盾しない、
+  Projectローカルの推奨デフォルトとして位置づける）。
 
 ## 7. サンプルプロジェクト: 3AI競争テスト（competitions/）
 
