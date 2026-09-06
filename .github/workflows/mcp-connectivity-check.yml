@@ -5,8 +5,8 @@ on:
     inputs:
       steel_browser_mcp_url:
         description: >-
-          Steel Browser MCPのデプロイ済みCloud Run URL（未デプロイなら空欄のままでよい。
-          空欄の場合はこのチェックをスキップする）
+          Steel Browser MCPのデプロイ済みURL（`/mcp`付き・末尾スラッシュ付きでも自動で正規化する。
+          未デプロイなら空欄のままでよい。空欄の場合はこのチェックをスキップする）
         required: false
         default: ""
 
@@ -25,20 +25,25 @@ jobs:
         id: url
         run: |
           url=$(python3 -c "import json; print(json.load(open('projects/registry.json'))['onboarding']['google_media_mcp_url'])")
-          base="${url%/mcp}"
+          base="${url%/}"
+          base="${base%/mcp}"
           echo "base=$base" >> "$GITHUB_OUTPUT"
 
       - name: /healthz を確認（認証不要エンドポイント）
         run: |
           set -x
-          curl -sS -o /tmp/healthz.txt -w "\nHTTP_STATUS:%{http_code}\n" "${{ steps.url.outputs.base }}/healthz" || true
+          curl -sS --connect-timeout 10 --max-time 20 \
+            -o /tmp/healthz.txt -w "\nHTTP_STATUS:%{http_code}\n" \
+            "${{ steps.url.outputs.base }}/healthz" || true
           echo "--- body ---"
           cat /tmp/healthz.txt || true
 
       - name: /readyz を確認（認証不要エンドポイント、Secret設定状況を反映）
         run: |
           set -x
-          curl -sS -o /tmp/readyz.txt -w "\nHTTP_STATUS:%{http_code}\n" "${{ steps.url.outputs.base }}/readyz" || true
+          curl -sS --connect-timeout 10 --max-time 20 \
+            -o /tmp/readyz.txt -w "\nHTTP_STATUS:%{http_code}\n" \
+            "${{ steps.url.outputs.base }}/readyz" || true
           echo "--- body ---"
           cat /tmp/readyz.txt || true
 
@@ -47,16 +52,28 @@ jobs:
     runs-on: ubuntu-latest
     if: ${{ github.event.inputs.steel_browser_mcp_url != '' }}
     steps:
+      - name: 入力URLを正規化（末尾スラッシュ・/mcpサフィックスを除去）
+        id: url
+        run: |
+          base="${{ github.event.inputs.steel_browser_mcp_url }}"
+          base="${base%/}"
+          base="${base%/mcp}"
+          echo "base=$base" >> "$GITHUB_OUTPUT"
+
       - name: /healthz を確認（認証不要エンドポイント）
         run: |
           set -x
-          curl -sS -o /tmp/healthz.txt -w "\nHTTP_STATUS:%{http_code}\n" "${{ github.event.inputs.steel_browser_mcp_url }}/healthz" || true
+          curl -sS --connect-timeout 10 --max-time 20 \
+            -o /tmp/healthz.txt -w "\nHTTP_STATUS:%{http_code}\n" \
+            "${{ steps.url.outputs.base }}/healthz" || true
           echo "--- body ---"
           cat /tmp/healthz.txt || true
 
       - name: /readyz を確認（認証不要エンドポイント）
         run: |
           set -x
-          curl -sS -o /tmp/readyz.txt -w "\nHTTP_STATUS:%{http_code}\n" "${{ github.event.inputs.steel_browser_mcp_url }}/readyz" || true
+          curl -sS --connect-timeout 10 --max-time 20 \
+            -o /tmp/readyz.txt -w "\nHTTP_STATUS:%{http_code}\n" \
+            "${{ steps.url.outputs.base }}/readyz" || true
           echo "--- body ---"
           cat /tmp/readyz.txt || true
