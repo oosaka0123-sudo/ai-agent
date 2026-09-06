@@ -6,6 +6,13 @@
 
 ## [Unreleased]
 
+### Fixed
+
+- Google Media MCP（`mcp_server/`）: Cloud Run配下で`POST /mcp`（末尾スラッシュなし）が
+  `http://`（`https://`ではなく）への`307`リダイレクトを返し、HTTPS限定のクライアントが
+  接続できなくなっていたコード側のバグを修正（`uvicorn.run`に
+  `proxy_headers=True, forwarded_allow_ips="*"`を追加）。要再デプロイ。
+
 ### Added
 
 - Steel Browser MCP専用の `Dockerfile.steel-browser` / `cloudbuild.steel-browser.yaml` を追加。

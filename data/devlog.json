@@ -884,5 +884,52 @@
       "GitHub Actions",
       "Mobile First"
     ]
+  },
+  {
+    "id": "2026-09-06-google-media-mcp-forwarded-proto-fix",
+    "date": "2026-09-06",
+    "title": "新環境でnetwork policy解消を確認、Google Media MCPのX-Forwarded-Protoコード側バグを発見・修正",
+    "project": "ai-agent",
+    "purpose": "新しいClaude Code Remote environment「MCP-Cloud」でGoogle Media MCPへの接続チェックリストを検証し、実際に画像・動画生成をGitHub実装まで進める。",
+    "whatMade": "mcp_server/__main__.pyのuvicorn.run()にproxy_headers=True, forwarded_allow_ips=\"*\"を追加し、Cloud Run配下でPOST /mcpの末尾スラッシュ自動リダイレクトがhttp://（https://ではなく）になっていたコード側バグを修正。回帰防止テストtests/mcp_server/test_main.pyとdocs/GOOGLE_MEDIA_MCP.mdのTroubleshooting追記も行った。",
+    "changes": [
+      "mcp_server/__main__.py",
+      "tests/mcp_server/test_main.py",
+      "docs/GOOGLE_MEDIA_MCP.md",
+      "docs/devlog/2026-09-06.md",
+      "data/devlog.json",
+      "CHANGELOG.md",
+      "docs/devlog/self-eval/claude-code.md"
+    ],
+    "aiUsed": [
+      "Claude Code"
+    ],
+    "services": [
+      "Google Cloud Run",
+      "Claude Code Remote"
+    ],
+    "tech": [
+      "Python",
+      "uvicorn",
+      "Starlette",
+      "pytest",
+      "curl"
+    ],
+    "problems": "新environmentではnetwork policy拒否(403/407)とトークン未設定の2点は解消済みだったが、依然としてMCP接続は405で失敗しており、原因の切り分けが必要だった。診断中にcurl -vでBearerトークンの実値をログへ露出させてしまった。",
+    "solutions": "curlで直接307リダイレクトのLocationヘッダーを確認し、http://への誤ったスキームが原因と特定。uvicornのforwarded_allow_ipsデフォルト(127.0.0.1)がCloud Runの内部転送元アドレスを信頼しないことが根本原因と分かり、forwarded_allow_ips=\"*\"で修正・ローカル実機再現で検証した。トークン露出は直ちにユーザーへ報告しローテーションを推奨した。",
+    "learnings": "プロキシ越しの405/接続拒否はネットワークポリシーだけが原因とは限らず、サーバー自身が返すリダイレクトのスキーム誤りでも同じ症状になる。Cloud Run上のuvicorn/Starletteアプリはforwarded_allow_ipsを明示的に設定しないとX-Forwarded-Protoが無視される。秘密値を扱う診断コマンドで-vのような詳細出力を不用意に使わない。",
+    "images": [],
+    "githubCommits": [],
+    "pullRequests": [],
+    "relatedUrls": [],
+    "nextSteps": "ユーザーがGOOGLE_MEDIA_MCP_TOKENを速やかにローテーションする。人間がgoogle-media-mcp Cloud Runサービスを最新コードで再デプロイし、GOOGLE_MEDIA_MCP_ALLOWED_HOSTSの設定を確認する。完了後、新セッションでMCP接続確認・tool一覧・実呼び出しテストから再開し、画像/動画生成→GitHub実装→CI→公開確認へ進む。",
+    "tags": [
+      "AIエージェント",
+      "Google Media MCP",
+      "Cloud Run",
+      "uvicorn",
+      "セキュリティ",
+      "MCP-Cloud"
+    ]
   }
 ]
