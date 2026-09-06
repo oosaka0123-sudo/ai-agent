@@ -33,6 +33,20 @@ rather than reimplementing it, and `scripts/onboard_projects.py` (PR #25)
 is what distributes `.mcp.json` to every registered project rather than a
 second distribution mechanism.
 
+`ai-agent` itself has `auto_onboard: false` in `projects/registry.json`
+(it is the control plane, not an onboarding target), so it does not go
+through that distribution mechanism. Its own root `.mcp.json` was added
+manually with the same `google-media` entry shape, so that once egress and
+token setup allow it (see below), Claude Code sessions working on this
+repository can call `generate_image` / `generate_video` directly instead of
+using the local `scripts/generate_media.py` CLI. As of 2026-09-06 this path
+is **not yet usable**: Claude Code's cloud execution environment still
+blocks the connection with an egress policy denial, and the required
+`GOOGLE_MEDIA_MCP_TOKEN` environment variable is unset there, so the CLI
+remains the fallback until both are configured. See
+[`docs/MOBILE_CLOUD_FIRST.md`](MOBILE_CLOUD_FIRST.md) for the full
+diagnosis and the exact settings that need to change.
+
 ### Why video generation never makes Claude Code poll
 
 `generate_video` starts the Veo job, polls `operations.get` on an interval,

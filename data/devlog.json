@@ -645,5 +645,119 @@
       "Claude Code",
       "ガバナンス"
     ]
+  },
+  {
+    "id": "2026-09-06-mobile-cloud-first-inventory",
+    "date": "2026-09-06",
+    "title": "PR #39をmergeable状態まで仕上げ、Mobile First / Cloud Firstを正式化・棚卸し",
+    "project": "ai-agent",
+    "purpose": "ユーザーが明示した新方針「Mobile First / Cloud First」（スマホだけで指示→AI作業→GitHub変更→テスト→承認→デプロイを完結できる環境を目指す）を、既存ADRと両立する形でai-masterへ正式化し、ai-agent側でスマホ完結を阻害するローカル依存箇所を棚卸しする。あわせて前段PR #39をmergeable状態まで仕上げる。",
+    "whatMade": "ai-master DECISIONS.mdへADR-015を追加(既存ADR-013を否定せず拡張)、AGENTS.mdのDEFAULT節に要約を追記、CONNECT.mdをGoogle Media MCPブロッカーの再確認結果とClaude Code→GitHubの検証範囲拡大で更新(oosaka0123-sudo/ai-master PR #27)。ai-agent側ではdocs/MOBILE_CLOUD_FIRST.mdに機能別の棚卸し表(現在/スマホ完結/問題/推奨構成/次の作業)を作成し、.mcp.jsonを新規追加してGoogle Media MCPのgoogle-mediaエントリを設定した。PR #39はCopilotレビュー指摘3件に対応しmergeable_state: cleanまで仕上げた。",
+    "changes": [
+      "PR #39: docs/CLAUDE_FAMILY_ROLES.md, data/devlog.json, docs/devlog/self-eval/claude-code.md (Copilot指摘対応)",
+      ".mcp.json",
+      "docs/MOBILE_CLOUD_FIRST.md",
+      "docs/GOOGLE_MEDIA_MCP.md",
+      "AGENTS.md",
+      "README.md",
+      "PROJECT_SPEC.md",
+      "docs/devlog/2026-09-06.md",
+      "data/devlog.json",
+      "CHANGELOG.md",
+      "docs/devlog/self-eval/claude-code.md",
+      "(別リポジトリ oosaka0123-sudo/ai-master) DECISIONS.md, AGENTS.md, CONNECT.md"
+    ],
+    "aiUsed": [
+      "Claude Code"
+    ],
+    "services": [
+      "GitHub",
+      "Google Cloud Run"
+    ],
+    "tech": [
+      "Markdown",
+      "JSON",
+      "Model Context Protocol",
+      "GitHub Actions"
+    ],
+    "problems": "Claude Code cloud実行環境からGoogle Media MCP(Cloud Run)へのCONNECTがagent proxyでHTTP 403(policy denial)として拒否されることを実際に再現・再確認した。AIエージェント側では解決できない環境/組織側の制約である。",
+    "solutions": "プロキシ迂回を試みず、/root/.ccr/README.mdの指示通り「報告して停止する」対応とし、docs/MOBILE_CLOUD_FIRST.mdに人間が対応すべき次の作業として明記した。.mcp.json自体は先行して安全に(トークンは環境変数参照のみで)追加し、接続経路が復旧すればすぐ使える状態にした。",
+    "learnings": "クラウド実行環境そのものが「クラウド」であっても、そこからさらに外部のCloud Runサービスへ到達できるかは別問題であり、egress policyの実地確認(curlでの再現)が棚卸しの正確性にとって重要だった。",
+    "images": [],
+    "githubCommits": [],
+    "pullRequests": [
+      {
+        "label": "docs: Claude製品ファミリー(Claude/Cowork/Code)の役割分担とMCP分類を整理",
+        "url": "https://github.com/oosaka0123-sudo/ai-agent/pull/39"
+      },
+      {
+        "label": "Mobile First / Cloud FirstをADR-015として正式化",
+        "url": "https://github.com/oosaka0123-sudo/ai-master/pull/27"
+      }
+    ],
+    "relatedUrls": [],
+    "nextSteps": "Google Media MCPへのegress許可・GOOGLE_MEDIA_MCP_TOKEN設定を環境管理者に確認する。Steel Browser MCPのCloud Runデプロイ(人間承認・課金操作)。PR #39マージ後、本PRのbaseをmainへ変更しCI確認・マージ可能状態まで仕上げる。",
+    "tags": [
+      "AIエージェント",
+      "Mobile First",
+      "Cloud First",
+      "MCP",
+      "ガバナンス"
+    ]
+  },
+  {
+    "id": "2026-09-06-merge-and-403-diagnosis",
+    "date": "2026-09-06",
+    "title": "PR #39・ai-master #27をマージ、#40を再ベース、Google Media MCP HTTP 403を切り分け",
+    "project": "ai-agent",
+    "purpose": "ユーザー指示に従いPR #39・ai-master #27をマージし、#40をmainへ再ベースする。あわせてGoogle Media MCPのHTTP 403がコード側の問題か、Claude Code cloud実行環境のegress制約かを切り分ける。",
+    "whatMade": "PR #39をsquash mergeし、#40のbaseをmainへ変更してマージコンフリクト(additiveな重複、対立なし)を解消。ai-master #27を最終確認のうえsquash mergeした。Google Media MCPの403原因を、curlでのCONNECT拒否再現(agent proxyのconnect_rejected)、GOOGLE_MEDIA_MCP_TOKEN未設定の確認、Claude_Code_RemoteのAPIで取得した本セッションのenvironment情報(Default / env_01CYPndo4QJ8xTExPzhz5asg、trusted network access)から、コード側ではなく実行環境のnetwork policyと環境変数設定の2点に起因すると切り分け、docs/MOBILE_CLOUD_FIRST.mdに人間が行うべき設定手順を追記した。",
+    "changes": [
+      "docs/MOBILE_CLOUD_FIRST.md",
+      "docs/devlog/2026-09-06.md",
+      "data/devlog.json",
+      "docs/devlog/self-eval/claude-code.md",
+      "(マージのみ) oosaka0123-sudo/ai-agent PR #39, #40",
+      "(マージのみ) oosaka0123-sudo/ai-master PR #27"
+    ],
+    "aiUsed": [
+      "Claude Code"
+    ],
+    "services": [
+      "GitHub",
+      "Google Cloud Run"
+    ],
+    "tech": [
+      "Markdown",
+      "Bash"
+    ],
+    "problems": "PR #39のsquash merge後、#40のブランチとmainの間でadditiveな内容が形式上のマージコンフリクトとして検出された。またGoogle Media MCPの403原因がコード側か環境側か不明だった。",
+    "solutions": "マージコンフリクトは内容を1つずつ確認し、対立がないことを確認したうえで両方の変更を残す形で解消した。403原因は、CONNECTメソッドへの403がトンネル確立前のproxy自身の応答である(Cloud Run側は返せない)という仕組みの理解と、GOOGLE_MEDIA_MCP_TOKEN未設定の確認、本セッションのenvironment情報の取得により、環境設定側の問題と結論づけた。",
+    "learnings": "HTTPプロキシのCONNECTメソッドへの403は宛先サーバーではなくプロキシ自身の応答であるという仕組みの理解が、コード側/環境側の切り分けに直接使える。Claude Code on the webのenvironment設定(network policy・環境変数)はセッション開始時に固定され、実行中には反映されない。",
+    "images": [],
+    "githubCommits": [],
+    "pullRequests": [
+      {
+        "label": "docs: Claude製品ファミリー(Claude/Cowork/Code)の役割分担とMCP分類を整理",
+        "url": "https://github.com/oosaka0123-sudo/ai-agent/pull/39"
+      },
+      {
+        "label": "docs: Mobile First / Cloud Firstの棚卸しとGoogle Media MCP接続設定を追加",
+        "url": "https://github.com/oosaka0123-sudo/ai-agent/pull/40"
+      },
+      {
+        "label": "Mobile First / Cloud FirstをADR-015として正式化",
+        "url": "https://github.com/oosaka0123-sudo/ai-master/pull/27"
+      }
+    ],
+    "relatedUrls": [],
+    "nextSteps": "ユーザーまたは環境管理者がenvironment Default(env_01CYPndo4QJ8xTExPzhz5asg)のnetwork policy変更とGOOGLE_MEDIA_MCP_TOKEN設定を行い、新しいセッションで到達性を再確認する。Steel Browser MCPのCloud Runデプロイ(人間承認・課金操作)。",
+    "tags": [
+      "AIエージェント",
+      "Mobile First",
+      "Cloud First",
+      "MCP",
+      "トラブルシューティング"
+    ]
   }
 ]

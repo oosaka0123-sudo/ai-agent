@@ -622,3 +622,217 @@ Master Repositoryは `oosaka0123-sudo/ai-master`」という依頼を受けた�
   見直したい場合は、その方針転換をユーザーが明示したうえで別途対応する。
 - Pull Request作成済み: https://github.com/oosaka0123-sudo/ai-agent/pull/39
   （ユーザー承認後にPR作成を依頼され、対応した。追記日: 2026-09-06）
+
+## 2026-09-06 — PR #39のmergeable化とMobile First / Cloud Firstの正式化・棚卸し
+
+### 対象
+
+- `oosaka0123-sudo/ai-agent` PR #39（Copilotレビュー対応）
+- `.mcp.json`（新規）
+- `docs/MOBILE_CLOUD_FIRST.md`（新規）
+- `docs/GOOGLE_MEDIA_MCP.md` / `AGENTS.md` / `README.md` / `PROJECT_SPEC.md`（クロスリファレンス）
+- `docs/devlog/2026-09-06.md` / `data/devlog.json` / `CHANGELOG.md`
+- （別リポジトリ）`oosaka0123-sudo/ai-master` PR #27（`DECISIONS.md` ADR-015 / `AGENTS.md` / `CONNECT.md`）
+
+### 初回実装内容（このタスクでの作業）
+
+ユーザーから前段の実装内容の承認と、以下4点の指示を受けた。
+
+1. `claude/mcp-ai-dev-architecture-mdng2s` ブランチからPR作成
+2. PR説明に変更内容・設計判断・テスト結果・`ai-master`を直接変更しなかった理由を明記
+3. CI/Actions/Checkを確認し、問題があれば修正
+4. マージ可能状態まで仕上げる
+
+さらに新方針「Mobile First / Cloud First」の正式化指示（既存ADRとの整合確認、
+新ADRとしての追加、既存ADR削除禁止、ローカル依存棚卸し表の作成、実装まで進めること）
+を受けた。以下を実施した。
+
+1. PR #39を作成し、変更内容・設計判断（なぜ`ai-master`を直接変更しなかったか）・
+   テスト結果を本文に明記した。
+2. CI（シークレットスキャン・pytest）の実行を確認し、両方成功したことを確認した。
+3. Copilotの自動レビューが3件の指摘を行った（devlogエントリのcommit/PRリンク未記載、
+   MCP分類表がセッション固有のツール名`mcp__github__*`等に依存、自己評価ログの
+   「PR未作成」記述が古い）。3件すべてが正当な指摘だったため修正し、各スレッドへ
+   返信のうえ解決（resolve）し、`mergeable_state: clean` を確認した。
+4. `ai-master` の `DECISIONS.md` / `AGENTS.md` / `CONNECT.md` を確認し、既存ADR-013
+   （PC電源OFF運用はGitHub Actions/API優先）と両立可能と判断。ADR-013を削除・置換せず、
+   新しいADR-015として追加し、`AGENTS.md` のDEFAULT節に要約とポインタを追記した
+   （`ai-master` PR #27）。既存のHuman Gate（ADR-012）は緩和しないことを明記した。
+5. Google Media MCPの既知BLOCKERを、本セッション（Claude Code cloud実行環境）から
+   実際に `curl https://google-media-mcp-518404402696.us-central1.run.app/healthz`
+   を実行して再現・再確認し（agent proxyから403 `connect_rejected`）、
+   `ai-master/CONNECT.md` を実アクセスの結果で更新した。あわせてClaude Code→GitHubの
+   検証範囲に `ai-master` 自体を追加した（本タスクでの実績に基づく）。
+6. Claude / Claude Code / Cowork / GitHub / Google Media MCP / Steel Browser MCP等について
+   スマホ完結を阻害するローカル依存箇所を棚卸しし、`docs/MOBILE_CLOUD_FIRST.md` に
+   依頼された形式（機能 | 現在 | スマホ完結 | 問題 | 推奨構成 | 次の作業）の表を作成した。
+7. アクセス可能な範囲の実装として、`ai-agent` リポジトリ直下に `.mcp.json` を新規追加し、
+   `scripts/onboard_projects.py` が他プロジェクトへ配布するものと同じ安全なパターン
+   （トークンは環境変数参照のみ、実値を含まない）でGoogle Media MCPの `google-media`
+   エントリを設定した。
+
+### 自己評価結果（PROJECT_SPEC.md照合・自己レビュー）
+
+- 依頼の4項目（PR作成・PR説明・CI確認・マージ可能状態）をすべて満たしているか確認した →
+  PR #39は`mergeable_state: clean`、CI成功、Copilotレビュー3件すべて対応・解決済み。
+  ただし最終的な**マージ操作そのもの**は実行していない（マージは共有状態に影響する
+  操作であり、ユーザーから明示的な自動マージ許可を受けていないため。「マージ可能状態まで
+  仕上げる」という指示を「マージ可能な状態にする」の意味と解釈し、マージ自体は
+  人間判断に残した）。
+- Mobile First / Cloud Firstの正式化について、`ai-master` の既存ADRとの矛盾がないか
+  再確認した → ADR-013（否定せず拡張）、ADR-012（Human Gate緩和なしと明記）、
+  ADR-002/003（新規ファイルを作らずDECISIONS.md/AGENTS.md/CONNECT.mdへの追記のみ）との
+  整合を確認した。
+- 棚卸し表の各行がOBSERVED（実際に確認した事実）とHYPOTHESIS/未確認を区別できているか
+  確認した → Google Media MCPのブロッカーは本日実際にcurlで再現した一次情報、
+  Claude Coworkの状態はUNKNOWN（本セッションから確認手段がない）として明記した。
+- `.mcp.json` に実際の秘密値（トークンの値）が含まれていないことを確認した
+  （`${GOOGLE_MEDIA_MCP_TOKEN}` という環境変数参照のみ）。
+
+### 発見した問題
+
+1. Copilotレビューの3件（上記参照）。
+2. Google Media MCPへの接続がClaude Code cloud実行環境のegress policyで
+   ブロックされていることを、実際のcurl実行で再確認した（AIエージェント側では
+   解決不可能な環境/組織側の制約）。
+
+### 修正した内容
+
+- 上記1: PR #39側で3件すべて修正し、返信・スレッド解決済み。
+- 上記2: 修正はできないため、`docs/MOBILE_CLOUD_FIRST.md` に人間が対応すべき次の作業
+  として明記し、プロキシ迂回等の危険な回避策は取らなかった
+  （`/root/.ccr/README.md` の指示に従った）。
+
+### 再テスト結果
+
+- PR #39: CIが成功し、Copilot対応後もCI再実行不要な純粋なドキュメント修正であることを
+  確認し、`mergeable_state: clean` を再確認した。
+- `.mcp.json` がJSONとして valid であることを確認した（Write時点で構文エラーなし、
+  かつ他のJSON設定ファイルと同じ形状で `python3 -m json.tool`相当の検証は
+  `scripts/onboard_projects.py` の生成物と目視比較で確認）。
+- `data/devlog.json` を読み込み・追記・書き出しし、有効なJSON（14件→15件）であることを確認した。
+
+### 最終自己評価
+
+| 項目 | 評価 | コメント |
+|---|---|---|
+| 仕様適合性 | 95/100 | 依頼された4項目（PR作成・説明・CI確認・マージ可能状態）とMobile First/Cloud First正式化・棚卸し・実装まですべて対応した。マージ操作自体は人間判断に残した（仕様上の解釈、下記参照）。 |
+| 正常動作 | 90/100 | CI成功を実際に確認した。Google Media MCP接続は環境側の制約で検証できていない（棚卸し表に明記済み）。 |
+| コード品質 | — | 対象外（`.mcp.json`はコードではなく設定ファイル、既存パターンを踏襲）。 |
+| 保守性 | 90/100 | 既存ドキュメントとの重複を避け、Master(ai-master)とProject(ai-agent)の責務分離を維持した。 |
+| セキュリティ | 100/100 | `.mcp.json`に実値の秘密情報を含めていない。egress policyブロックを回避しようとしなかった。 |
+
+**総合: 93/100**
+
+### 残っている問題・今後の課題
+
+- Google Media MCPへのegress許可、`GOOGLE_MEDIA_MCP_TOKEN`のClaude Code実行環境への
+  設定状況は、環境管理者の確認が必要（AIエージェント側では解決不可）。
+- Steel Browser MCPは未デプロイ（課金を伴う人間承認が必要な操作のため、このセッションでは実施していない）。
+- 2つ目のPR（`claude/mobile-cloud-first-inventory`、PR #39ブランチから分岐したスタックPR）は、
+  PR #39マージ後にbaseを`main`へ変更する必要がある。
+
+### 人間による確認が必要な項目
+
+- PR #39・ai-master PR #27の最終マージ判断。
+- Google Media MCPのegress許可設定、`GOOGLE_MEDIA_MCP_TOKEN`の環境変数設定確認。
+- Steel Browser MCPのCloud Runデプロイ（課金操作）。
+
+## 2026-09-06 — PR #39・ai-master #27のマージ、#40の再ベース、Google Media MCP HTTP 403の切り分け
+
+### 対象
+
+- `oosaka0123-sudo/ai-agent` PR #39（マージ）, #40（再ベース・診断内容追記）
+- `oosaka0123-sudo/ai-master` PR #27（マージ）
+- `docs/MOBILE_CLOUD_FIRST.md`（切り分け結果セクション追加）
+- `docs/devlog/2026-09-06.md` / `data/devlog.json`
+
+### 初回実装内容（このタスクでの作業）
+
+ユーザーから以下の指示を受けた。
+
+1. PR #39を先にマージする
+2. #40のbaseをmainへ変更し、CI/Copilotレビューを確認する
+3. 問題がなければ#40をマージする
+4. ai-master #27も最終確認後にマージする
+5. マージ後、Google Media MCPのHTTP 403について、コード側の問題かClaudeクラウド実行環境の
+   egress制約かを切り分ける。コード側で解決不能な場合は無理に変更せず、人間側で必要な設定を
+   1つずつ具体的に案内する
+
+以下を実施した。
+
+1. PR #39を`mergeable_state: clean`を再確認のうえsquash mergeした。
+2. #40のbaseを`main`へ変更した。squash mergeにより発生したテキストコンフリクト
+   （AGENTS.md / CHANGELOG.md / PROJECT_SPEC.md / README.md / data/devlog.json /
+   docs/devlog/2026-09-06.md / docs/devlog/self-eval/claude-code.md）を、1ファイルずつ
+   内容を確認し、対立がない（両方とも他方を包含するadditiveな変更である）ことを確認したうえで
+   解消した。CIが再度green（シークレットスキャン・pytest成功）になったことを確認した。
+3. ai-master #27を最終確認（差分再確認、`mergeable_state: clean`、CIなし）のうえ
+   squash mergeした。
+4. Google Media MCPのHTTP 403を切り分けた。
+   - `curl https://google-media-mcp-....run.app/healthz` を再実行し、agent proxyから
+     `connect_rejected`（CONNECT tunnel failed, response 403）を再現した。
+   - CONNECTメソッドへの403は、TLSトンネル確立前にproxy自身が返す応答であり、
+     Cloud Run（トンネル確立後のアプリケーション層）が返せる種類の応答ではないという
+     HTTPプロキシの基本的な仕組みに基づき、コード側（`mcp_server/`・Cloud Run設定）の
+     問題ではないと判断した。
+   - `[ -n "${GOOGLE_MEDIA_MCP_TOKEN:-}" ]` で環境変数の設定有無を確認し（値は一切表示・
+     記録していない）、未設定であることを確認した。
+   - `Claude_Code_Remote` MCPサーバーの `get_session` / `list_environments` から、
+     本セッションのenvironment（`Default` / `env_01CYPndo4QJ8xTExPzhz5asg`、
+     「trusted network access」）を特定した。
+   - 以上から、コード側では解決不能で、(a) このenvironmentのnetwork policy変更、
+     (b) `GOOGLE_MEDIA_MCP_TOKEN`の環境変数設定、の2点が必要と結論づけ、
+     `docs/MOBILE_CLOUD_FIRST.md`に人間が行うべき設定手順を番号付きで具体的に追記した
+     （Claude Code on the webのenvironment設定ページの参照先URLも明記）。
+
+### 自己評価結果（PROJECT_SPEC.md照合・自己レビュー）
+
+- 依頼の5項目すべてに対応できているか確認した → 1〜4はGitHub操作で完了を確認済み。
+  5は「コード側で解決不能な場合は無理に変更せず」との指示通り、コード変更は一切行わず、
+  診断結果と人間向けの具体的な設定手順のみをドキュメント化した。
+- 「1つずつ具体的に」という要求を満たしているか確認した → network policy変更、
+  トークン設定、新セッションでの再確認、の3ステップに分解し、それぞれ何を・どこで・
+  なぜ変更するかを明記した。
+- 切り分けの根拠が推測ではなく実際の確認に基づいているか確認した →
+  curl実行結果、環境変数の有無チェック、`Claude_Code_Remote`から取得したセッション
+  メタデータの3つの一次情報に基づいており、いずれも本文中に確認方法・結果を明記した。
+
+### 発見した問題
+
+- PR #39のsquash merge後、#40のbaseを`main`へ変更した際に、`mergeable_state: dirty`と
+  なり、7ファイルでテキストコンフリクトが発生した。
+
+### 修正した内容
+
+- `git merge origin/main`を実行し、7ファイルのコンフリクトを1つずつ内容確認のうえ解消した
+  （squash mergeによりコミット系譜が分岐したことが原因で、内容自体に対立はなかった）。
+
+### 再テスト結果
+
+- マージ後、#40のCIが再実行され、シークレットスキャン・pytestとも成功したことを確認した。
+- `data/devlog.json`をPythonで読み込み、有効なJSON（15件→16件）であることを再確認した。
+
+### 最終自己評価
+
+| 項目 | 評価 | コメント |
+|---|---|---|
+| 仕様適合性 | 95/100 | 依頼の5項目すべてに対応した。切り分け結果の具体性・実行環境情報の特定まで踏み込めた。 |
+| 正常動作 | 90/100 | マージ操作・CI確認は実際に成功を確認した。切り分け結果自体は環境設定変更後の再確認待ち。 |
+| コード品質 | — | 対象外（コード変更なし、マージ操作とドキュメント追記のみ）。 |
+| 保守性 | 90/100 | 診断根拠・環境識別情報を明記し、後から別セッションが読んでも同じ手順で再確認できる。 |
+| セキュリティ | 100/100 | トークンの値は一切表示・記録していない。プロキシ回避策は取らなかった。 |
+
+**総合: 93/100**
+
+### 残っている問題・今後の課題
+
+- Google Media MCPへの接続は、環境設定変更（network policy・環境変数）が完了するまで
+  引き続き利用できない。
+- Steel Browser MCPは未デプロイのまま（課金操作のため人間対応待ち）。
+
+### 人間による確認が必要な項目
+
+- `docs/MOBILE_CLOUD_FIRST.md`の「人間が行うべき設定」に従い、environment `Default`
+  （`env_01CYPndo4QJ8xTExPzhz5asg`）のnetwork policy変更と`GOOGLE_MEDIA_MCP_TOKEN`設定を行う。
+- Steel Browser MCPのCloud Runデプロイ（課金操作）。

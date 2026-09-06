@@ -98,6 +98,11 @@
 ChatGPT/GPTのGitHub操作については [`docs/GPT_GITHUB_CONTROL.md`](docs/GPT_GITHUB_CONTROL.md)
 を参照してください。
 
+スマートフォンだけで「指示 → AI作業 → GitHub変更 → テスト → 承認 → デプロイ」まで
+完結させる **Mobile First / Cloud First** 方針、およびこのリポジトリでの
+ローカル依存箇所の棚卸しは [`docs/MOBILE_CLOUD_FIRST.md`](docs/MOBILE_CLOUD_FIRST.md)
+を参照してください。
+
 ## サンプルプロジェクト（基盤の動作確認用）
 
 この基盤が実際に機能するかを確認するために、これまで以下の2つのサンプルを
