@@ -8,6 +8,11 @@
 
 ### Added
 
+- Steel Cloud Browser Remote HTTP MCP サーバー（`mcp_server.steel_app:app`）を追加。
+  全AIクライアント共通のクラウドブラウザ基盤として `create_session` / `navigate` / `extract` /
+  `screenshot` / `release_session` の最小5ツールを提供。インバウンド Bearer トークン認証と
+  Steel Upstream API キーの分離、SSRF / プライベートIP / メタデータアクセス拒否、セッション TTL
+  およびアイドルタイムアウト自動解放を実装。ドキュメント `docs/STEEL_BROWSER_MCP.md` を作成。
 - Google Cloud Vertex AI（公式 `google-genai` SDK）に接続するメディア生成基盤を追加。
   `scripts/generate_media.py` から `--provider google --type image|video --prompt "..."`
   で画像・動画を生成し、`public/assets/ai/` へ保存する。動画生成はジョブ開始→状態確認→
