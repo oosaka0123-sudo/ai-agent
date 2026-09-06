@@ -54,8 +54,8 @@ MCPサーバーは場当たり的に追加せず、用途で3層に分類し、�
 
 | 分類 | 用途 | 主担当 | このリポジトリの実例 |
 |---|---|---|---|
-| **Development MCP** | 開発・テスト・Repository操作 | Claude Code | GitHub（本セッションの `mcp__github__*`）、filesystem/repo操作 |
-| **Knowledge / Work MCP** | 調査・資料・業務・自動化・プロジェクト運営、複数アプリ横断 | Claude Cowork | Google Drive（`mcp__Google_Drive__*`）、（将来）Gmail/Calendar/Docs/Sheets、Steel Cloud Browser（`mcp_server/steel_browser/`、[`docs/STEEL_BROWSER_MCP.md`](STEEL_BROWSER_MCP.md)） |
+| **Development MCP** | 開発・テスト・Repository操作 | Claude Code | GitHub MCP、filesystem/repo操作系MCP |
+| **Knowledge / Work MCP** | 調査・資料・業務・自動化・プロジェクト運営、複数アプリ横断 | Claude Cowork | Google Drive MCP、（将来）Gmail/Calendar/Docs/Sheets MCP、Steel Cloud Browser（`mcp_server/steel_browser/`、[`docs/STEEL_BROWSER_MCP.md`](STEEL_BROWSER_MCP.md)） |
 | **Media MCP** | 画像・動画・Webコンテンツ制作 | Claude Cowork がオーケストレーション、実装はClaude Codeが `mcp_server/` へAPI実装 | Google Media MCP（`mcp_server/`、[`docs/GOOGLE_MEDIA_MCP.md`](GOOGLE_MEDIA_MCP.md)） |
 
 判断基準（MCPをどこへ接続するか）:

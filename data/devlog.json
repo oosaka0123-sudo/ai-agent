@@ -624,8 +624,18 @@
     "solutions": "ai-master側は変更を加えず、ai-masterのAGENTS.mdが定める『Projectローカル運用ルールがMasterのDEFAULTをそのProject内だけ上書きできる』という優先順位に従い、役割分担・MCP分類の実質的な内容はすべてai-agent（Projectローカル）側にDEFAULTの推奨パターンとして実装した。",
     "learnings": "複数リポジトリにまたがるAI運用基盤の設計依頼では、提示された具体的なディレクトリ構成をそのまま実装する前に、対象リポジトリが既に持つ設計判断（ADR等）を確認し、根幹方針の変更が必要な場合はリポジトリ側のガバナンスルールに従うべきである。",
     "images": [],
-    "githubCommits": [],
-    "pullRequests": [],
+    "githubCommits": [
+      {
+        "label": "docs: Claude製品ファミリー(Claude/Cowork/Code)の役割分担とMCP分類を整理",
+        "url": "https://github.com/oosaka0123-sudo/ai-agent/commit/b9f5648978437b50e2567a7198891ce7ade36512"
+      }
+    ],
+    "pullRequests": [
+      {
+        "label": "docs: Claude製品ファミリー(Claude/Cowork/Code)の役割分担とMCP分類を整理",
+        "url": "https://github.com/oosaka0123-sudo/ai-agent/pull/39"
+      }
+    ],
     "relatedUrls": [],
     "nextSteps": "Claude Cowork・Claude（chat）からの実際の接続・実行が確認できたら ai-master/CONNECT.md へ実アクセスの結果を追記する。ユーザーがai-master側の構造変更を明示的に望む場合は別途方針を確認する。",
     "tags": [

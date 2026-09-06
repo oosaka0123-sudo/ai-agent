@@ -620,4 +620,5 @@ Master Repositoryは `oosaka0123-sudo/ai-master`」という依頼を受けた�
 
 - `ai-master` 側のADR-002/003/012（最小5ファイル構成、製品名を役割に固定しない方針）を
   見直したい場合は、その方針転換をユーザーが明示したうえで別途対応する。
-- Pull Requestの作成要否（今回は明示的な依頼がなかったため作成していない）。
+- Pull Request作成済み: https://github.com/oosaka0123-sudo/ai-agent/pull/39
+  （ユーザー承認後にPR作成を依頼され、対応した。追記日: 2026-09-06）
