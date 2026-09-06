@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "google-media": {
+      "type": "http",
+      "url": "${GOOGLE_MEDIA_MCP_URL:-https://google-media-mcp-518404402696.us-central1.run.app/mcp}",
+      "headers": {
+        "Authorization": "Bearer ${GOOGLE_MEDIA_MCP_TOKEN}"
+      }
+    }
+  }
+}

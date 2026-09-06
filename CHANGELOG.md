@@ -8,6 +8,11 @@
 
 ### Added
 
+- Mobile First / Cloud First 方針（`oosaka0123-sudo/ai-master` ADR-015）に基づき、
+  このリポジトリでのローカル依存箇所の棚卸し表（機能 / 現在 / スマホ完結 / 問題 /
+  推奨構成 / 次の作業）を `docs/MOBILE_CLOUD_FIRST.md` として追加。あわせて
+  `.mcp.json` をリポジトリ直下に新規追加し、Google Media MCPの `google-media`
+  エントリ（トークンは環境変数参照のみ）を設定した。
 - Claude製品ファミリー（Claude / Claude Cowork / Claude Code）の役割分担、MCPサーバーの
   3分類（Development / Knowledge-Work / Media）と接続先判断基準、MCPとAPIの使い分け、
   Agent間引き継ぎテンプレートをまとめた `docs/CLAUDE_FAMILY_ROLES.md` と

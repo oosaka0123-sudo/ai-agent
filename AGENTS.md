@@ -191,6 +191,14 @@ MCP分類・Secret管理・Agent間引き継ぎは
 [`docs/CLAUDE_FAMILY_ROLES.md`](docs/CLAUDE_FAMILY_ROLES.md) にまとめている。
 Claude Cowork等でこのリポジトリを開いた場合は、作業前にそちらも確認すること。
 
+## Mobile First / Cloud First
+
+原則としてユーザーがスマートフォンだけから「指示 → AI作業 → GitHub変更 → テスト →
+承認 → デプロイ」まで完結できる環境を目指す（`oosaka0123-sudo/ai-master`
+`DECISIONS.md` ADR-015、`AGENTS.md` DEFAULT項目13が正本）。このリポジトリでの
+棚卸し結果・スマホ完結を阻害するローカル依存箇所・推奨構成は
+[`docs/MOBILE_CLOUD_FIRST.md`](docs/MOBILE_CLOUD_FIRST.md) を参照。
+
 ## AIエージェントが作業する際の基本フロー
 
 1. `main` を最新化してから作業ブランチを作成する。

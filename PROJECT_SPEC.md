@@ -214,6 +214,11 @@ AIエージェントは、作業完了前の自己レビュー（[`AGENTS.md`](A
   [`docs/CLAUDE_FAMILY_ROLES.md`](docs/CLAUDE_FAMILY_ROLES.md) にまとめている
   （`oosaka0123-sudo/ai-master` のCapability-based Routing方針と矛盾しない、
   Projectローカルの推奨デフォルトとして位置づける）。
+- **Mobile First / Cloud First**: `oosaka0123-sudo/ai-master` ADR-015を正本とし、
+  スマートフォンだけで「指示 → AI作業 → GitHub変更 → テスト → 承認 → デプロイ」まで
+  完結できる環境を目指す。このリポジトリでのローカル依存箇所の棚卸し（機能別の
+  スマホ完結可否・問題・推奨構成・次の作業）は
+  [`docs/MOBILE_CLOUD_FIRST.md`](docs/MOBILE_CLOUD_FIRST.md) にまとめている。
 
 ## 7. サンプルプロジェクト: 3AI競争テスト（competitions/）
 
