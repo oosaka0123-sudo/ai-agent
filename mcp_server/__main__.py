@@ -20,13 +20,22 @@ def main() -> None:
     # leaves Starlette's own trailing-slash redirect (e.g. POST /mcp ->
     # /mcp/) built as an absolute http:// URL, which strict HTTPS-only
     # clients then refuse to follow.
+    #
+    # Trusting forwarded headers from *any* peer is only safe because
+    # Cloud Run's frontend is the sole thing that can reach this container
+    # (see docs/GOOGLE_MEDIA_MCP.md's IAM/ingress summary) -- elsewhere
+    # (`docker run` for local dev, per the Dockerfile's own instructions) a
+    # client could spoof its scheme/IP via those same headers, so this only
+    # widens trust when `K_SERVICE` (set automatically by Cloud Run, unset
+    # everywhere else) confirms we're actually running there.
+    on_cloud_run = bool(os.environ.get("K_SERVICE"))
     uvicorn.run(
         "mcp_server.app:app",
         host="0.0.0.0",
         port=port,
         log_config=None,
         proxy_headers=True,
-        forwarded_allow_ips="*",
+        forwarded_allow_ips="*" if on_cloud_run else "127.0.0.1",
     )
 
 

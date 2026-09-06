@@ -228,12 +228,15 @@ request, including correctly authenticated ones — this is easy to
 mistake for an auth problem since it also returns a 4xx; (5) a `POST
 /mcp` (no trailing slash) that comes back as a `307` redirect to an
 `http://` (not `https://`) URL means the deployed revision predates the
-`forwarded_allow_ips="*"` fix in `mcp_server/__main__.py` — Cloud Run
-terminates TLS at its frontend and connects to the container from a
-non-loopback internal address, so without trusting that address's
-`X-Forwarded-Proto`, uvicorn/Starlette builds the trailing-slash redirect
-as plain `http://`; strict HTTPS-only clients (including forward proxies
-that only tunnel HTTPS CONNECT, which read that as a plain-HTTP request
+Cloud Run `forwarded_allow_ips` fix in `mcp_server/__main__.py` (only
+takes effect when `K_SERVICE` is set, which Cloud Run does automatically —
+this trust is deliberately not extended to `docker run` or other non-Cloud-Run
+environments) — Cloud Run terminates TLS at its frontend and connects to
+the container from a non-loopback internal address, so without trusting
+that address's `X-Forwarded-Proto`, uvicorn/Starlette builds the
+trailing-slash redirect as plain `http://`; strict HTTPS-only clients
+(including forward proxies that only tunnel HTTPS CONNECT, which read
+that as a plain-HTTP request
 and refuse it) then fail to follow it. Redeploy the service (step 5 above)
 with the current code to pick up the fix — this is not a `gcloud
 services update` env-var change, since it's a code-level default, not
