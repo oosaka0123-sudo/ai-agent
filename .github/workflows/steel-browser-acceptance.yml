@@ -27,8 +27,9 @@ jobs:
             "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=steel-browser-acceptance")"
           token="$(python3 -c 'import json,sys; print(json.load(sys.stdin)["value"])' <<<"$response")"
           test -n "$token"
+          echo "::add-mask::$token"
           echo "token=$token" >> "$GITHUB_OUTPUT"
-          echo "GitHub OIDC token acquired (value masked by GitHub Actions)."
+          echo "GitHub OIDC token acquired."
 
       - name: Run Cloud Run self-acceptance endpoint
         shell: bash
