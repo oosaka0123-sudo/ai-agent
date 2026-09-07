@@ -11,6 +11,7 @@ Application Default Credentials（`gcloud auth application-default login`）や
 """
 from __future__ import annotations
 
+import mimetypes
 import time
 from typing import Optional
 
@@ -107,16 +108,29 @@ class GoogleVertexProvider:
         aspect_ratio: Optional[str] = None,
         negative_prompt: Optional[str] = None,
         duration_seconds: Optional[int] = None,
+        image: Optional[str] = None,
         poll_interval: float = 15.0,
         timeout: float = 600.0,
         **_: object,
     ) -> GenerationResult:
         resolved_model = model or DEFAULT_VIDEO_MODEL
 
+        # image-to-video: `image` is a `gs://` URI of a previously generated
+        # asset (typically this provider's own generate_image output). Veo
+        # reads it directly from GCS -- the SDK never downloads the bytes
+        # through this process, it just needs the URI and a MIME type.
+        source_image = None
+        if image:
+            guessed_mime_type, _ = mimetypes.guess_type(image)
+            source_image = types.Image(
+                gcs_uri=image,
+                mime_type=guessed_mime_type or "image/png",
+            )
+
         # ジョブ開始（非同期のロングランニングオペレーション）
         operation = self._client.models.generate_videos(
             model=resolved_model,
-            source=types.GenerateVideosSource(prompt=prompt),
+            source=types.GenerateVideosSource(prompt=prompt, image=source_image),
             config=types.GenerateVideosConfig(
                 number_of_videos=count,
                 aspect_ratio=aspect_ratio,

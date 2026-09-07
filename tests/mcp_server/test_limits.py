@@ -8,6 +8,7 @@ from mcp_server.limits import (
     LimitError,
     load_global_max_concurrent,
     validate_image_count,
+    validate_image_uri,
     validate_project_slug,
     validate_video_duration,
 )
@@ -49,6 +50,23 @@ def test_video_duration_over_cap_raises():
 
 def test_video_duration_none_is_allowed():
     validate_video_duration(None, Limits())  # provider default; must not raise
+
+
+def test_image_uri_none_is_allowed():
+    validate_image_uri(None)  # text-to-video; must not raise
+
+
+def test_valid_gcs_image_uri_passes():
+    validate_image_uri("gs://rss7-ai-media-genmedia/projects/ai-agent/images/2026/09/image_x.png")
+
+
+@pytest.mark.parametrize(
+    "bad_uri",
+    ["not-a-gcs-uri", "https://example.com/image.png", "/local/path/image.png", "gs://", "gs://bucket-only"],
+)
+def test_invalid_image_uri_raises(bad_uri):
+    with pytest.raises(LimitError, match="invalid image"):
+        validate_image_uri(bad_uri)
 
 
 def test_global_max_concurrent_env_override_wins(monkeypatch):

@@ -36,6 +36,7 @@ from .limits import (
     LimitError,
     load_global_max_concurrent,
     validate_image_count,
+    validate_image_uri,
     validate_project_slug,
     validate_video_duration,
 )
@@ -270,8 +271,10 @@ def generate_video(
         prompt: What to generate.
         project_slug: The registered site/project this belongs to (lowercase
             kebab-case, matching projects/registry.json).
-        image: Reserved for image-to-video conditioning once the provider
-            wrapper supports it; currently ignored if passed.
+        image: Optional gs:// URI of a previously generated image (e.g. the
+            gcs_uri a prior generate_image call returned) to use as the
+            first frame for image-to-video conditioning. Omit for
+            text-to-video.
         aspect_ratio: e.g. "16:9", "9:16".
         duration_seconds: Clip length (capped by
             GOOGLE_MEDIA_MAX_VIDEO_DURATION_SECONDS).
@@ -283,6 +286,7 @@ def generate_video(
     try:
         validate_project_slug(project_slug)
         validate_video_duration(duration_seconds, Limits())
+        validate_image_uri(image)
     except LimitError as exc:
         raise ToolError(f"invalid_request: {exc}") from exc
 
@@ -296,6 +300,7 @@ def generate_video(
             aspect_ratio=aspect_ratio,
             negative_prompt=negative_prompt,
             duration_seconds=duration_seconds,
+            image=image,
             poll_interval=config.limits.video_poll_interval_seconds,
             timeout=config.limits.video_timeout_seconds,
         )
