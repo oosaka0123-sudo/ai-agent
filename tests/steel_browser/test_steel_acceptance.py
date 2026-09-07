@@ -42,6 +42,8 @@ def _github_claims(event_name: str) -> dict[str, object]:
         "iss": "https://token.actions.githubusercontent.com",
         "aud": "steel-browser-acceptance",
         "repository": "oosaka0123-sudo/ai-agent",
+        "repository_id": "1351103972",
+        "repository_owner_id": "281356293",
         "ref": "refs/heads/main",
         "workflow_ref": (
             "oosaka0123-sudo/ai-agent/.github/workflows/"
@@ -51,7 +53,9 @@ def _github_claims(event_name: str) -> dict[str, object]:
     }
 
 
-def _stub_oidc_crypto(monkeypatch, event_name: str) -> None:
+def _stub_oidc_crypto(monkeypatch, event_name: str, **claim_overrides) -> None:
+    claims = _github_claims(event_name)
+    claims.update(claim_overrides)
     monkeypatch.setattr(
         acceptance_module._jwks_client,
         "get_signing_key_from_jwt",
@@ -60,7 +64,7 @@ def _stub_oidc_crypto(monkeypatch, event_name: str) -> None:
     monkeypatch.setattr(
         acceptance_module.jwt,
         "decode",
-        lambda *_args, **_kwargs: _github_claims(event_name),
+        lambda *_args, **_kwargs: claims,
     )
 
 
@@ -77,6 +81,12 @@ def test_verify_oidc_accepts_manual_dispatch(monkeypatch):
 def test_verify_oidc_rejects_pull_request_event(monkeypatch):
     _stub_oidc_crypto(monkeypatch, "pull_request")
     with pytest.raises(ValueError, match="event_name"):
+        verify_github_actions_oidc("token")
+
+
+def test_verify_oidc_rejects_wrong_repository_id(monkeypatch):
+    _stub_oidc_crypto(monkeypatch, "push", repository_id="999999")
+    with pytest.raises(ValueError, match="repository_id"):
         verify_github_actions_oidc("token")
 
 
