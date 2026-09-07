@@ -1,8 +1,9 @@
 """Google Vertex AI（公式 `google-genai` SDK）を使った画像・動画生成。
 
-画像は Imagen（`client.models.generate_images`）、動画は Veo（`client.models.generate_videos`）
-を呼び出す。動画生成は非同期のロングランニングオペレーションなので、
-ジョブ開始 → `client.operations.get` で状態確認 → 完了、の流れをここで吸収する。
+画像は Gemini（`client.models.generate_content` + `response_modalities=["IMAGE"]`）、
+動画は Veo（`client.models.generate_videos`）を呼び出す。動画生成は非同期の
+ロングランニングオペレーションなので、ジョブ開始 → `client.operations.get`
+で状態確認 → 完了、の流れをここで吸収する。
 
 認証情報はコードに直接書かない。`genai.Client(vertexai=True, ...)` は
 Application Default Credentials（`gcloud auth application-default login`）や
@@ -21,12 +22,18 @@ from .base import GenerationResult
 
 # 2026年時点でVertex AI上で利用できる代表的なモデル。
 # モデルは頻繁に更新されるため、必要に応じて --model で上書きすること。
-DEFAULT_IMAGE_MODEL = "imagen-3.0-generate-002"
-DEFAULT_VIDEO_MODEL = "veo-2.0-generate-001"
+#
+# 画像はImagen専用のgenerate_images ではなく、Gemini本体の
+# generate_content（response_modalities=["IMAGE"]）を使う。旧
+# imagen-3.0-generate-002 / imagen-4.0-generate-001 はプロジェクト
+# rss7-ai-media のVertex AI上でPublisher Model 404を返し続けたため
+# （Issue #43）、現行のモデル構成へ切り替えた。
+DEFAULT_IMAGE_MODEL = "gemini-2.5-flash-image"
+DEFAULT_VIDEO_MODEL = "veo-3.1-fast-generate-001"
 
 
 class GoogleVertexProvider:
-    """Vertex AI 上の Imagen（画像）・Veo（動画）を呼び出すプロバイダ。"""
+    """Vertex AI 上の Gemini（画像）・Veo（動画）を呼び出すプロバイダ。"""
 
     name = "google"
 
@@ -51,29 +58,45 @@ class GoogleVertexProvider:
     ) -> GenerationResult:
         resolved_model = model or DEFAULT_IMAGE_MODEL
 
-        # 注: SDK側で generate_images は将来的に非推奨（2027年1月以降に削除予定、
-        # generate_content + 画像モデルへの移行が案内されている）。現時点では
-        # Imagen系モデルへの最も直接的な呼び出し方法なのでそのまま使用している。
-        response = self._client.models.generate_images(
+        # Geminiのgenerate_contentには専用のnegative_prompt引数がないため、
+        # プロンプト本文に折り込む。
+        full_prompt = prompt
+        if negative_prompt:
+            full_prompt = f"{prompt}\n\nAvoid: {negative_prompt}"
+
+        response = self._client.models.generate_content(
             model=resolved_model,
-            prompt=prompt,
-            config=types.GenerateImagesConfig(
-                number_of_images=count,
-                aspect_ratio=aspect_ratio,
-                negative_prompt=negative_prompt,
-                output_mime_type=output_mime_type,
+            contents=full_prompt,
+            config=types.GenerateContentConfig(
+                response_modalities=["IMAGE"],
+                candidate_count=count,
+                image_config=types.ImageConfig(
+                    aspect_ratio=aspect_ratio,
+                    output_mime_type=output_mime_type,
+                ),
             ),
         )
 
-        if not response.generated_images:
+        assets = []
+        for candidate in response.candidates or []:
+            content = candidate.content
+            if content is None:
+                continue
+            for part in content.parts or []:
+                if part.inline_data is not None:
+                    assets.append(
+                        types.Image(
+                            image_bytes=part.inline_data.data,
+                            mime_type=part.inline_data.mime_type or output_mime_type,
+                        )
+                    )
+
+        if not assets:
             raise RuntimeError(
                 "画像が生成されませんでした（安全フィルター等で除外された可能性があります）。"
             )
 
-        return GenerationResult(
-            model=resolved_model,
-            assets=[generated.image for generated in response.generated_images],
-        )
+        return GenerationResult(model=resolved_model, assets=assets)
 
     def generate_video(
         self,
