@@ -152,3 +152,47 @@ PR上のGitHub Actionsで以下を確認した。
 
 - actual Claude Code → Google Media MCP runtime smoke testは、Claude Code実行環境側の証拠が必要であり、このcontrol-plane unit testとは別。
 - bearer authenticationの長期的なOAuth/short-lived化は別の設計・レビュー対象。
+
+
+## 2026-09-08 — Remote Desktop Commander × gcloud showcase
+
+### 初回実装
+
+GitHub Pagesへ `web/remote-gcloud.html` を追加し、Remote Desktop Commander → Windows → gcloud → Cloud Run → Google Media MCP → Gemini / Veo → GCS / GitHub Pagesの実運用経路を可視化した。トップページにもFeatured Stack導線を追加し、Google Media MCP本番受け入れで生成済みの画像・動画を主要ビジュアルとして再利用した。
+
+### 初回自己評価
+
+**95/100**
+
+- 仕様適合性: 97
+- 正常動作: 95
+- スマホ対応: 94
+- UI/UX: 95
+- コード品質: 92
+- 保守性: 91
+- パフォーマンス: 95
+- セキュリティ: 99
+
+### 発見した問題と修正
+
+- gcloudのactive account identifierは確認できるがPublicページへ出す必要がない。
+  - 対策: project名・SDK version等の非秘密情報だけを掲載し、account identifier / token / credentialは非掲載。
+- Claude Codeを主担当にする予定だったが、Windows側Claude OAuth sessionが期限切れだった。
+  - 対策: 本人認証だけをHuman Gateとして残し、GitHub / Remote Desktop Commander / gcloudで独立して安全に進められる実装・検証は停止しなかった。
+- 新しい専用ページを追加するとホームから発見しづらい。
+  - 対策: top navigationとFeatured Stackカードの2経路を追加した。
+- Google生成メディアが単なる装飾になると実績との関係が分かりにくい。
+  - 対策: MCP本番受け入れで実生成された画像・Veo動画をVerified sectionと隣接して掲載し、ダミーではないことを明記した。
+
+### テスト / 再テスト
+
+- `web/index.html` / `web/remote-gcloud.html` をPython `html.parser` でparse: success
+- 参照する画像3件・動画1件・構成図画像のRepository存在確認: success
+- `git diff --check origin/main...HEAD`: success
+- responsive CSSを390px級breakpointを含めて実装し、mobile layoutで1-columnへ落ちることをコードレビュー
+
+### 最終自己評価
+
+**97/100**
+
+残る確認はPR CI、main merge後のGitHub Pages deploy、公開URLでのLive Verification。Claude Code本人認証はサイト実装とは分離された外部Human Gateとして残っている。
