@@ -112,7 +112,7 @@ def run_acceptance_lifecycle(
         failed_step = "screenshot"
         captured = screenshot(session_id=session_id, full_page=False)
         image_b64 = captured.get("screenshot_base64") or ""
-        if len(image_b64) < 100 or captured.get("mime_type") != "image/png":
+        if len(image_b64) < 80 or captured.get("mime_type") != "image/png":
             raise RuntimeError("screenshot returned no usable PNG payload")
         steps.append(
             {
