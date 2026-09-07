@@ -15,6 +15,7 @@ _DEFAULT_AUDIENCE = "steel-browser-acceptance"
 _DEFAULT_REPOSITORY = "oosaka0123-sudo/ai-agent"
 _DEFAULT_REF = "refs/heads/main"
 _DEFAULT_WORKFLOW = ".github/workflows/steel-browser-acceptance.yml"
+_ALLOWED_EVENTS = {"push", "workflow_dispatch"}
 
 _jwks_client = PyJWKClient(_GITHUB_JWKS_URL, cache_keys=True)
 
@@ -72,7 +73,7 @@ def verify_github_actions_oidc(token: str) -> dict[str, Any]:
         raise ValueError("ref claim mismatch")
     if claims.get("workflow_ref") != expected["workflow_ref"]:
         raise ValueError("workflow_ref claim mismatch")
-    if claims.get("event_name") != "workflow_dispatch":
+    if claims.get("event_name") not in _ALLOWED_EVENTS:
         raise ValueError("event_name claim mismatch")
 
     return claims
