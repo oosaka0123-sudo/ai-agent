@@ -1,23 +1,103 @@
-name: Steel Browser Acceptance
+name: Steel Browser Deploy and Acceptance
 
 on:
   workflow_dispatch:
-    inputs:
-      steel_browser_base_url:
-        description: "Steel Browser MCP Cloud Run base URL (override only if service URL changes)"
-        required: false
-        default: "https://steel-browser-mcp-518404402696.us-central1.run.app"
+  push:
+    branches: [main]
+    paths:
+      - "Dockerfile.steel-browser"
+      - ".dockerignore"
+      - "requirements.txt"
+      - "mcp_server/steel_app.py"
+      - "mcp_server/steel_browser/**"
+      - ".github/workflows/steel-browser-acceptance.yml"
 
 permissions:
   contents: read
   id-token: write
 
+concurrency:
+  group: steel-browser-production
+  cancel-in-progress: false
+
+env:
+  PROJECT_ID: rss7-ai-media
+  PROJECT_NUMBER: "518404402696"
+  REGION: us-central1
+  SERVICE: steel-browser-mcp
+  ARTIFACT_REPO: cloud-run-source-deploy
+  WIF_PROVIDER: projects/518404402696/locations/global/workloadIdentityPools/github-actions-ai-agent/providers/steel-main
+  DEPLOYER_SA: github-actions-steel-deployer@rss7-ai-media.iam.gserviceaccount.com
+
 jobs:
-  acceptance:
-    name: Real 5-step Steel browser lifecycle
+  deploy-and-accept:
+    name: Deploy Steel and run real 5-step lifecycle
     runs-on: ubuntu-latest
     steps:
-      - name: Request short-lived GitHub OIDC token
+      - name: Checkout main
+        uses: actions/checkout@v7
+
+      - name: Authenticate to Google Cloud with keyless WIF
+        uses: google-github-actions/auth@v3
+        with:
+          project_id: ${{ env.PROJECT_ID }}
+          workload_identity_provider: ${{ env.WIF_PROVIDER }}
+          service_account: ${{ env.DEPLOYER_SA }}
+
+      - name: Set up gcloud
+        uses: google-github-actions/setup-gcloud@v3
+
+      - name: Configure Artifact Registry Docker authentication
+        shell: bash
+        run: gcloud auth configure-docker "${REGION}-docker.pkg.dev" --quiet
+
+      - name: Build and push Steel Browser image
+        id: image
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          image="${REGION}-docker.pkg.dev/${PROJECT_ID}/${ARTIFACT_REPO}/${SERVICE}:${GITHUB_SHA}"
+          docker build -f Dockerfile.steel-browser -t "$image" .
+          docker push "$image"
+          echo "uri=$image" >> "$GITHUB_OUTPUT"
+
+      - name: Update existing Cloud Run service image only
+        shell: bash
+        env:
+          IMAGE: ${{ steps.image.outputs.uri }}
+        run: |
+          set -Eeuo pipefail
+          gcloud run services update "$SERVICE" \
+            --project="$PROJECT_ID" \
+            --region="$REGION" \
+            --image="$IMAGE" \
+            --quiet
+
+      - name: Verify Cloud Run readiness
+        id: service
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          base="$(gcloud run services describe "$SERVICE" \
+            --project="$PROJECT_ID" --region="$REGION" \
+            --format='value(status.url)')"
+          test -n "$base"
+          base="${base%/}"
+          echo "base=$base" >> "$GITHUB_OUTPUT"
+
+          ready=false
+          for _ in $(seq 1 10); do
+            body="$(curl -fsS --connect-timeout 10 --max-time 20 "$base/readyz" 2>/dev/null || true)"
+            if [[ "$body" == *'"ready":true'* || "$body" == *'"ready": true'* ]]; then
+              ready=true
+              break
+            fi
+            sleep 3
+          done
+          [[ "$ready" == true ]]
+          echo "Steel Browser /readyz: ready=true"
+
+      - name: Request short-lived GitHub OIDC token for application acceptance
         id: oidc
         shell: bash
         run: |
@@ -29,16 +109,15 @@ jobs:
           test -n "$token"
           echo "::add-mask::$token"
           echo "token=$token" >> "$GITHUB_OUTPUT"
-          echo "GitHub OIDC token acquired."
+          echo "Application acceptance OIDC token acquired."
 
       - name: Run Cloud Run self-acceptance endpoint
         shell: bash
         env:
-          BASE_URL: ${{ inputs.steel_browser_base_url }}
+          BASE_URL: ${{ steps.service.outputs.base }}
           OIDC_TOKEN: ${{ steps.oidc.outputs.token }}
         run: |
           set -Eeuo pipefail
-          base="${BASE_URL%/}"
           body="$(mktemp)"
           trap 'rm -f "$body"' EXIT
           status="$(curl -sS --connect-timeout 10 --max-time 180 \
@@ -46,7 +125,7 @@ jobs:
             -H "Authorization: Bearer ${OIDC_TOKEN}" \
             -H 'Accept: application/json' \
             -o "$body" -w '%{http_code}' \
-            "${base}/acceptance")"
+            "${BASE_URL%/}/acceptance")"
 
           python3 - "$status" "$body" <<'PY'
           import json
@@ -56,7 +135,7 @@ jobs:
           with open(sys.argv[2], encoding="utf-8") as fh:
               payload = json.load(fh)
 
-          # Response intentionally contains no session ID, token, or screenshot payload.
+          # The endpoint intentionally returns no session ID, token, or screenshot payload.
           print(json.dumps(payload, ensure_ascii=False, indent=2))
           if status != 200:
               raise SystemExit(f"acceptance endpoint returned HTTP {status}")
@@ -74,5 +153,5 @@ jobs:
           if observed != expected or any(step.get("status") != "pass" for step in payload["steps"]):
               raise SystemExit(f"unexpected acceptance steps: {observed}")
 
-          print("Steel Browser MCP acceptance: ALL PASS")
+          print("Steel Browser MCP deploy + acceptance: ALL PASS")
           PY
