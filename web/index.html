@@ -7,6 +7,9 @@
 <meta name="description" content="Claude Code / ChatGPT / Codex / Gemini などを使って作ってきたWebサイト・アプリ・AIエージェントの開発記録アーカイブ。">
 <meta name="theme-color" content="#05070f">
 <link rel="stylesheet" href="assets/css/style.css">
+<style>
+.media-preview-grid{display:grid;grid-template-columns:2fr 1fr 1fr;gap:12px}.media-preview-card{position:relative;display:block;overflow:hidden;min-height:180px;border-radius:20px;border:1px solid rgba(255,255,255,.09);background:#060914}.media-preview-card img,.media-preview-card video{width:100%;height:100%;object-fit:cover;display:block}.media-preview-wide{grid-row:span 2;min-height:372px}.media-preview-video{grid-column:span 2}.media-preview-video span{position:absolute;left:12px;bottom:12px;padding:7px 10px;border-radius:999px;background:rgba(3,7,16,.72);backdrop-filter:blur(10px);font-size:.72rem;font-weight:800;letter-spacing:.1em;color:#55e6ff}@media(max-width:760px){.media-preview-grid{grid-template-columns:1fr 1fr}.media-preview-wide{grid-column:1/-1;grid-row:auto;min-height:260px}.media-preview-video{grid-column:1/-1;min-height:220px}}
+</style>
 </head>
 <body>
   <header class="topbar">
@@ -16,6 +19,7 @@
       <input id="searchInput" type="search" placeholder="開発を検索（例: バス, Claude, PWA, GitHub）" aria-label="開発を検索" autocomplete="off">
     </label>
     <nav class="topbar-nav">
+      <a href="media-lab.html">MEDIA LAB</a>
       <a href="guides/index.html">ガイド</a>
     </nav>
   </header>
@@ -26,6 +30,19 @@
       <h1 class="hero-title">MY DEVELOPMENT ARCHIVE</h1>
       <p class="hero-subtitle">自分の開発記録</p>
       <div class="stats-row" id="statsRow"></div>
+    </section>
+
+    <section class="section" id="media-lab">
+      <div class="section-head">
+        <h2 class="section-title">Google Media MCP LAB</h2>
+        <p class="section-hint"><a href="media-lab.html">ギャラリーを見る →</a></p>
+      </div>
+      <div class="media-preview-grid">
+        <a class="media-preview-card media-preview-wide" href="media-lab.html"><img src="assets/google-media-acceptance/image-01.png" alt="Google Media MCP generated image"></a>
+        <a class="media-preview-card" href="media-lab.html"><img src="assets/google-media-acceptance/image-02.png" alt="Google Media MCP generated image"></a>
+        <a class="media-preview-card" href="media-lab.html"><img src="assets/google-media-acceptance/image-03.png" alt="Google Media MCP generated image"></a>
+        <a class="media-preview-card media-preview-video" href="media-lab.html"><video src="assets/google-media-acceptance/video-04.mp4" muted autoplay loop playsinline preload="metadata"></video><span>VEO VIDEO</span></a>
+      </div>
     </section>
 
     <section class="section" id="guides">
@@ -88,7 +105,7 @@
     </section>
 
     <footer class="site-footer">
-      <p>MY DEVELOPMENT ARCHIVE ・ <a href="diagram.html">構成図を見る</a> ・ <a href="https://github.com/oosaka0123-sudo/ai-agent" target="_blank" rel="noopener">GitHub</a></p>
+      <p>MY DEVELOPMENT ARCHIVE ・ <a href="media-lab.html">MEDIA LAB</a> ・ <a href="diagram.html">構成図を見る</a> ・ <a href="https://github.com/oosaka0123-sudo/ai-agent" target="_blank" rel="noopener">GitHub</a></p>
     </footer>
   </div>
 
