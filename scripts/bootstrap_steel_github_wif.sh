@@ -4,6 +4,8 @@ set -Eeuo pipefail
 PROJECT_ID="${PROJECT_ID:-rss7-ai-media}"
 REGION="${REGION:-us-central1}"
 GITHUB_REPOSITORY="${GITHUB_REPOSITORY:-oosaka0123-sudo/ai-agent}"
+GITHUB_REPOSITORY_ID="${GITHUB_REPOSITORY_ID:-1351103972}"
+GITHUB_REPOSITORY_OWNER_ID="${GITHUB_REPOSITORY_OWNER_ID:-281356293}"
 POOL_ID="${STEEL_GITHUB_WIF_POOL:-github-actions-ai-agent}"
 PROVIDER_ID="${STEEL_GITHUB_WIF_PROVIDER:-steel-main}"
 DEPLOYER_SA_NAME="${STEEL_GITHUB_DEPLOYER_SA:-github-actions-steel-deployer}"
@@ -49,8 +51,8 @@ if ! gcloud iam workload-identity-pools describe "$POOL_ID" \
     --display-name="ai-agent GitHub Actions"
 fi
 
-ATTRIBUTE_MAPPING="google.subject=assertion.sub,attribute.repository=assertion.repository,attribute.ref=assertion.ref,attribute.workflow_ref=assertion.workflow_ref"
-ATTRIBUTE_CONDITION="assertion.repository=='${GITHUB_REPOSITORY}' && assertion.ref=='refs/heads/main' && assertion.workflow_ref=='${GITHUB_REPOSITORY}/${WORKFLOW_PATH}@refs/heads/main' && (assertion.event_name=='push' || assertion.event_name=='workflow_dispatch')"
+ATTRIBUTE_MAPPING="google.subject=assertion.sub,attribute.repository=assertion.repository,attribute.repository_id=assertion.repository_id,attribute.repository_owner_id=assertion.repository_owner_id,attribute.ref=assertion.ref,attribute.workflow_ref=assertion.workflow_ref"
+ATTRIBUTE_CONDITION="assertion.repository=='${GITHUB_REPOSITORY}' && assertion.repository_id=='${GITHUB_REPOSITORY_ID}' && assertion.repository_owner_id=='${GITHUB_REPOSITORY_OWNER_ID}' && assertion.ref=='refs/heads/main' && assertion.workflow_ref=='${GITHUB_REPOSITORY}/${WORKFLOW_PATH}@refs/heads/main' && (assertion.event_name=='push' || assertion.event_name=='workflow_dispatch')"
 
 if ! gcloud iam workload-identity-pools providers describe "$PROVIDER_ID" \
   --project="$PROJECT_ID" --location=global \
@@ -80,7 +82,7 @@ printf '[4/7] Granting least-privilege WIF and deployment permissions...\n'
 gcloud iam service-accounts add-iam-policy-binding "$DEPLOYER_SA" \
   --project="$PROJECT_ID" \
   --role="roles/iam.workloadIdentityUser" \
-  --member="principalSet://iam.googleapis.com/${POOL_NAME}/attribute.repository/${GITHUB_REPOSITORY}" \
+  --member="principalSet://iam.googleapis.com/${POOL_NAME}/attribute.repository_id/${GITHUB_REPOSITORY_ID}" \
   >/dev/null
 
 gcloud projects add-iam-policy-binding "$PROJECT_ID" \
