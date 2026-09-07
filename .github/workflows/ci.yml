@@ -38,3 +38,6 @@ jobs:
 
       - name: "pytest 実行（tests/: ネットワーク接続不要な単体テストのみ。Google/GitHub の実API呼び出しはすべてfake/stubに置き換え済み）"
         run: pytest tests/
+
+      - name: Google Media MCP 再デプロイhelperのshell構文確認
+        run: bash -n scripts/redeploy_google_media_mcp.sh
