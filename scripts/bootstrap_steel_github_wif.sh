@@ -31,7 +31,7 @@ project_number="$(gcloud projects describe "$PROJECT_ID" --format='value(project
 [[ -n "$project_number" ]] || fail "could not resolve project number"
 
 printf '[1/7] Ensuring required identity APIs are enabled...\n'
-gcloud services enable iamcredentials.googleapis.com sts.googleapis.com \
+gcloud services enable iam.googleapis.com iamcredentials.googleapis.com sts.googleapis.com \
   --project="$PROJECT_ID" >/dev/null
 
 printf '[2/7] Ensuring GitHub deployer service account exists...\n'
