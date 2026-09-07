@@ -11,6 +11,7 @@ from datetime import datetime, timezone
 from html import unescape
 from typing import Any, Optional
 
+import httpx
 import steel
 from mcp.server.mcpserver import MCPServer
 from mcp.server.mcpserver.exceptions import ToolError
@@ -20,6 +21,8 @@ from .session_manager import SessionTracker
 from .url_validator import validate_url_safety
 
 logger = logging.getLogger("mcp_server.steel_browser.server")
+
+MAX_SCREENSHOT_BYTES = 4 * 1024 * 1024
 
 mcp = MCPServer(
     name="steel-browser",
@@ -46,6 +49,23 @@ def set_steel_client(client: Any) -> None:
     """Helper for injecting a mock Steel client in tests."""
     global _steel_client
     _steel_client = client
+
+
+def _download_screenshot_base64(url: str) -> str:
+    if not isinstance(url, str) or not url.startswith("https://"):
+        raise ToolError("steel_api_error: Upstream screenshot URL must use HTTPS.")
+    try:
+        response = httpx.get(url, follow_redirects=True, timeout=30.0)
+        response.raise_for_status()
+    except Exception as exc:
+        raise ToolError(f"steel_api_error: Failed to download hosted screenshot: {exc}") from exc
+
+    content_type = response.headers.get("content-type", "").split(";", 1)[0].strip().lower()
+    if content_type != "image/png":
+        raise ToolError(f"steel_api_error: Hosted screenshot returned unexpected content type: {content_type or 'missing'}")
+    if len(response.content) > MAX_SCREENSHOT_BYTES:
+        raise ToolError("steel_api_error: Hosted screenshot exceeds the 4 MiB safety limit.")
+    return base64.b64encode(response.content).decode("ascii")
 
 
 def _target_url_or_error(safe_url: Optional[str], last_url: Optional[str]) -> str:
@@ -271,12 +291,25 @@ def screenshot(
     session_tracker.touch(session_id, target_url)
 
     b64_data = ""
+    hosted_url = None
     if hasattr(shot_res, "image_base64") and shot_res.image_base64:
         b64_data = shot_res.image_base64
     elif hasattr(shot_res, "data") and isinstance(shot_res.data, bytes):
-        b64_data = base64.b64encode(shot_res.data).decode("utf-8")
+        b64_data = base64.b64encode(shot_res.data).decode("ascii")
+    if hasattr(shot_res, "url") and shot_res.url:
+        hosted_url = str(shot_res.url)
     elif isinstance(shot_res, dict):
-        b64_data = shot_res.get("image_base64") or shot_res.get("data") or ""
+        raw_data = shot_res.get("image_base64") or shot_res.get("data")
+        if not b64_data and isinstance(raw_data, bytes):
+            b64_data = base64.b64encode(raw_data).decode("ascii")
+        elif not b64_data and isinstance(raw_data, str):
+            b64_data = raw_data
+        hosted_url = shot_res.get("url")
+
+    if not b64_data and hosted_url:
+        b64_data = _download_screenshot_base64(hosted_url)
+    if not b64_data:
+        raise ToolError("steel_api_error: Upstream screenshot response contained no image payload or URL.")
 
     return {
         "session_id": session_id,
