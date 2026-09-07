@@ -13,6 +13,7 @@ credentials.json
 *service-account*.json
 *sa-key*.json
 gcp-*.json
+gha-creds-*.json
 __pycache__
 *.pyc
 .pytest_cache

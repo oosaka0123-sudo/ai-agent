@@ -1,10 +1,12 @@
-# Steel Browser MCP acceptance automation
+# Steel Browser MCP deploy + acceptance automation
 
 ## Goal
 
-Cloud Shellへの手入力を受入試験の必須条件から外し、GitHub ActionsからSteel Browser MCPの実ブラウザ5工程を安全に実行する。
+Steel Browser MCPを、初回のGCP trust bootstrap後は次の流れで自動運用する。
 
-対象工程:
+`main merge -> GitHub Actions OIDC -> container build/push -> Cloud Run image update -> /readyz -> real 5-step acceptance`
+
+受入工程:
 
 1. `create_session(project_slug="rss7-ai-media")`
 2. `navigate` → `https://example.com/`
@@ -14,39 +16,73 @@ Cloud Shellへの手入力を受入試験の必須条件から外し、GitHub Ac
 
 ## Security model
 
-- GitHub Actions側に`STEEL_API_KEY`や`STEEL_BROWSER_MCP_TOKEN`を保存しない。
-- workflowは`id-token: write`でGitHub Actions OIDCの短期JWTを取得する。
+- GitHub Actions SecretsへGCPサービスアカウント鍵、`STEEL_API_KEY`、`STEEL_BROWSER_MCP_TOKEN`を保存しない。
+- Google Cloudへの認証はGitHub Actions OIDC + Workload Identity Federation (WIF)を使う。
+- WIF providerは次を条件に固定する:
+  - repository: `oosaka0123-sudo/ai-agent`
+  - ref: `refs/heads/main`
+  - workflow_ref: `oosaka0123-sudo/ai-agent/.github/workflows/steel-browser-acceptance.yml@refs/heads/main`
+  - event: `push` または `workflow_dispatch`
+- GitHub deployer SAは `github-actions-steel-deployer@rss7-ai-media.iam.gserviceaccount.com`。
+- deployerにはArtifact Registry Writer、Cloud Run Developer、Service Usage Consumer、およびSteel runtime SAに対するService Account Userだけを付与する。
 - Cloud Runの`POST /acceptance`はMCP Bearer tokenとは別系統でGitHub OIDCを検証する。
-- JWT署名はGitHubのJWKSを使いRS256で検証する。
-- `iss` / `aud`に加えて以下を固定照合する:
-  - `repository = oosaka0123-sudo/ai-agent`
-  - `ref = refs/heads/main`
-  - `workflow_ref = oosaka0123-sudo/ai-agent/.github/workflows/steel-browser-acceptance.yml@refs/heads/main`
-  - `event_name = workflow_dispatch`
-- 別repo・別branch・別workflowのGitHub OIDC tokenでは起動できない。
+- application acceptance JWTはGitHub JWKS + RS256で検証し、repository/ref/workflow_ref/event/audienceをfail-closedで固定照合する。
 - レスポンスにsession ID、Steel API Key、MCP token、screenshot base64本体を含めない。
-- 返す実行証跡は各stepのPASS/FAIL、extract文字数、screenshot base64文字数、MIME typeのみ。
+- `gha-creds-*.json` は`.gitignore`と`.dockerignore`の両方で除外する。
 
-## Workflow
+## One-time bootstrap
 
-`.github/workflows/steel-browser-acceptance.yml`
+WIF trustはGCP側へ一度だけ作る必要がある。GCP認証済みCloud Shellで次の1行を実行する。
 
-GitHub Actionsの`Run workflow`から起動する。既定のCloud Run base URLは:
+```bash
+curl -fsSL https://raw.githubusercontent.com/oosaka0123-sudo/ai-agent/main/scripts/bootstrap_steel_github_wif.sh -o /tmp/bootstrap-steel-wif.sh && bash /tmp/bootstrap-steel-wif.sh
+```
 
-`https://steel-browser-mcp-518404402696.us-central1.run.app`
+このbootstrapはSecret値を表示せず、以下を連続実行する。
 
-service URLが変わった場合のみworkflow inputで上書きする。
+1. GitHub deployer service account作成（存在すれば再利用）
+2. Workload Identity Pool / Provider作成
+3. repository/main/workflow/event条件をproviderへ設定
+4. 最小限のdeploy権限を付与
+5. `ai-agent/main`を最新化
+6. `scripts/redeploy_steel_browser_mcp.sh`で現行mainをSteel Cloud Runへ再デプロイ
+7. `scripts/run_steel_acceptance_cloudshell.sh`で実5工程を実行
 
-## Initial deployment boundary
+したがって、この一度のbootstrapで現在のIssue #44の最終受入も実行できる。
 
-この機能を既存Steel Browser Cloud Runへ反映する最初の1回だけ、新revisionへの再デプロイが必要。その後の受入試験はCloud Shellへtokenやコマンドを貼らずGitHub Actionsから実行できる。
+## Automatic workflow
+
+`.github/workflows/steel-browser-acceptance.yml` は、Steel runtimeに影響するファイルが`main`へpushされた場合と、手動`workflow_dispatch`で動く。
+
+Actions側は:
+
+1. GitHub OIDCからWIF経由で短期GCP credentialsを取得
+2. GitHub runner上で`Dockerfile.steel-browser`をbuild
+3. `us-central1-docker.pkg.dev/rss7-ai-media/cloud-run-source-deploy/steel-browser-mcp:<commit SHA>`へpush
+4. 既存`steel-browser-mcp`サービスのimageだけを更新（Secret/env/runtime SA設定を上書きしない）
+5. `/readyz`を確認
+6. application acceptance用の別GitHub OIDC tokenを取得
+7. `POST /acceptance`で5工程を実行
+
+## Manual fallback
+
+自動デプロイ経路に障害がある場合だけ、GCP認証済み環境の最新`main`で:
+
+```bash
+bash scripts/redeploy_steel_browser_mcp.sh
+bash scripts/run_steel_acceptance_cloudshell.sh
+```
+
+を使う。通常運用では不要。
 
 ## Success criteria
 
-workflowがHTTP 200を受け、レスポンスが次を満たすこと:
+実環境で次を満たした場合のみIssue #44をcloseする。
 
-- `ok: true`
-- `result: ALL_PASS`
-- 5工程が上記順序で全て`status: pass`
-
-この条件を実環境で確認した後にのみIssue #44をcloseする。
+- `/readyz` = HTTP 200 / `ready=true`
+- `create_session` PASS
+- `navigate` PASS
+- `extract` PASS
+- `screenshot` PASS
+- `release_session` PASS
+- acceptance result = `ALL_PASS`
