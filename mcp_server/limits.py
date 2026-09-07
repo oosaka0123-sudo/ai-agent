@@ -20,6 +20,7 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_REGISTRY_PATH = REPO_ROOT / "projects" / "registry.json"
 
 SLUG_RE = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
+GCS_URI_RE = re.compile(r"^gs://[a-z0-9][a-z0-9._-]{1,221}/.+$")
 
 
 class LimitError(ValueError):
@@ -53,6 +54,21 @@ def validate_image_count(count: int, limits: Limits) -> None:
         raise LimitError("count must be at least 1")
     if count > limits.max_image_count:
         raise LimitError(f"count={count} exceeds the configured cap of {limits.max_image_count}")
+
+
+def validate_image_uri(image: str | None) -> None:
+    """`generate_video`'s optional image-to-video input must be a `gs://`
+    URI (e.g. the `gcs_uri` a prior `generate_image` call returned) -- Veo
+    reads it directly from GCS, so a local path or signed HTTPS URL would
+    silently fail deep inside the Vertex AI call instead of failing fast
+    here with a clear message."""
+    if image is None:
+        return
+    if not GCS_URI_RE.match(image):
+        raise LimitError(
+            f"invalid image: {image!r} (must be a gs://<bucket>/<object> URI, "
+            "e.g. the gcs_uri a prior generate_image call returned)"
+        )
 
 
 def validate_video_duration(duration_seconds: int | None, limits: Limits) -> None:

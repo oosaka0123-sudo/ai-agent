@@ -101,5 +101,59 @@ def test_generate_video_uses_default_model(monkeypatch):
 
     call_kwargs = fake_client.models.generate_videos.call_args.kwargs
     assert call_kwargs["model"] == "veo-3.1-fast-generate-001"
+    assert call_kwargs["source"].image is None
     assert result.model == "veo-3.1-fast-generate-001"
     assert result.assets == [video]
+
+
+def test_generate_video_without_image_omits_source_image(monkeypatch):
+    fake_client = MagicMock()
+    operation = MagicMock()
+    operation.done = True
+    operation.error = None
+    operation.result.generated_videos = [MagicMock(video=MagicMock())]
+    fake_client.models.generate_videos.return_value = operation
+    monkeypatch.setattr(google_provider.genai, "Client", lambda **_: fake_client)
+
+    provider = GoogleVertexProvider()
+    provider.generate_video(prompt="text-to-video only")
+
+    source = fake_client.models.generate_videos.call_args.kwargs["source"]
+    assert source.prompt == "text-to-video only"
+    assert source.image is None
+
+
+def test_generate_video_passes_gcs_image_for_image_to_video_conditioning(monkeypatch):
+    fake_client = MagicMock()
+    operation = MagicMock()
+    operation.done = True
+    operation.error = None
+    operation.result.generated_videos = [MagicMock(video=MagicMock())]
+    fake_client.models.generate_videos.return_value = operation
+    monkeypatch.setattr(google_provider.genai, "Client", lambda **_: fake_client)
+
+    provider = GoogleVertexProvider()
+    gcs_uri = "gs://rss7-ai-media-genmedia/projects/ai-agent/images/2026/09/image_x.png"
+    provider.generate_video(prompt="animate this image", image=gcs_uri)
+
+    source = fake_client.models.generate_videos.call_args.kwargs["source"]
+    assert source.image is not None
+    assert source.image.gcs_uri == gcs_uri
+    assert source.image.mime_type == "image/png"
+
+
+def test_generate_video_guesses_mime_type_from_image_extension(monkeypatch):
+    fake_client = MagicMock()
+    operation = MagicMock()
+    operation.done = True
+    operation.error = None
+    operation.result.generated_videos = [MagicMock(video=MagicMock())]
+    fake_client.models.generate_videos.return_value = operation
+    monkeypatch.setattr(google_provider.genai, "Client", lambda **_: fake_client)
+
+    provider = GoogleVertexProvider()
+    gcs_uri = "gs://rss7-ai-media-genmedia/projects/ai-agent/images/2026/09/image_x.jpg"
+    provider.generate_video(prompt="animate this image", image=gcs_uri)
+
+    source = fake_client.models.generate_videos.call_args.kwargs["source"]
+    assert source.image.mime_type == "image/jpeg"
