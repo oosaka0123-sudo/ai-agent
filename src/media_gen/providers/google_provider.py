@@ -188,30 +188,45 @@ class GoogleVertexProvider:
         timeout: float = 600.0,
         **_: object,
     ) -> GenerationResult:
-        """Backward-compatible synchronous wrapper around the resumable API."""
-        started = self.start_video_generation(
-            prompt=prompt,
-            model=model,
-            count=count,
-            aspect_ratio=aspect_ratio,
-            negative_prompt=negative_prompt,
-            duration_seconds=duration_seconds,
-            image=image,
+        """Generate a video synchronously, preserving the original behavior.
+
+        The resumable start/check methods are intentionally separate so
+        existing callers and tests keep the established operation-object
+        polling semantics.
+        """
+        resolved_model = model or DEFAULT_VIDEO_MODEL
+
+        operation = self._client.models.generate_videos(
+            model=resolved_model,
+            source=self._video_source(prompt, image),
+            config=types.GenerateVideosConfig(
+                number_of_videos=count,
+                aspect_ratio=aspect_ratio,
+                negative_prompt=negative_prompt,
+                duration_seconds=duration_seconds,
+            ),
         )
-        operation_name = started["operation_name"]
-        resolved_model = started["model"]
 
         start = time.monotonic()
-        while True:
-            checked = self.check_video_generation(
-                operation_name=operation_name,
-                model=resolved_model,
-            )
-            if checked["status"] == "success":
-                return checked["generation"]  # type: ignore[return-value]
+        while not operation.done:
             if time.monotonic() - start > timeout:
                 raise TimeoutError(
                     f"動画生成が{timeout:.0f}秒以内に完了しませんでした"
-                    f"（ジョブ名: {operation_name}）。"
+                    f"（ジョブ名: {operation.name}）。"
                 )
             time.sleep(poll_interval)
+            operation = self._client.operations.get(operation)
+
+        if operation.error:
+            raise RuntimeError(f"動画生成ジョブが失敗しました: {operation.error}")
+
+        result = operation.result
+        if not result or not result.generated_videos:
+            raise RuntimeError(
+                "動画が生成されませんでした（安全フィルター等で除外された可能性があります）。"
+            )
+
+        return GenerationResult(
+            model=resolved_model,
+            assets=[generated.video for generated in result.generated_videos],
+        )
