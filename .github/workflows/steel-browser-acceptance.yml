@@ -78,11 +78,7 @@ jobs:
         shell: bash
         run: |
           set -Eeuo pipefail
-          base="$(gcloud run services describe "$SERVICE" \
-            --project="$PROJECT_ID" --region="$REGION" \
-            --format='value(status.url)')"
-          test -n "$base"
-          base="${base%/}"
+          base="https://${SERVICE}-${PROJECT_NUMBER}.${REGION}.run.app"
           echo "base=$base" >> "$GITHUB_OUTPUT"
 
           ready=false
