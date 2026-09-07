@@ -41,3 +41,6 @@ jobs:
 
       - name: Google Media MCP 再デプロイhelperのshell構文確認
         run: bash -n scripts/redeploy_google_media_mcp.sh
+
+      - name: Steel Browser MCP 受入試験helperのshell構文確認
+        run: bash -n scripts/run_steel_acceptance_cloudshell.sh
