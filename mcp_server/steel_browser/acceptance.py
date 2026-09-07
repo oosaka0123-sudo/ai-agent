@@ -13,6 +13,8 @@ _GITHUB_ISSUER = "https://token.actions.githubusercontent.com"
 _GITHUB_JWKS_URL = "https://token.actions.githubusercontent.com/.well-known/jwks"
 _DEFAULT_AUDIENCE = "steel-browser-acceptance"
 _DEFAULT_REPOSITORY = "oosaka0123-sudo/ai-agent"
+_DEFAULT_REPOSITORY_ID = "1351103972"
+_DEFAULT_REPOSITORY_OWNER_ID = "281356293"
 _DEFAULT_REF = "refs/heads/main"
 _DEFAULT_WORKFLOW = ".github/workflows/steel-browser-acceptance.yml"
 _ALLOWED_EVENTS = {"push", "workflow_dispatch"}
@@ -24,6 +26,12 @@ def _expected_claims() -> dict[str, str]:
     repository = os.environ.get(
         "STEEL_ACCEPTANCE_GITHUB_REPOSITORY", _DEFAULT_REPOSITORY
     ).strip()
+    repository_id = os.environ.get(
+        "STEEL_ACCEPTANCE_GITHUB_REPOSITORY_ID", _DEFAULT_REPOSITORY_ID
+    ).strip()
+    repository_owner_id = os.environ.get(
+        "STEEL_ACCEPTANCE_GITHUB_REPOSITORY_OWNER_ID", _DEFAULT_REPOSITORY_OWNER_ID
+    ).strip()
     ref = os.environ.get("STEEL_ACCEPTANCE_GITHUB_REF", _DEFAULT_REF).strip()
     workflow_path = os.environ.get(
         "STEEL_ACCEPTANCE_GITHUB_WORKFLOW", _DEFAULT_WORKFLOW
@@ -33,6 +41,8 @@ def _expected_claims() -> dict[str, str]:
     ).strip()
     return {
         "repository": repository,
+        "repository_id": repository_id,
+        "repository_owner_id": repository_owner_id,
         "ref": ref,
         "workflow_ref": f"{repository}/{workflow_path}@{ref}",
         "audience": audience,
@@ -60,6 +70,8 @@ def verify_github_actions_oidc(token: str) -> dict[str, Any]:
                 "iss",
                 "aud",
                 "repository",
+                "repository_id",
+                "repository_owner_id",
                 "ref",
                 "workflow_ref",
                 "event_name",
@@ -69,6 +81,10 @@ def verify_github_actions_oidc(token: str) -> dict[str, Any]:
 
     if claims.get("repository") != expected["repository"]:
         raise ValueError("repository claim mismatch")
+    if str(claims.get("repository_id")) != expected["repository_id"]:
+        raise ValueError("repository_id claim mismatch")
+    if str(claims.get("repository_owner_id")) != expected["repository_owner_id"]:
+        raise ValueError("repository_owner_id claim mismatch")
     if claims.get("ref") != expected["ref"]:
         raise ValueError("ref claim mismatch")
     if claims.get("workflow_ref") != expected["workflow_ref"]:
