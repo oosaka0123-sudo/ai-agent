@@ -2,8 +2,8 @@
 
 画像は Gemini（`client.models.generate_content` + `response_modalities=["IMAGE"]`）、
 動画は Veo（`client.models.generate_videos`）を呼び出す。動画生成は非同期の
-ロングランニングオペレーションなので、ジョブ開始 → `client.operations.get`
-で状態確認 → 完了、の流れをここで吸収する。
+ロングランニングオペレーションなので、通常の同期ヘルパーに加えて
+「開始」と「状態確認」を分離した resumable API も提供する。
 
 認証情報はコードに直接書かない。`genai.Client(vertexai=True, ...)` は
 Application Default Credentials（`gcloud auth application-default login`）や
@@ -21,14 +21,6 @@ from google.genai import types
 from ..config import get_google_config
 from .base import GenerationResult
 
-# 2026年時点でVertex AI上で利用できる代表的なモデル。
-# モデルは頻繁に更新されるため、必要に応じて --model で上書きすること。
-#
-# 画像はImagen専用のgenerate_images ではなく、Gemini本体の
-# generate_content（response_modalities=["IMAGE"]）を使う。旧
-# imagen-3.0-generate-002 / imagen-4.0-generate-001 はプロジェクト
-# rss7-ai-media のVertex AI上でPublisher Model 404を返し続けたため
-# （Issue #43）、現行のモデル構成へ切り替えた。
 DEFAULT_IMAGE_MODEL = "gemini-2.5-flash-image"
 DEFAULT_VIDEO_MODEL = "veo-3.1-fast-generate-001"
 
@@ -59,8 +51,6 @@ class GoogleVertexProvider:
     ) -> GenerationResult:
         resolved_model = model or DEFAULT_IMAGE_MODEL
 
-        # Geminiのgenerate_contentには専用のnegative_prompt引数がないため、
-        # プロンプト本文に折り込む。
         full_prompt = prompt
         if negative_prompt:
             full_prompt = f"{prompt}\n\nAvoid: {negative_prompt}"
@@ -99,6 +89,91 @@ class GoogleVertexProvider:
 
         return GenerationResult(model=resolved_model, assets=assets)
 
+    @staticmethod
+    def _video_source(prompt: str, image: Optional[str]) -> types.GenerateVideosSource:
+        source_image = None
+        if image:
+            guessed_mime_type, _ = mimetypes.guess_type(image)
+            source_image = types.Image(
+                gcs_uri=image,
+                mime_type=guessed_mime_type or "image/png",
+            )
+        return types.GenerateVideosSource(prompt=prompt, image=source_image)
+
+    def start_video_generation(
+        self,
+        *,
+        prompt: str,
+        model: Optional[str] = None,
+        count: int = 1,
+        aspect_ratio: Optional[str] = None,
+        negative_prompt: Optional[str] = None,
+        duration_seconds: Optional[int] = None,
+        image: Optional[str] = None,
+        **_: object,
+    ) -> dict[str, str]:
+        """Start a Veo long-running operation and return immediately.
+
+        The returned operation name is safe to persist and can be passed to
+        :meth:`check_video_generation` from a later MCP request. This is the
+        resumable path used when an MCP client has a shorter request timeout
+        than Veo's generation latency.
+        """
+        resolved_model = model or DEFAULT_VIDEO_MODEL
+        operation = self._client.models.generate_videos(
+            model=resolved_model,
+            source=self._video_source(prompt, image),
+            config=types.GenerateVideosConfig(
+                number_of_videos=count,
+                aspect_ratio=aspect_ratio,
+                negative_prompt=negative_prompt,
+                duration_seconds=duration_seconds,
+            ),
+        )
+        if not operation.name:
+            raise RuntimeError("動画生成ジョブのoperation nameを取得できませんでした。")
+        return {"model": resolved_model, "operation_name": operation.name}
+
+    def check_video_generation(
+        self,
+        *,
+        operation_name: str,
+        model: Optional[str] = None,
+    ) -> dict[str, object]:
+        """Check one Veo operation without blocking for completion."""
+        if not operation_name or "/operations/" not in operation_name:
+            raise ValueError("有効なVeo operation nameが必要です。")
+
+        operation = types.GenerateVideosOperation(name=operation_name)
+        operation = self._client.operations.get(operation)
+
+        if not operation.done:
+            return {
+                "status": "processing",
+                "operation_name": operation_name,
+                "model": model or DEFAULT_VIDEO_MODEL,
+            }
+
+        if operation.error:
+            raise RuntimeError(f"動画生成ジョブが失敗しました: {operation.error}")
+
+        result = operation.result
+        if not result or not result.generated_videos:
+            raise RuntimeError(
+                "動画が生成されませんでした（安全フィルター等で除外された可能性があります）。"
+            )
+
+        generation = GenerationResult(
+            model=model or DEFAULT_VIDEO_MODEL,
+            assets=[generated.video for generated in result.generated_videos],
+        )
+        return {
+            "status": "success",
+            "operation_name": operation_name,
+            "model": generation.model,
+            "generation": generation,
+        }
+
     def generate_video(
         self,
         *,
@@ -113,53 +188,30 @@ class GoogleVertexProvider:
         timeout: float = 600.0,
         **_: object,
     ) -> GenerationResult:
-        resolved_model = model or DEFAULT_VIDEO_MODEL
-
-        # image-to-video: `image` is a `gs://` URI of a previously generated
-        # asset (typically this provider's own generate_image output). Veo
-        # reads it directly from GCS -- the SDK never downloads the bytes
-        # through this process, it just needs the URI and a MIME type.
-        source_image = None
-        if image:
-            guessed_mime_type, _ = mimetypes.guess_type(image)
-            source_image = types.Image(
-                gcs_uri=image,
-                mime_type=guessed_mime_type or "image/png",
-            )
-
-        # ジョブ開始（非同期のロングランニングオペレーション）
-        operation = self._client.models.generate_videos(
-            model=resolved_model,
-            source=types.GenerateVideosSource(prompt=prompt, image=source_image),
-            config=types.GenerateVideosConfig(
-                number_of_videos=count,
-                aspect_ratio=aspect_ratio,
-                negative_prompt=negative_prompt,
-                duration_seconds=duration_seconds,
-            ),
+        """Backward-compatible synchronous wrapper around the resumable API."""
+        started = self.start_video_generation(
+            prompt=prompt,
+            model=model,
+            count=count,
+            aspect_ratio=aspect_ratio,
+            negative_prompt=negative_prompt,
+            duration_seconds=duration_seconds,
+            image=image,
         )
+        operation_name = started["operation_name"]
+        resolved_model = started["model"]
 
-        # 状態確認 → 完了まで待機
         start = time.monotonic()
-        while not operation.done:
+        while True:
+            checked = self.check_video_generation(
+                operation_name=operation_name,
+                model=resolved_model,
+            )
+            if checked["status"] == "success":
+                return checked["generation"]  # type: ignore[return-value]
             if time.monotonic() - start > timeout:
                 raise TimeoutError(
                     f"動画生成が{timeout:.0f}秒以内に完了しませんでした"
-                    f"（ジョブ名: {operation.name}）。"
+                    f"（ジョブ名: {operation_name}）。"
                 )
             time.sleep(poll_interval)
-            operation = self._client.operations.get(operation)
-
-        if operation.error:
-            raise RuntimeError(f"動画生成ジョブが失敗しました: {operation.error}")
-
-        result = operation.result
-        if not result or not result.generated_videos:
-            raise RuntimeError(
-                "動画が生成されませんでした（安全フィルター等で除外された可能性があります）。"
-            )
-
-        return GenerationResult(
-            model=resolved_model,
-            assets=[generated.video for generated in result.generated_videos],
-        )
