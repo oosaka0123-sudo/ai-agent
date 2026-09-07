@@ -1,11 +1,8 @@
-"""The two MCP tools: `generate_image` and `generate_video`.
+"""Google Media MCP tools for image and video generation.
 
-Both tools run the full job → poll → success/failed → save-to-GCS cycle
-inside the tool call itself, so Claude Code makes one call and gets a final
-result — it never has to poll. All Vertex AI calls go through
-`media_gen.providers.google_provider.GoogleVertexProvider` (PR #26); this
-module only adds request validation, provider routing, retry orchestration,
-GCS persistence, audit logging, and cost-safety limits around it.
+`generate_image` and the legacy `generate_video` keep their existing synchronous
+behavior. `start_video_generation` + `check_video_generation` provide a resumable
+Veo path for MCP clients whose per-tool timeout is shorter than video generation.
 """
 from __future__ import annotations
 
@@ -47,10 +44,9 @@ mcp = MCPServer(
     name="google-media",
     title="Google Media (Imagen / Veo)",
     description=(
-        "Generates images (Imagen) and video (Veo) via Google Vertex AI, "
-        "stores the results in Google Cloud Storage, and returns their "
-        "location. Video generation is handled fully server-side, "
-        "including polling — a single call returns the final result."
+        "Generates images (Gemini) and video (Veo) via Google Vertex AI, "
+        "stores results in Google Cloud Storage, and supports resumable video "
+        "operations for MCP clients with short request timeouts."
     ),
 )
 
@@ -60,8 +56,6 @@ _gate: Optional[ConcurrencyGate] = None
 
 
 def _lazy_init() -> tuple[ServerConfig, GcsUploader, ConcurrencyGate]:
-    """Deferred so importing this module (e.g. for tests) never requires real
-    GCP env vars or credentials unless a tool is actually invoked."""
     global _config, _uploader, _gate
     if _config is None:
         _config = get_server_config()
@@ -74,6 +68,35 @@ def _lazy_init() -> tuple[ServerConfig, GcsUploader, ConcurrencyGate]:
     return _config, _uploader, _gate
 
 
+def _persist_assets(
+    *,
+    generation,
+    media_type: str,
+    project_slug: str,
+    uploader: GcsUploader,
+) -> list[dict[str, Any]]:
+    scratch_dir = Path(tempfile.mkdtemp(prefix="google-media-"))
+    try:
+        assets_out = []
+        for index, asset in enumerate(generation.assets):
+            mime_type = getattr(asset, "mime_type", None)
+            local_path = build_local_scratch_path(
+                scratch_dir, media_type, mime_type, index=index
+            )
+            asset.save(str(local_path))
+            object_path = build_gcs_object_path(
+                project_slug, media_type, local_path.name
+            )
+            gcs_uri = uploader.upload_file(
+                local_path, object_path, content_type=mime_type
+            )
+            url = uploader.signed_url(object_path)
+            assets_out.append({"index": index, "gcs_uri": gcs_uri, "url": url})
+        return assets_out
+    finally:
+        shutil.rmtree(scratch_dir, ignore_errors=True)
+
+
 def _run_generation(
     *,
     media_type: str,
@@ -84,9 +107,6 @@ def _run_generation(
     aspect_ratio: Optional[str],
     requested_duration_seconds: Optional[float] = None,
 ) -> dict[str, Any]:
-    # Validate before touching GCP config, so a malformed request fails with a
-    # clear message even if the server's own GOOGLE_CLOUD_PROJECT/GCS bucket
-    # env vars happen to be missing or misconfigured.
     validate_project_slug(project_slug)
     try:
         config, uploader, gate = _lazy_init()
@@ -94,11 +114,6 @@ def _run_generation(
         raise ToolError(f"server_configuration: {exc}") from exc
 
     try:
-        # Only resolves the *name* here (cheap) — the actual provider client
-        # is constructed once, lazily, inside `call_provider` itself. Doing
-        # it here too would construct (e.g.) GoogleVertexProvider twice per
-        # request for no reason, and its own RuntimeError (missing GCP env
-        # vars) wouldn't be one this except clause catches anyway.
         resolved_provider_name = resolve_provider_name(provider_name)
     except ProviderUnavailableError as exc:
         raise ToolError(f"provider_unavailable: {exc}") from exc
@@ -112,9 +127,6 @@ def _run_generation(
     started = time.monotonic()
 
     try:
-        # retry_result.attempts (used below, in both the failure and success
-        # audit-log entries) already carries the final attempt count --
-        # nothing else here needs a running counter of its own.
         retry_result = run_with_retry(
             call_provider,
             max_attempts=config.limits.max_retry_attempts,
@@ -142,19 +154,12 @@ def _run_generation(
             raise ToolError(f"{classified.category}: {classified.message}")
 
         generation = retry_result.value
-        scratch_dir = Path(tempfile.mkdtemp(prefix="google-media-"))
-        try:
-            assets_out = []
-            for index, asset in enumerate(generation.assets):
-                mime_type = getattr(asset, "mime_type", None)
-                local_path = build_local_scratch_path(scratch_dir, media_type, mime_type, index=index)
-                asset.save(str(local_path))
-                object_path = build_gcs_object_path(project_slug, media_type, local_path.name)
-                gcs_uri = uploader.upload_file(local_path, object_path, content_type=mime_type)
-                url = uploader.signed_url(object_path)
-                assets_out.append({"index": index, "gcs_uri": gcs_uri, "url": url})
-        finally:
-            shutil.rmtree(scratch_dir, ignore_errors=True)
+        assets_out = _persist_assets(
+            generation=generation,
+            media_type=media_type,
+            project_slug=project_slug,
+            uploader=uploader,
+        )
 
         duration_seconds = time.monotonic() - started
         created_at = datetime.now(timezone.utc).isoformat()
@@ -208,22 +213,7 @@ def generate_image(
     output_format: str = "image/png",
     provider: str = "auto",
 ) -> dict[str, Any]:
-    """Generate one or more images with Google Vertex AI (Imagen).
-
-    Args:
-        prompt: What to generate.
-        project_slug: The registered site/project this belongs to (lowercase
-            kebab-case, matching projects/registry.json). Used for GCS
-            layout and audit logs — required so generated media always has
-            a clear owner.
-        aspect_ratio: e.g. "1:1", "16:9", "9:16". Provider default if omitted.
-        model: Overrides the provider's default image model.
-        count: Number of images (capped by GOOGLE_MEDIA_MAX_IMAGE_COUNT).
-        negative_prompt: Elements to avoid.
-        output_format: Image MIME type, e.g. "image/png".
-        provider: "google" (only implemented provider today) or "auto".
-    """
-    # Cheap, GCP-config-independent validation first (see _run_generation).
+    """Generate one or more images with Google Vertex AI."""
     try:
         validate_project_slug(project_slug)
         validate_image_count(count, Limits())
@@ -262,27 +252,7 @@ def generate_video(
     negative_prompt: Optional[str] = None,
     provider: str = "auto",
 ) -> dict[str, Any]:
-    """Generate a video with Google Vertex AI (Veo). Fully synchronous from
-    the caller's point of view: this call starts the job, polls until it
-    finishes or times out, uploads the result to GCS, and returns the final
-    outcome — never a job ID to poll separately.
-
-    Args:
-        prompt: What to generate.
-        project_slug: The registered site/project this belongs to (lowercase
-            kebab-case, matching projects/registry.json).
-        image: Optional gs:// URI of a previously generated image (e.g. the
-            gcs_uri a prior generate_image call returned) to use as the
-            first frame for image-to-video conditioning. Omit for
-            text-to-video.
-        aspect_ratio: e.g. "16:9", "9:16".
-        duration_seconds: Clip length (capped by
-            GOOGLE_MEDIA_MAX_VIDEO_DURATION_SECONDS).
-        model: Overrides the provider's default video model.
-        negative_prompt: Elements to avoid.
-        provider: "google" (only implemented provider today) or "auto".
-    """
-    # Cheap, GCP-config-independent validation first (see _run_generation).
+    """Generate a video synchronously. Kept for backward compatibility."""
     try:
         validate_project_slug(project_slug)
         validate_video_duration(duration_seconds, Limits())
@@ -314,3 +284,168 @@ def generate_video(
         aspect_ratio=aspect_ratio,
         requested_duration_seconds=duration_seconds,
     )
+
+
+@mcp.tool(structured_output=True)
+def start_video_generation(
+    prompt: str,
+    project_slug: str,
+    image: Optional[str] = None,
+    aspect_ratio: Optional[str] = None,
+    duration_seconds: Optional[int] = None,
+    model: Optional[str] = None,
+    negative_prompt: Optional[str] = None,
+    provider: str = "auto",
+) -> dict[str, Any]:
+    """Start a Veo job and return immediately with a resumable operation name.
+
+    Use this instead of `generate_video` when the MCP client enforces a short
+    per-tool timeout. Call `check_video_generation` with the returned values
+    until status becomes `success`.
+    """
+    try:
+        validate_project_slug(project_slug)
+        validate_video_duration(duration_seconds, Limits())
+        validate_image_uri(image)
+    except LimitError as exc:
+        raise ToolError(f"invalid_request: {exc}") from exc
+
+    try:
+        resolved_provider_name = resolve_provider_name(provider)
+        _lazy_init()
+        p = get_provider(provider)
+        started = p.start_video_generation(
+            prompt=prompt,
+            model=model,
+            count=1,
+            aspect_ratio=aspect_ratio,
+            negative_prompt=negative_prompt,
+            duration_seconds=duration_seconds,
+            image=image,
+        )
+    except ProviderUnavailableError as exc:
+        raise ToolError(f"provider_unavailable: {exc}") from exc
+    except Exception as exc:
+        classified = classify_error(exc)
+        raise ToolError(f"{classified.category}: {classified.message}") from exc
+
+    return {
+        "provider": resolved_provider_name,
+        "type": "video",
+        "status": "processing",
+        "generation_id": uuid.uuid4().hex,
+        "project_slug": project_slug,
+        "prompt": prompt,
+        "aspect_ratio": aspect_ratio,
+        "requested_duration_seconds": duration_seconds,
+        "model": started["model"],
+        "operation_name": started["operation_name"],
+        "image": image,
+        "created_at": datetime.now(timezone.utc).isoformat(),
+    }
+
+
+@mcp.tool(structured_output=True)
+def check_video_generation(
+    operation_name: str,
+    project_slug: str,
+    generation_id: str,
+    prompt: str,
+    model: Optional[str] = None,
+    aspect_ratio: Optional[str] = None,
+    requested_duration_seconds: Optional[int] = None,
+    provider: str = "auto",
+) -> dict[str, Any]:
+    """Check a resumable Veo job once; upload to GCS only after completion."""
+    try:
+        validate_project_slug(project_slug)
+    except LimitError as exc:
+        raise ToolError(f"invalid_request: {exc}") from exc
+    if not generation_id:
+        raise ToolError("invalid_request: generation_id is required")
+    if not operation_name or "/operations/" not in operation_name:
+        raise ToolError("invalid_request: valid operation_name is required")
+
+    try:
+        resolved_provider_name = resolve_provider_name(provider)
+        _, uploader, _ = _lazy_init()
+        p = get_provider(provider)
+        checked = p.check_video_generation(
+            operation_name=operation_name,
+            model=model,
+        )
+    except ProviderUnavailableError as exc:
+        raise ToolError(f"provider_unavailable: {exc}") from exc
+    except Exception as exc:
+        classified = classify_error(exc)
+        write_audit_log(
+            AuditLogEntry(
+                project_slug=project_slug,
+                repository=None,
+                provider=provider,
+                model=model or "(unresolved)",
+                type="video",
+                prompt=prompt,
+                status="failed",
+                generation_id=generation_id,
+                error=classified.message,
+                error_category=classified.category,
+                retry_count=0,
+                requested_duration_seconds=requested_duration_seconds,
+            )
+        )
+        raise ToolError(f"{classified.category}: {classified.message}") from exc
+
+    if checked["status"] != "success":
+        return {
+            "provider": resolved_provider_name,
+            "type": "video",
+            "status": "processing",
+            "generation_id": generation_id,
+            "project_slug": project_slug,
+            "model": checked.get("model") or model,
+            "operation_name": operation_name,
+        }
+
+    generation = checked["generation"]
+    assets_out = _persist_assets(
+        generation=generation,
+        media_type="video",
+        project_slug=project_slug,
+        uploader=uploader,
+    )
+    first = assets_out[0] if assets_out else {}
+    created_at = datetime.now(timezone.utc).isoformat()
+
+    write_audit_log(
+        AuditLogEntry(
+            project_slug=project_slug,
+            repository=None,
+            provider=resolved_provider_name,
+            model=generation.model,
+            type="video",
+            prompt=prompt,
+            status="success",
+            generation_id=generation_id,
+            output_uri=first.get("gcs_uri"),
+            retry_count=0,
+            requested_duration_seconds=requested_duration_seconds,
+        )
+    )
+
+    return {
+        "provider": resolved_provider_name,
+        "model": generation.model,
+        "type": "video",
+        "status": "success",
+        "generation_id": generation_id,
+        "project_slug": project_slug,
+        "aspect_ratio": aspect_ratio,
+        "requested_duration_seconds": requested_duration_seconds,
+        "created_at": created_at,
+        "count": len(assets_out),
+        "gcs_uri": first.get("gcs_uri"),
+        "url": first.get("url"),
+        "assets": assets_out,
+        "operation_name": operation_name,
+    }
