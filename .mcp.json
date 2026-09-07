@@ -6,6 +6,13 @@
       "headers": {
         "Authorization": "Bearer ${GOOGLE_MEDIA_MCP_TOKEN}"
       }
+    },
+    "steel-browser": {
+      "type": "http",
+      "url": "${STEEL_BROWSER_MCP_URL}",
+      "headers": {
+        "Authorization": "Bearer ${STEEL_BROWSER_MCP_TOKEN}"
+      }
     }
   }
 }
