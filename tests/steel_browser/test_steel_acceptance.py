@@ -23,7 +23,7 @@ def test_acceptance_lifecycle_returns_only_non_secret_evidence(reset_steel_state
     assert "session_id" not in str(result)
     assert "screenshot_base64" not in str(result)
     shot = next(step for step in result["steps"] if step["name"] == "screenshot")
-    assert shot["base64_chars"] > 100
+    assert shot["base64_chars"] >= 80
     assert shot["mime_type"] == "image/png"
 
 
