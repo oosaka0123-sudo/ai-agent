@@ -109,8 +109,17 @@ def get_server_config() -> ServerConfig:
     # The MCP SDK's DNS-rebinding protection defaults to an *empty* allow-list,
     # which rejects every request (not just malicious ones) until the real
     # Cloud Run hostname is registered here. This is a required one-time step
-    # after first deploy — see docs/GOOGLE_MEDIA_MCP.md.
+    # after first deploy — see docs/GOOGLE_MEDIA_MCP.md. Enforced here (like
+    # every other required setting on this dataclass) so a deploy that forgets
+    # it fails loudly via /readyz instead of reporting ready=true while every
+    # real MCP request is silently rejected with 421 at the transport layer
+    # (mirrors mcp_server/steel_browser/config.py's identical check).
     allowed_hosts = _list_env("GOOGLE_MEDIA_MCP_ALLOWED_HOSTS")
+    if not allowed_hosts:
+        raise RuntimeError(
+            "GOOGLE_MEDIA_MCP_ALLOWED_HOSTS is not set. At least one explicit host is "
+            "required for DNS rebinding protection."
+        )
     allowed_origins = _list_env("GOOGLE_MEDIA_MCP_ALLOWED_ORIGINS")
 
     return ServerConfig(

@@ -46,3 +46,30 @@ def test_correct_token_is_accepted(monkeypatch):
             "/mcp", json=_TOOLS_LIST, headers={**_HEADERS, "Authorization": "Bearer secret"}
         )
     assert response.status_code == 200
+
+
+def _ready_env(monkeypatch):
+    monkeypatch.setenv("GOOGLE_CLOUD_PROJECT", "fake-project")
+    monkeypatch.setenv("GOOGLE_MEDIA_GCS_BUCKET", "fake-bucket")
+    monkeypatch.setenv("GOOGLE_MEDIA_MCP_TOKEN", "secret")
+    monkeypatch.setenv("GOOGLE_MEDIA_MCP_ALLOWED_HOSTS", "localhost")
+
+
+def test_readyz_configured(monkeypatch):
+    _ready_env(monkeypatch)
+    app = create_app()
+    with TestClient(app, base_url="http://localhost") as client:
+        response = client.get("/readyz")
+    assert response.status_code == 200
+    assert response.json() == {"ready": True}
+
+
+def test_readyz_missing_allowed_hosts(monkeypatch):
+    _ready_env(monkeypatch)
+    monkeypatch.delenv("GOOGLE_MEDIA_MCP_ALLOWED_HOSTS", raising=False)
+    app = create_app()
+    with TestClient(app, base_url="http://localhost") as client:
+        response = client.get("/readyz")
+    assert response.status_code == 503
+    assert response.json()["ready"] is False
+    assert "ALLOWED_HOSTS" in response.json()["error"]
