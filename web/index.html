@@ -8,7 +8,7 @@
 <meta name="theme-color" content="#05070f">
 <link rel="stylesheet" href="assets/css/style.css">
 <style>
-.media-preview-grid{display:grid;grid-template-columns:2fr 1fr 1fr;gap:12px}.media-preview-card{position:relative;display:block;overflow:hidden;min-height:180px;border-radius:20px;border:1px solid rgba(255,255,255,.09);background:#060914}.media-preview-card img,.media-preview-card video{width:100%;height:100%;object-fit:cover;display:block}.media-preview-wide{grid-row:span 2;min-height:372px}.media-preview-video{grid-column:span 2}.media-preview-video span{position:absolute;left:12px;bottom:12px;padding:7px 10px;border-radius:999px;background:rgba(3,7,16,.72);backdrop-filter:blur(10px);font-size:.72rem;font-weight:800;letter-spacing:.1em;color:#55e6ff}@media(max-width:760px){.media-preview-grid{grid-template-columns:1fr 1fr}.media-preview-wide{grid-column:1/-1;grid-row:auto;min-height:260px}.media-preview-video{grid-column:1/-1;min-height:220px}}
+.media-preview-grid{display:grid;grid-template-columns:2fr 1fr 1fr;gap:12px}.media-preview-card{position:relative;display:block;overflow:hidden;min-height:180px;border-radius:20px;border:1px solid rgba(255,255,255,.09);background:#060914}.media-preview-card img,.media-preview-card video{width:100%;height:100%;object-fit:cover;display:block}.media-preview-wide{grid-row:span 2;min-height:372px}.media-preview-video{grid-column:span 2}.media-preview-video span{position:absolute;left:12px;bottom:12px;padding:7px 10px;border-radius:999px;background:rgba(3,7,16,.72);backdrop-filter:blur(10px);font-size:.72rem;font-weight:800;letter-spacing:.1em;color:#55e6ff}.stack-feature{position:relative;display:grid;grid-template-columns:1.1fr .9fr;gap:0;overflow:hidden;border:1px solid rgba(96,165,250,.22);border-radius:24px;background:linear-gradient(135deg,rgba(17,24,48,.98),rgba(8,10,23,.98));box-shadow:var(--shadow-lg);text-decoration:none}.stack-feature-copy{padding:26px}.stack-feature-kicker{margin:0 0 8px;color:#55e6ff;font-size:.7rem;font-weight:800;letter-spacing:.13em}.stack-feature h3{margin:0;font-size:clamp(1.35rem,3vw,2rem);line-height:1.2}.stack-feature p{margin:12px 0 0;color:var(--text-dim);font-size:.9rem;line-height:1.7}.stack-feature-tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:18px}.stack-feature-tags span{padding:5px 9px;border:1px solid var(--border);border-radius:999px;color:var(--text-faint);font-size:.68rem}.stack-feature-media{position:relative;min-height:260px}.stack-feature-media img{display:block;width:100%;height:100%;object-fit:cover}.stack-feature-media:after{content:"OPEN SPECIAL PAGE →";position:absolute;right:12px;bottom:12px;padding:7px 10px;border-radius:999px;background:rgba(3,7,16,.78);font-size:.67rem;font-weight:800;letter-spacing:.06em;color:#fff}.topbar-nav{display:flex;gap:12px;align-items:center}.topbar-nav a{font-size:.76rem;color:var(--text-dim);text-decoration:none;white-space:nowrap}@media(max-width:760px){.media-preview-grid{grid-template-columns:1fr 1fr}.media-preview-wide{grid-column:1/-1;grid-row:auto;min-height:260px}.media-preview-video{grid-column:1/-1;min-height:220px}.stack-feature{grid-template-columns:1fr}.stack-feature-media{min-height:220px}.topbar{flex-wrap:wrap}.topbar-nav{width:100%;overflow:auto;padding-bottom:2px}}
 </style>
 </head>
 <body>
@@ -19,6 +19,7 @@
       <input id="searchInput" type="search" placeholder="開発を検索（例: バス, Claude, PWA, GitHub）" aria-label="開発を検索" autocomplete="off">
     </label>
     <nav class="topbar-nav">
+      <a href="remote-gcloud.html">REMOTE + GCLOUD</a>
       <a href="media-lab.html">MEDIA LAB</a>
       <a href="guides/index.html">ガイド</a>
     </nav>
@@ -30,6 +31,22 @@
       <h1 class="hero-title">MY DEVELOPMENT ARCHIVE</h1>
       <p class="hero-subtitle">自分の開発記録</p>
       <div class="stats-row" id="statsRow"></div>
+    </section>
+
+    <section class="section" id="remote-stack">
+      <div class="section-head">
+        <h2 class="section-title">Featured Stack</h2>
+        <p class="section-hint">実運用できるAI開発基盤</p>
+      </div>
+      <a class="stack-feature" href="remote-gcloud.html">
+        <div class="stack-feature-copy">
+          <p class="stack-feature-kicker">REMOTE DESKTOP COMMANDER × GOOGLE CLOUD</p>
+          <h3>WindowsのgcloudとGoogle Media MCPをAIから使う</h3>
+          <p>Remote Desktop Commanderを実行ブリッジにして、認証済みWindows → gcloud → Cloud Run → Gemini画像生成 → Veo動画生成までつないだ実運用スタック。</p>
+          <div class="stack-feature-tags"><span>Remote Desktop Commander</span><span>gcloud</span><span>Cloud Run</span><span>Google Media MCP</span><span>Gemini</span><span>Veo</span></div>
+        </div>
+        <div class="stack-feature-media"><img src="assets/remote-ai-agent-diagram.webp" alt="Remote Desktop CommanderとGoogle Cloudを含むAI開発構成" loading="lazy"></div>
+      </a>
     </section>
 
     <section class="section" id="media-lab">
@@ -105,7 +122,7 @@
     </section>
 
     <footer class="site-footer">
-      <p>MY DEVELOPMENT ARCHIVE ・ <a href="media-lab.html">MEDIA LAB</a> ・ <a href="diagram.html">構成図を見る</a> ・ <a href="https://github.com/oosaka0123-sudo/ai-agent" target="_blank" rel="noopener">GitHub</a></p>
+      <p>MY DEVELOPMENT ARCHIVE ・ <a href="remote-gcloud.html">REMOTE + GCLOUD</a> ・ <a href="media-lab.html">MEDIA LAB</a> ・ <a href="diagram.html">構成図を見る</a> ・ <a href="https://github.com/oosaka0123-sudo/ai-agent" target="_blank" rel="noopener">GitHub</a></p>
     </footer>
   </div>
 
