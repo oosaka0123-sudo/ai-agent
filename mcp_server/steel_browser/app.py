@@ -1,7 +1,8 @@
 """ASGI Starlette app for Steel Cloud Browser MCP server.
 
 Mounts the MCP server at `/mcp`, adds unauthenticated `/healthz` and `/readyz` probes,
-and requires Bearer token authentication (`STEEL_BROWSER_MCP_TOKEN`) on all MCP requests.
+and requires Bearer token authentication (`STEEL_BROWSER_MCP_TOKEN`) on MCP requests.
+The `/acceptance` endpoint uses separate GitHub Actions OIDC authentication.
 """
 from __future__ import annotations
 
@@ -21,10 +22,13 @@ from starlette.routing import Mount, Route
 
 from mcp.server.transport_security import TransportSecuritySettings
 
+from .acceptance import run_acceptance_lifecycle, verify_github_actions_oidc
 from .config import get_steel_config
 from .server import get_steel_client, mcp, session_tracker
 
-_UNAUTHENTICATED_PATHS = {"/healthz", "/readyz"}
+# These paths do not use the MCP bearer token. `/acceptance` performs its own
+# fail-closed GitHub Actions OIDC verification in the route handler.
+_MCP_AUTH_EXEMPT_PATHS = {"/healthz", "/readyz", "/acceptance"}
 
 
 class _JsonLogFormatter(logging.Formatter):
@@ -53,7 +57,7 @@ class SteelBearerAuthMiddleware(BaseHTTPMiddleware):
         self._token = token
 
     async def dispatch(self, request: Request, call_next):
-        if request.url.path in _UNAUTHENTICATED_PATHS:
+        if request.url.path in _MCP_AUTH_EXEMPT_PATHS:
             return await call_next(request)
         header = request.headers.get("authorization", "")
         if not self._token or header != f"Bearer {self._token}":
@@ -71,6 +75,27 @@ async def _readyz(_request: Request) -> JSONResponse:
     except RuntimeError as exc:
         return JSONResponse({"ready": False, "error": str(exc)}, status_code=503)
     return JSONResponse({"ready": True})
+
+
+def _bearer_token(request: Request) -> str:
+    header = request.headers.get("authorization", "")
+    prefix = "Bearer "
+    if not header.startswith(prefix):
+        return ""
+    return header[len(prefix) :].strip()
+
+
+async def _acceptance(request: Request) -> JSONResponse:
+    """Run the real 5-step Steel smoke test for the pinned GitHub workflow only."""
+    token = _bearer_token(request)
+    try:
+        await asyncio.to_thread(verify_github_actions_oidc, token)
+    except Exception:
+        # Do not disclose JWT validation details to callers.
+        return JSONResponse({"error": "unauthorized"}, status_code=401)
+
+    result = await asyncio.to_thread(run_acceptance_lifecycle)
+    return JSONResponse(result, status_code=200 if result.get("ok") else 502)
 
 
 async def _session_cleanup_loop(interval_seconds: float = 60.0) -> None:
@@ -126,6 +151,7 @@ def create_steel_app() -> Starlette:
         routes=[
             Route("/healthz", _healthz),
             Route("/readyz", _readyz),
+            Route("/acceptance", _acceptance, methods=["POST"]),
             Mount(
                 "/mcp",
                 app=mcp.streamable_http_app(

@@ -1,0 +1,78 @@
+name: Steel Browser Acceptance
+
+on:
+  workflow_dispatch:
+    inputs:
+      steel_browser_base_url:
+        description: "Steel Browser MCP Cloud Run base URL (override only if service URL changes)"
+        required: false
+        default: "https://steel-browser-mcp-518404402696.us-central1.run.app"
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  acceptance:
+    name: Real 5-step Steel browser lifecycle
+    runs-on: ubuntu-latest
+    steps:
+      - name: Request short-lived GitHub OIDC token
+        id: oidc
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          response="$(curl -fsS \
+            -H "Authorization: Bearer ${ACTIONS_ID_TOKEN_REQUEST_TOKEN}" \
+            "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=steel-browser-acceptance")"
+          token="$(python3 -c 'import json,sys; print(json.load(sys.stdin)["value"])' <<<"$response")"
+          test -n "$token"
+          echo "::add-mask::$token"
+          echo "token=$token" >> "$GITHUB_OUTPUT"
+          echo "GitHub OIDC token acquired."
+
+      - name: Run Cloud Run self-acceptance endpoint
+        shell: bash
+        env:
+          BASE_URL: ${{ inputs.steel_browser_base_url }}
+          OIDC_TOKEN: ${{ steps.oidc.outputs.token }}
+        run: |
+          set -Eeuo pipefail
+          base="${BASE_URL%/}"
+          body="$(mktemp)"
+          trap 'rm -f "$body"' EXIT
+          status="$(curl -sS --connect-timeout 10 --max-time 180 \
+            -X POST \
+            -H "Authorization: Bearer ${OIDC_TOKEN}" \
+            -H 'Accept: application/json' \
+            -o "$body" -w '%{http_code}' \
+            "${base}/acceptance")"
+
+          python3 - "$status" "$body" <<'PY'
+          import json
+          import sys
+
+          status = int(sys.argv[1])
+          with open(sys.argv[2], encoding="utf-8") as fh:
+              payload = json.load(fh)
+
+          # Response intentionally contains no session ID, token, or screenshot payload.
+          print(json.dumps(payload, ensure_ascii=False, indent=2))
+          if status != 200:
+              raise SystemExit(f"acceptance endpoint returned HTTP {status}")
+          if payload.get("ok") is not True or payload.get("result") != "ALL_PASS":
+              raise SystemExit("Steel acceptance did not report ALL_PASS")
+
+          expected = [
+              "create_session",
+              "navigate",
+              "extract",
+              "screenshot",
+              "release_session",
+          ]
+          observed = [step.get("name") for step in payload.get("steps", [])]
+          if observed != expected or any(step.get("status") != "pass" for step in payload["steps"]):
+              raise SystemExit(f"unexpected acceptance steps: {observed}")
+
+          print("Steel Browser MCP acceptance: ALL PASS")
+          PY
