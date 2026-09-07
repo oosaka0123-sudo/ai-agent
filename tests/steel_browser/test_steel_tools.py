@@ -3,8 +3,13 @@ create_session, navigate, extract, screenshot, release_session.
 """
 from __future__ import annotations
 
+import base64
+from types import SimpleNamespace
+
 import pytest
 from mcp.server.mcpserver.exceptions import ToolError
+
+import mcp_server.steel_browser.server as steel_server
 
 from mcp_server.steel_browser.server import (
     create_session,
@@ -110,6 +115,24 @@ def test_screenshot_success(reset_steel_state):
     assert shot_res["url"] == "https://example.com"
     assert shot_res["mime_type"] == "image/png"
     assert len(shot_res["screenshot_base64"]) > 0
+
+
+def test_screenshot_hosted_url_is_downloaded(reset_steel_state, monkeypatch):
+    mock_client = reset_steel_state
+    png_bytes = b"\x89PNG\r\n\x1a\n" + (b"steel" * 32)
+    mock_client.screenshot.return_value = SimpleNamespace(
+        image_base64=None, data=None, url="https://images.steel.dev/v1/static/test.png"
+    )
+    response = SimpleNamespace(
+        content=png_bytes, headers={"content-type": "image/png; charset=binary"}, raise_for_status=lambda: None
+    )
+    monkeypatch.setattr(steel_server.httpx, "get", lambda *args, **kwargs: response)
+
+    create_session(project_slug="my-project")
+    shot_res = screenshot(session_id="sess_mock_123", url="https://example.com")
+
+    assert shot_res["mime_type"] == "image/png"
+    assert shot_res["screenshot_base64"] == base64.b64encode(png_bytes).decode("ascii")
 
 
 def test_screenshot_after_navigation_returns_last_url(reset_steel_state):
