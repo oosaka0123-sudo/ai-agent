@@ -13,17 +13,15 @@ for cmd in gcloud python3 curl; do
   }
 done
 
-echo "[1/6] Resolving Steel Browser Cloud Run service..."
-BASE_URL="$(gcloud run services describe "$SERVICE" \
-  --project="$PROJECT_ID" \
-  --region="$REGION" \
-  --format='value(status.url)')"
-if [[ -z "$BASE_URL" ]]; then
-  echo "[FAIL] Cloud Run service URL could not be resolved." >&2
+echo "[1/6] Resolving Steel Browser canonical Cloud Run URL..."
+PROJECT_NUMBER="$(gcloud projects describe "$PROJECT_ID" --format='value(projectNumber)')"
+if [[ -z "$PROJECT_NUMBER" ]]; then
+  echo "[FAIL] Google Cloud project number could not be resolved." >&2
   exit 1
 fi
+BASE_URL="${STEEL_BROWSER_BASE_URL:-https://${SERVICE}-${PROJECT_NUMBER}.${REGION}.run.app}"
 BASE_URL="${BASE_URL%/}"
-MCP_URL="${BASE_URL}/mcp"
+MCP_URL="${BASE_URL}/mcp/"
 echo "[PASS] service resolved: $BASE_URL"
 
 echo "[2/6] Checking readiness..."
@@ -64,9 +62,8 @@ import asyncio
 import json
 import os
 
-import httpx2
 from mcp import Client
-from mcp.client.streamable_http import streamable_http_client
+from mcp.client.streamable_http import httpx2, streamable_http_client
 
 MCP_URL = os.environ["MCP_URL"]
 TOKEN = os.environ["STEEL_BROWSER_MCP_TOKEN"]
