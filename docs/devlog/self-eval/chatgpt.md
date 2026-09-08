@@ -175,6 +175,8 @@ GitHub Pagesへ `web/remote-gcloud.html` を追加し、Remote Desktop Commander
 
 ### 発見した問題と修正
 
+- OSバージョン自体は今回live verificationしていないのに初稿で「Windows 11」と断定していた。
+  - 対策: 公開文言を「Authorized Windows device」へ修正し、OBSERVEDの範囲に戻した。
 - gcloudのactive account identifierは確認できるがPublicページへ出す必要がない。
   - 対策: project名・SDK version等の非秘密情報だけを掲載し、account identifier / token / credentialは非掲載。
 - Claude Codeを主担当にする予定だったが、Windows側Claude OAuth sessionが期限切れだった。
