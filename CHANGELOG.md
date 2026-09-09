@@ -6,8 +6,38 @@
 
 ## [Unreleased]
 
+### Added
+
+- 「スマホだけでホームページを作る」ガイドのClaude Code版本文（`guides/smartphone-website/claude.md`）を執筆し、
+  3AI（Claude Code / Gemini・Jules / Codex）すべての本文が出揃った。
+- トップページ（`web/index.html`）にAI開発スタックのヒーローセクション（実生成メディアのプレビュー、
+  使用サービスバッジ、CTA導線）と「Featured Stack」カードを追加し、REMOTE + GCLOUD／MEDIA LABへの
+  導線をトップから直接提供するようにした。
+- 全ページ共通のアクセシビリティ基盤（`web/assets/js/render.js` / `web/assets/css/style.css`）を追加:
+  スキップリンク、`prefers-reduced-motion`対応（自動再生動画の停止・アニメーション無効化）、
+  `env(safe-area-inset-*)`によるノッチ・ホームバー対応、フォーカスリング、タップ領域44px確保。
+
 ### Fixed
 
+- 全ページ共通ナビ（`web/assets/js/render.js`）で、`web/guides/index.html` を開いたときに
+  「HOME」と「ガイド」の2項目が同時に`aria-current="page"`になっていた問題を修正。
+  現在地判定をURLベース名の比較から、リンクごとの解決済みフルパス比較に変更した。
+- PR #67のマージ前QA（Chrome DevTools Protocolによる390 CSSピクセル幅の実測）で発見した
+  モバイル横スクロール不具合を修正。閉じた状態のモバイル用ドロワーナビ（`.topbar-nav`、
+  `position:fixed`＋`transform:translateX(100%)`で画面外に配置）が、視覚的には見えないにも
+  かかわらずページ全体の横スクロール領域を310px分広げていた（`document.documentElement.scrollWidth`
+  が`clientWidth`を超過）。オフキャンバス表現を`transform`から、要素自体は常にビューポート内
+  （`right:0`）に置いたまま`clip-path`で表示/非表示を切り替える方式に変更し、根本原因を解消した
+  （`web/assets/js/render.js`）。あわせて`html`/`body`に`overflow-x:hidden`のフォールバック付き
+  `overflow-x:clip`を追加し、カード・タイムライン・ガイドテーマカード・Markdown本文中の
+  長い技術文字列（URL・トークン等）がグリッド/フレックスの列幅を押し広げないよう
+  `overflow-wrap:anywhere`（`min-width:0`と併用）を追加した（`web/assets/css/style.css`）。
+- `guides/themes.json` の「スマホだけでホームページを作る」テーマの全体ステータスが、
+  3AIすべての本文執筆完了後も`in-progress`のまま更新されておらず、ガイド一覧で
+  「執筆中」と誤表示されていた問題を修正（`completed`に更新）。
+- `.gitignore` に `web/competitions/` の除外を追加。`scripts/sync-site-data.sh` が
+  `competitions/` から複製するビルド成果物だが除外対象から漏れており、他の同期先
+  （`web/data/`・`web/guides-data/`）と扱いが不揃いだった。
 - Google Media MCP（`mcp_server/`）: Cloud Run配下で`POST /mcp`（末尾スラッシュなし）が
   `http://`（`https://`ではなく）への`307`リダイレクトを返し、HTTPS限定のクライアントが
   接続できなくなっていたコード側のバグを修正（`uvicorn.run`に
