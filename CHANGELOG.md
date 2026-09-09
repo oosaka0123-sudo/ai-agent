@@ -15,6 +15,7 @@
 
 ### Added
 
+- Added `scripts/steel_client_bridge.ps1` and `scripts/verify_steel_client.py` so Windows Codex / Claude Code clients can use the production Steel Browser MCP with a process-scoped token loaded from Google Secret Manager; no long-lived local token storage is required.
 - Steel Browser MCP専用の `Dockerfile.steel-browser` / `cloudbuild.steel-browser.yaml` を追加。
   既存の `gcloud run deploy --source=.` がリポジトリ直下の `Dockerfile`（無関係のGoogle Media
   MCP用）を拾ってしまい、Steel Browser MCPを正しくデプロイできなかったコード側の問題を修正した。

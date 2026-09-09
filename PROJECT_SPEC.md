@@ -219,6 +219,7 @@ AIエージェントは、作業完了前の自己レビュー（[`AGENTS.md`](A
   完結できる環境を目指す。このリポジトリでのローカル依存箇所の棚卸し（機能別の
   スマホ完結可否・問題・推奨構成・次の作業）は
   [`docs/MOBILE_CLOUD_FIRST.md`](docs/MOBILE_CLOUD_FIRST.md) にまとめている。
+- **Steel Browser local client bridge**: `scripts/steel_client_bridge.ps1` loads the MCP bearer token from Google Secret Manager only for the current process, verifies the Remote HTTP MCP, and connects Codex / Claude Code without committing or permanently storing the token. See [`docs/STEEL_CLIENT_CONNECTION.md`](docs/STEEL_CLIENT_CONNECTION.md).
 
 ## 7. サンプルプロジェクト: 3AI競争テスト（competitions/）
 
