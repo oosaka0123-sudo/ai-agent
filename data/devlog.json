@@ -931,5 +931,49 @@
       "セキュリティ",
       "MCP-Cloud"
     ]
+  },
+  {
+    "id": "2026-09-09-site-finish-and-claude-guide",
+    "date": "2026-09-09",
+    "title": "MY DEVELOPMENT ARCHIVEの公開仕上げとClaude Code版ガイド本文の執筆",
+    "project": "ai-agent",
+    "purpose": "前セッションから引き継いだ未コミットの変更（トップページ刷新・共通アクセシビリティ基盤・Claude Code版ガイド本文）を自己レビューし、公開できる状態まで仕上げる。",
+    "whatMade": "トップページのAI開発スタックヒーロー、Featured Stackカード、全ページ共通のスキップリンク・reduced-motion対応・safe-area対応、Claude Code版「スマホだけでホームページを作る」ガイド本文の公開確認。あわせてガイドの共有ステータスデータと.gitignoreの不整合を発見・修正した。",
+    "changes": [
+      ".gitignore（web/competitions/ を除外に追加）",
+      "guides/themes.json（smartphone-website テーマの status を completed に修正）",
+      "CHANGELOG.md（本日の変更点を追記）",
+      "PROJECT_SPEC.md / README.md（ガイドのステータス記述を最新化）",
+      "docs/devlog/2026-09-09.md / data/devlog.json / docs/devlog/self-eval/claude-code.md"
+    ],
+    "aiUsed": [
+      "Claude Code"
+    ],
+    "services": [
+      "GitHub",
+      "GitHub Pages"
+    ],
+    "tech": [
+      "HTML",
+      "CSS",
+      "JavaScript",
+      "Python",
+      "GitHub Actions"
+    ],
+    "problems": "ローカル環境にブラウザが無く、実ブラウザでのスマホ幅レンダリング確認ができなかった。また guides/themes.json のテーマ全体ステータスが in-progress のまま残っており、3AIとも本文執筆済みにもかかわらずガイド一覧で「執筆中」と誤表示されていた。",
+    "solutions": "ブラウザの代替として、HTMLタグ対応の静的パーサーチェック・JS構文チェック・内部リンクとアセット存在チェック・ローカルHTTPサーバーでの全ページ200確認・CSSクラスとHTML参照の突き合わせを実施。themes.json は共通編集が許される部分のため、Claude Code担当ファイルの完了に合わせて completed に修正した。",
+    "learnings": "複数AI・複数セッションが並行編集する構成では、個別ファイルの完了と、それを集約する共有インデックスの状態が食い違うことがあるため、個別ファイルを完了させた際は集約側の整合性も必ず確認する必要がある。",
+    "images": [],
+    "githubCommits": [],
+    "pullRequests": [],
+    "relatedUrls": [],
+    "nextSteps": "ブラウザが使える環境で実機/実ブラウザによるスマホ幅（390px）の目視確認を行う。他AIが新しいガイドテーマを追加する際は themes.json のステータス整合を都度確認する。",
+    "tags": [
+      "Webサイト",
+      "GitHub Pages",
+      "アクセシビリティ",
+      "ガイド",
+      "Claude Code"
+    ]
   }
 ]

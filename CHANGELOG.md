@@ -6,8 +6,25 @@
 
 ## [Unreleased]
 
+### Added
+
+- 「スマホだけでホームページを作る」ガイドのClaude Code版本文（`guides/smartphone-website/claude.md`）を執筆し、
+  3AI（Claude Code / Gemini・Jules / Codex）すべての本文が出揃った。
+- トップページ（`web/index.html`）にAI開発スタックのヒーローセクション（実生成メディアのプレビュー、
+  使用サービスバッジ、CTA導線）と「Featured Stack」カードを追加し、REMOTE + GCLOUD／MEDIA LABへの
+  導線をトップから直接提供するようにした。
+- 全ページ共通のアクセシビリティ基盤（`web/assets/js/render.js` / `web/assets/css/style.css`）を追加:
+  スキップリンク、`prefers-reduced-motion`対応（自動再生動画の停止・アニメーション無効化）、
+  `env(safe-area-inset-*)`によるノッチ・ホームバー対応、フォーカスリング、タップ領域44px確保。
+
 ### Fixed
 
+- `guides/themes.json` の「スマホだけでホームページを作る」テーマの全体ステータスが、
+  3AIすべての本文執筆完了後も`in-progress`のまま更新されておらず、ガイド一覧で
+  「執筆中」と誤表示されていた問題を修正（`completed`に更新）。
+- `.gitignore` に `web/competitions/` の除外を追加。`scripts/sync-site-data.sh` が
+  `competitions/` から複製するビルド成果物だが除外対象から漏れており、他の同期先
+  （`web/data/`・`web/guides-data/`）と扱いが不揃いだった。
 - Google Media MCP（`mcp_server/`）: Cloud Run配下で`POST /mcp`（末尾スラッシュなし）が
   `http://`（`https://`ではなく）への`307`リダイレクトを返し、HTTPS限定のクライアントが
   接続できなくなっていたコード側のバグを修正（`uvicorn.run`に

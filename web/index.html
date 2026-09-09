@@ -7,9 +7,6 @@
 <meta name="description" content="Claude Code / ChatGPT / Codex / Gemini などを使って作ってきたWebサイト・アプリ・AIエージェントの開発記録アーカイブ。">
 <meta name="theme-color" content="#05070f">
 <link rel="stylesheet" href="assets/css/style.css">
-<style>
-.media-preview-grid{display:grid;grid-template-columns:2fr 1fr 1fr;gap:12px}.media-preview-card{position:relative;display:block;overflow:hidden;min-height:180px;border-radius:20px;border:1px solid rgba(255,255,255,.09);background:#060914}.media-preview-card img,.media-preview-card video{width:100%;height:100%;object-fit:cover;display:block}.media-preview-wide{grid-row:span 2;min-height:372px}.media-preview-video{grid-column:span 2}.media-preview-video span{position:absolute;left:12px;bottom:12px;padding:7px 10px;border-radius:999px;background:rgba(3,7,16,.72);backdrop-filter:blur(10px);font-size:.72rem;font-weight:800;letter-spacing:.1em;color:#55e6ff}.stack-feature{position:relative;display:grid;grid-template-columns:1.1fr .9fr;gap:0;overflow:hidden;border:1px solid rgba(96,165,250,.22);border-radius:24px;background:linear-gradient(135deg,rgba(17,24,48,.98),rgba(8,10,23,.98));box-shadow:var(--shadow-lg);text-decoration:none}.stack-feature-copy{padding:26px}.stack-feature-kicker{margin:0 0 8px;color:#55e6ff;font-size:.7rem;font-weight:800;letter-spacing:.13em}.stack-feature h3{margin:0;font-size:clamp(1.35rem,3vw,2rem);line-height:1.2}.stack-feature p{margin:12px 0 0;color:var(--text-dim);font-size:.9rem;line-height:1.7}.stack-feature-tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:18px}.stack-feature-tags span{padding:5px 9px;border:1px solid var(--border);border-radius:999px;color:var(--text-faint);font-size:.68rem}.stack-feature-media{position:relative;min-height:260px}.stack-feature-media img{display:block;width:100%;height:100%;object-fit:cover}.stack-feature-media:after{content:"OPEN SPECIAL PAGE →";position:absolute;right:12px;bottom:12px;padding:7px 10px;border-radius:999px;background:rgba(3,7,16,.78);font-size:.67rem;font-weight:800;letter-spacing:.06em;color:#fff}.topbar-nav{display:flex;gap:12px;align-items:center}.topbar-nav a{font-size:.76rem;color:var(--text-dim);text-decoration:none;white-space:nowrap}@media(max-width:760px){.media-preview-grid{grid-template-columns:1fr 1fr}.media-preview-wide{grid-column:1/-1;grid-row:auto;min-height:260px}.media-preview-video{grid-column:1/-1;min-height:220px}.stack-feature{grid-template-columns:1fr}.stack-feature-media{min-height:220px}.topbar{flex-wrap:wrap}.topbar-nav{width:100%;overflow:auto;padding-bottom:2px}}
-</style>
 </head>
 <body>
   <header class="topbar">
@@ -18,18 +15,51 @@
       <span aria-hidden="true">🔎</span>
       <input id="searchInput" type="search" placeholder="開発を検索（例: バス, Claude, PWA, GitHub）" aria-label="開発を検索" autocomplete="off">
     </label>
-    <nav class="topbar-nav">
+    <nav class="topbar-nav" aria-label="メインメニュー">
+      <a href="index.html" aria-current="page">HOME</a>
       <a href="remote-gcloud.html">REMOTE + GCLOUD</a>
       <a href="media-lab.html">MEDIA LAB</a>
       <a href="guides/index.html">ガイド</a>
+      <a href="diagram.html">構成図</a>
     </nav>
   </header>
 
-  <div class="wrap">
+  <main class="wrap" id="main">
     <section class="hero">
       <p class="hero-eyebrow">MY DEVELOPMENT ARCHIVE</p>
       <h1 class="hero-title">MY DEVELOPMENT ARCHIVE</h1>
       <p class="hero-subtitle">自分の開発記録</p>
+      <p class="hero-lede">Claude Codeが主実装、ChatGPTがPM/QAを担当し、GitHubを共通記憶（SSOT）にして
+        並行作業するAI開発基盤です。Remote Desktop Commander・gcloud・Google Media MCP・
+        Steel Browser MCPをつなぎ、GitHub Pagesまで公開する実働中のスタックをそのまま公開しています。</p>
+      <div class="hero-team" aria-label="使用しているAI・サービス">
+        <span class="badge">Claude Code</span>
+        <span class="badge">ChatGPT</span>
+        <span class="badge">GitHub</span>
+        <span class="badge">Remote Desktop Commander</span>
+        <span class="badge">gcloud</span>
+        <span class="badge">Google Media MCP</span>
+        <span class="badge">Steel Browser MCP</span>
+        <span class="badge">GitHub Pages</span>
+      </div>
+
+      <div class="hero-media" aria-label="Google Media MCPで実際に生成した画像・動画">
+        <div class="hero-media-main">
+          <video src="assets/google-media-acceptance/video-04.mp4" muted autoplay loop playsinline preload="metadata" aria-label="Google Media MCPとVeoで生成した動画サンプル（画像から動画への変換）"></video>
+          <span>VEO GENERATED VIDEO</span>
+        </div>
+        <div class="hero-media-side">
+          <img src="assets/google-media-acceptance/image-02.png" alt="Google Media MCPで生成した画像サンプル2" loading="eager">
+          <img src="assets/google-media-acceptance/image-03.png" alt="Google Media MCPで生成した画像サンプル3" loading="lazy">
+        </div>
+      </div>
+
+      <div class="hero-cta-row">
+        <a class="cta primary" href="remote-gcloud.html">開発スタックを見る</a>
+        <a class="cta" href="media-lab.html">生成メディアを見る</a>
+        <a class="cta" href="guides/index.html">3AI比較ガイドを見る</a>
+      </div>
+
       <div class="stats-row" id="statsRow"></div>
     </section>
 
@@ -55,10 +85,13 @@
         <p class="section-hint"><a href="media-lab.html">ギャラリーを見る →</a></p>
       </div>
       <div class="media-preview-grid">
-        <a class="media-preview-card media-preview-wide" href="media-lab.html"><img src="assets/google-media-acceptance/image-01.png" alt="Google Media MCP generated image"></a>
-        <a class="media-preview-card" href="media-lab.html"><img src="assets/google-media-acceptance/image-02.png" alt="Google Media MCP generated image"></a>
-        <a class="media-preview-card" href="media-lab.html"><img src="assets/google-media-acceptance/image-03.png" alt="Google Media MCP generated image"></a>
-        <a class="media-preview-card media-preview-video" href="media-lab.html"><video src="assets/google-media-acceptance/video-04.mp4" muted autoplay loop playsinline preload="metadata"></video><span>VEO VIDEO</span></a>
+        <a class="media-preview-card media-preview-wide" href="media-lab.html"><img src="assets/google-media-acceptance/image-01.png" alt="Google Media MCPで生成した画像1（アーカイブ表紙カット）" loading="lazy"></a>
+        <a class="media-preview-card" href="media-lab.html"><img src="assets/google-media-acceptance/image-02.png" alt="Google Media MCPで生成した画像2" loading="lazy"></a>
+        <a class="media-preview-card" href="media-lab.html"><img src="assets/google-media-acceptance/image-03.png" alt="Google Media MCPで生成した画像3" loading="lazy"></a>
+        <div class="media-preview-card media-preview-video">
+          <video src="assets/google-media-acceptance/video-01.mp4" muted loop playsinline preload="metadata" poster="assets/google-media-acceptance/image-01.png" controls aria-label="Google Media MCPで生成した動画サンプル1"></video>
+          <span>VEO SAMPLE</span>
+        </div>
       </div>
     </section>
 
@@ -124,7 +157,7 @@
     <footer class="site-footer">
       <p>MY DEVELOPMENT ARCHIVE ・ <a href="remote-gcloud.html">REMOTE + GCLOUD</a> ・ <a href="media-lab.html">MEDIA LAB</a> ・ <a href="diagram.html">構成図を見る</a> ・ <a href="https://github.com/oosaka0123-sudo/ai-agent" target="_blank" rel="noopener">GitHub</a></p>
     </footer>
-  </div>
+  </main>
 
   <script src="assets/js/data.js"></script>
   <script src="assets/js/render.js"></script>

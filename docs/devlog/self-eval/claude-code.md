@@ -1021,3 +1021,85 @@ Master Repositoryは `oosaka0123-sudo/ai-master`」という依頼を受けた�
 - `GOOGLE_MEDIA_MCP_TOKEN`を速やかにローテーションする（最優先）。
 - `google-media-mcp` Cloud Runサービスを本修正を含む最新コードで再デプロイする。
 - `GOOGLE_MEDIA_MCP_ALLOWED_HOSTS`が実際のホスト名を含んでいるか確認・設定する。
+
+---
+
+## 2026-09-09 — MY DEVELOPMENT ARCHIVEの公開仕上げとClaude Code版ガイド本文の完成確認
+
+### 対象
+
+- `web/index.html`, `web/media-lab.html`, `web/remote-gcloud.html`, `web/diagram.html`,
+  `web/devlog.html`, `web/project.html`, `web/guides/index.html`, `theme.html`, `view.html`
+- `web/assets/css/style.css`, `web/assets/js/render.js`
+- `guides/smartphone-website/claude.md`, `guides/smartphone-website/theme.json`, `guides/themes.json`
+- `PROJECT_SPEC.md`, `README.md`, `.gitignore`
+
+### 初回実装内容
+
+前セッションから引き継いだ、コミット未完了の状態（トップページのヒーロー刷新・全ページ共通の
+アクセシビリティ基盤・`<main id="main">`統一・Claude Code版ガイド本文の執筆）を確認し、
+公開判断のための自己レビューと静的QAを実施した上で仕上げた。
+
+### 自己評価結果（点数と問題点）
+
+- HTML構造: 全対象ページで開始/終了タグの対応が取れていることを静的パーサーで確認 → 良好。
+- JavaScript: 全JSファイルが構文エラーなく`new Function()`でパースできることを確認 → 良好。
+- リンク・アセット参照: 内部リンク・画像・動画パスがすべて実在ファイルに解決することを確認 → 良好。
+- データ整合性: `guides/themes.json`のテーマ全体`status`が`in-progress`のまま残っており、
+  3AIの本文がすべて`completed`になっているにもかかわらずガイド一覧で「執筆中」と
+  誤表示される不整合を発見 → **問題あり**。
+- ビルド成果物の扱い: `scripts/sync-site-data.sh`が生成する`web/competitions/`が
+  `.gitignore`の除外対象から漏れており、他の同期先（`web/data/`・`web/guides-data/`）と
+  扱いが不揃いだった → **問題あり**。
+
+### 発見した問題
+
+1. `guides/themes.json`: `smartphone-website`テーマの`status`が`in-progress`のまま、
+   3AIの本文執筆完了に追随して更新されていなかった。
+2. `.gitignore`: `web/competitions/`の除外エントリが欠落していた。
+
+### 修正した内容
+
+- 上記1: `guides/themes.json`の`status`を`completed`に修正し、`scripts/sync-site-data.sh`で
+  `web/guides-data/`へ再同期して`guides-index.js`の表示ロジック（`statusLabel`/badge）経由で
+  正しく「公開中」と表示されることを確認した。
+- 上記2: `.gitignore`に`/web/competitions/`を追加し、他の同期先ディレクトリと扱いを揃えた。
+
+### 再テスト結果
+
+- `pytest tests/`: 157件すべて成功。
+- `bash scripts/sync-site-data.sh`: エラーなく完了、同期後に`web/competitions/`が
+  `git status`に現れなくなったことを確認。
+- 全HTMLファイルのタグ対応チェック（Python `html.parser`ベースの自作チェッカー）: 問題なし。
+- 全JSファイルの構文チェック（Node `new Function()`）: 問題なし。
+- 内部リンク・メディアアセット参照の存在チェック: 問題なし。
+- ローカルHTTPサーバー（`python -m http.server`）で全対象ページ・ガイドJSON・
+  Markdownの200応答を確認。
+
+### 最終自己評価
+
+| 項目 | 評価 | コメント |
+|---|---|---|
+| 仕様適合性 | 95/100 | `PROJECT_SPEC.md`の必須要件（トップページ構成、ガイドの3AI選択構造、共通インフラ）を満たしている。 |
+| 正常動作 | 85/100 | 静的QA・データパイプライン確認は網羅したが、実ブラウザでの動作確認は環境制約により未実施（下記参照）。 |
+| スマホ対応 | 80/100 | safe-area対応・44pxタップ領域・レスポンシブCSSはコード上確認したが、実機/実ブラウザでの目視確認ができていない。 |
+| UI/UX | 90/100 | ヒーロー・CTA導線・ガイド一覧の情報設計は前セッションの実装を踏襲し一貫性を確認。 |
+| コード品質 | 90/100 | 共通CSS/JSへの集約（`.cta`、`.status-strip`、`initPageBase`）で重複を排除できている。 |
+| 保守性 | 90/100 | データとUIの分離（`themes.json`/`theme.json`とレンダラー）は維持されている。今回の不整合発見はこの分離の運用上の弱点でもある。 |
+| セキュリティ | 100/100 | 秘密情報の混入なし。`.gitignore`の是正もコミット対象の健全性維持に寄与。 |
+| パフォーマンス | 85/100 | 画像・動画に`loading="lazy"`/`preload="metadata"`を使用済み。実ブラウザでの計測は未実施。 |
+
+**総合: 89/100**
+
+### 残っている問題・今後の課題
+
+- 実ブラウザ（Chromium/Playwright等）が使える環境での、スマホ幅（390px前後）の
+  実機/実ブラウザ目視確認が未実施（ローカル環境にブラウザ・playwrightが存在しないため）。
+- 今後、他AIが新しいガイドテーマを追加する際、`themes.json`の全体ステータスと
+  各AIファイルのステータスの整合を都度確認する運用上の注意が必要。
+
+### 人間による確認が必要な項目
+
+- 実ブラウザ（スマホ実機を含む）でのトップページ・ガイドページ・MEDIA LAB・
+  REMOTE + GCLOUDページの目視確認（レイアウト崩れ、動画自動再生の挙動、
+  ナビゲーションのハンバーガーメニュー動作）。

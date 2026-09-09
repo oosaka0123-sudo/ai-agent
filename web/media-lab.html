@@ -11,17 +11,17 @@
 :root{--lab-cyan:#55e6ff;--lab-violet:#9c78ff;--lab-card:rgba(12,18,35,.78)}
 .lab-wrap{width:min(1180px,calc(100% - 28px));margin:0 auto;padding:42px 0 70px}
 .lab-hero{position:relative;overflow:hidden;border:1px solid rgba(85,230,255,.22);border-radius:28px;padding:38px 24px;background:radial-gradient(circle at 85% 10%,rgba(156,120,255,.22),transparent 38%),radial-gradient(circle at 12% 8%,rgba(85,230,255,.17),transparent 35%),#090d19}
-.lab-kicker{font-size:.78rem;letter-spacing:.18em;color:var(--lab-cyan);font-weight:800}.lab-title{font-size:clamp(2.1rem,8vw,5.5rem);line-height:.9;margin:10px 0 16px;letter-spacing:-.05em}.lab-title span{background:linear-gradient(90deg,var(--lab-cyan),#fff,var(--lab-violet));-webkit-background-clip:text;color:transparent}.lab-lead{max-width:720px;color:#b7c2d8;font-size:1.02rem;line-height:1.8}.lab-badges{display:flex;flex-wrap:wrap;gap:8px;margin-top:20px}.lab-badges span{padding:8px 11px;border-radius:999px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);font-size:.8rem}.lab-section{margin-top:42px}.lab-head{display:flex;justify-content:space-between;gap:16px;align-items:end;margin-bottom:16px}.lab-head h2{font-size:clamp(1.45rem,4vw,2.2rem);margin:0}.lab-head p{margin:0;color:#8e9ab3;font-size:.85rem}
+.lab-kicker{font-size:.78rem;letter-spacing:.18em;color:var(--lab-cyan);font-weight:800}.lab-title{font-size:clamp(2.1rem,8vw,5.5rem);line-height:.9;margin:10px 0 16px;letter-spacing:-.05em}.lab-title span{background:linear-gradient(90deg,var(--lab-cyan),#fff,var(--lab-violet));-webkit-background-clip:text;color:transparent}.lab-lead{max-width:720px;color:#b7c2d8;font-size:1.02rem;line-height:1.8}.lab-badges{display:flex;flex-wrap:wrap;gap:8px;margin-top:20px}.lab-badges span{padding:8px 11px;border-radius:999px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);font-size:.8rem}.lab-section{margin-top:42px}.lab-head{display:flex;justify-content:space-between;gap:16px;align-items:end;margin-bottom:16px}.lab-head h2{font-size:clamp(1.45rem,4vw,2.2rem);margin:0}.lab-head p{margin:0;color:#8e9ab3;font-size:.85rem}.lab-wrap .status-item b{color:var(--lab-cyan);font-size:1rem}
 </style>
 </head>
 <body>
 <header class="topbar">
 <a class="topbar-brand" href="index.html">MY <span>DEV</span> ARCHIVE</a>
-<nav class="topbar-nav"><a href="media-lab.html" aria-current="page">MEDIA LAB</a><a href="guides/index.html">ガイド</a></nav>
+<nav class="topbar-nav" aria-label="メインメニュー"><a href="index.html">HOME</a><a href="remote-gcloud.html">REMOTE + GCLOUD</a><a href="media-lab.html" aria-current="page">MEDIA LAB</a><a href="guides/index.html">ガイド</a><a href="diagram.html">構成図</a></nav>
 </header><style>
-.media-grid{display:grid;grid-template-columns:repeat(12,1fr);gap:14px}.media-card{position:relative;overflow:hidden;border-radius:22px;background:var(--lab-card);border:1px solid rgba(255,255,255,.09);box-shadow:0 18px 45px rgba(0,0,0,.24)}.media-card img,.media-card video{display:block;width:100%;height:100%;object-fit:cover;background:#02040a}.media-card img{min-height:280px}.media-card video{aspect-ratio:16/9}.media-card.large{grid-column:span 8}.media-card.small{grid-column:span 4}.media-card.half{grid-column:span 6}.media-meta{position:absolute;left:12px;right:12px;bottom:12px;padding:10px 12px;border-radius:14px;background:rgba(3,7,16,.74);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,.08)}.media-meta strong{display:block;font-size:.92rem}.media-meta span{display:block;color:#aab6cc;font-size:.72rem;margin-top:3px}.video-card{padding:10px}.video-card video{border-radius:15px}.video-label{display:flex;justify-content:space-between;gap:12px;padding:12px 4px 4px;color:#c8d3e8;font-size:.82rem}.status-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:18px}.status-item{padding:14px;border-radius:16px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08)}.status-item b{display:block;color:var(--lab-cyan);font-size:1rem}.status-item span{font-size:.72rem;color:#91a0bc}.lab-note{margin-top:40px;padding:18px;border:1px dashed rgba(85,230,255,.25);border-radius:18px;color:#9fadc5;line-height:1.7;font-size:.85rem}@media(max-width:760px){.media-card.large,.media-card.small,.media-card.half{grid-column:1/-1}.media-card img{min-height:220px}.status-strip{grid-template-columns:repeat(2,1fr)}.lab-head{align-items:start;flex-direction:column}.lab-wrap{padding-top:24px}}
+.media-grid{display:grid;grid-template-columns:repeat(12,1fr);gap:14px}.media-card{position:relative;overflow:hidden;border-radius:22px;background:var(--lab-card);border:1px solid rgba(255,255,255,.09);box-shadow:0 18px 45px rgba(0,0,0,.24)}.media-card img,.media-card video{display:block;width:100%;height:100%;object-fit:cover;background:#02040a}.media-card img{min-height:280px}.media-card video{aspect-ratio:16/9}.media-card.large{grid-column:span 8}.media-card.small{grid-column:span 4}.media-card.half{grid-column:span 6}.media-meta{position:absolute;left:12px;right:12px;bottom:12px;padding:10px 12px;border-radius:14px;background:rgba(3,7,16,.74);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,.08)}.media-meta strong{display:block;font-size:.92rem}.media-meta span{display:block;color:#aab6cc;font-size:.72rem;margin-top:3px}.video-card{padding:10px}.video-card video{border-radius:15px}.video-label{display:flex;justify-content:space-between;gap:12px;padding:12px 4px 4px;color:#c8d3e8;font-size:.82rem}.lab-note{margin-top:40px;padding:18px;border:1px dashed rgba(85,230,255,.25);border-radius:18px;color:#9fadc5;line-height:1.7;font-size:.85rem}@media(max-width:760px){.media-card.large,.media-card.small,.media-card.half{grid-column:1/-1}.media-card img{min-height:220px}.lab-head{align-items:start;flex-direction:column}.lab-wrap{padding-top:24px}}
 </style>
-<main class="lab-wrap">
+<main class="lab-wrap" id="main">
 <section class="lab-hero">
 <p class="lab-kicker">LIVE ACCEPTANCE GALLERY</p>
 <h1 class="lab-title">GOOGLE MEDIA<br><span>MCP LAB</span></h1>
@@ -40,10 +40,10 @@
 <section class="lab-section">
 <div class="lab-head"><h2>Generated Videos</h2><p>Veo実生成動画・4本</p></div>
 <div class="media-grid">
-<article class="media-card half video-card"><video src="assets/google-media-acceptance/video-01.mp4" controls muted playsinline loop preload="metadata"></video><div class="video-label"><b>VIDEO 01</b><span>Veo test</span></div></article>
-<article class="media-card half video-card"><video src="assets/google-media-acceptance/video-02.mp4" controls muted playsinline loop preload="metadata"></video><div class="video-label"><b>VIDEO 02</b><span>Veo test</span></div></article>
-<article class="media-card large video-card"><video src="assets/google-media-acceptance/video-03.mp4" controls muted playsinline loop preload="metadata"></video><div class="video-label"><b>VIDEO 03</b><span>Async generation artifact</span></div></article>
-<article class="media-card small video-card"><video src="assets/google-media-acceptance/video-04.mp4" controls muted playsinline loop preload="metadata"></video><div class="video-label"><b>VIDEO 04</b><span>Image → Video acceptance</span></div></article>
+<article class="media-card half video-card"><video src="assets/google-media-acceptance/video-01.mp4" controls muted playsinline loop preload="metadata" aria-label="Veo生成動画1"></video><div class="video-label"><b>VIDEO 01</b><span>Veo test</span></div></article>
+<article class="media-card half video-card"><video src="assets/google-media-acceptance/video-02.mp4" controls muted playsinline loop preload="metadata" aria-label="Veo生成動画2"></video><div class="video-label"><b>VIDEO 02</b><span>Veo test</span></div></article>
+<article class="media-card large video-card"><video src="assets/google-media-acceptance/video-03.mp4" controls muted playsinline loop preload="metadata" aria-label="Veo生成動画3（非同期生成の受入テスト）"></video><div class="video-label"><b>VIDEO 03</b><span>Async generation artifact</span></div></article>
+<article class="media-card small video-card"><video src="assets/google-media-acceptance/video-04.mp4" controls muted playsinline loop preload="metadata" aria-label="Veo生成動画4（画像から動画への受入テスト）"></video><div class="video-label"><b>VIDEO 04</b><span>Image → Video acceptance</span></div></article>
 </div>
 </section><section class="lab-section">
 <div class="lab-head"><h2>Production Flow</h2><p>本番受入経路</p></div>
@@ -54,6 +54,14 @@
 </main>
 <script src="assets/js/data.js"></script>
 <script src="assets/js/render.js"></script>
-<script>document.querySelectorAll('video').forEach((v,i)=>{if(i===0){v.autoplay=true;v.addEventListener('canplay',()=>v.play().catch(()=>{}),{once:true})}})</script>
+<script>
+if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+  var firstVideo = document.querySelector('.media-grid video');
+  if (firstVideo) {
+    firstVideo.autoplay = true;
+    firstVideo.addEventListener('canplay', function () { firstVideo.play().catch(function () {}); }, { once: true });
+  }
+}
+</script>
 </body>
 </html>
