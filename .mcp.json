@@ -9,7 +9,7 @@
     },
     "steel-browser": {
       "type": "http",
-      "url": "${STEEL_BROWSER_MCP_URL}",
+      "url": "${STEEL_BROWSER_MCP_URL:-https://steel-browser-mcp-518404402696.us-central1.run.app/mcp}",
       "headers": {
         "Authorization": "Bearer ${STEEL_BROWSER_MCP_TOKEN}"
       }
