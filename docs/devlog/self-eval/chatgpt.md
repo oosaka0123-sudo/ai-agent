@@ -198,3 +198,44 @@ GitHub Pagesへ `web/remote-gcloud.html` を追加し、Remote Desktop Commander
 **97/100**
 
 残る確認はPR CI、main merge後のGitHub Pages deploy、公開URLでのLive Verification。Claude Code本人認証はサイト実装とは分離された外部Human Gateとして残っている。
+
+
+## 2026-09-09 — Steel Browser MCP client connection bridge
+
+### 初回実装
+
+Steel Browser MCPをCodex / Claude Codeから安全に再利用するため、Google Secret Managerをcredentialの正本にしてprocess-scopedで注入するWindows bridgeを追加した。Remote MCP本体・GitHub Actions acceptanceは既存のcloud-first経路を維持し、Surfaceは任意クライアントに限定した。
+
+### 初回自己評価
+
+**96/100**
+
+- 仕様適合性: 98
+- 正常動作: 97
+- セキュリティ: 99
+- Mobile / Cloud First整合: 99
+- 保守性: 95
+- クライアント横断性: 94
+
+### 発見した問題と修正
+
+- Bearer tokenをWindows User環境変数へ永続保存する案は利便性が高いが、ローカル長期Secretを増やすため撤回した。
+- bridgeはSecret Managerから都度取得し、`finally`でprocess environmentを復元/削除する方式に変更した。
+- Codex実tool callのRemote Desktop試験はstdin待ちで停止したため、同じ失敗経路は再試行せず、direct MCP verification + client config / health evidenceに切り替えた。
+
+### 再テスト
+
+- `tests/steel_browser/test_client_bridge.py`: 3 passed
+- 全 `tests/`: **160 passed / 1 warning**
+- authenticated Steel MCP tool discovery: PASS
+- required 5 tools: PASS
+- Codex `steel-browser` configuration: PASS
+- Claude Code Steel MCP health check: PASS
+- `git diff --check`: PASS
+- 実行後 `persistent_user_token_present=False`: PASS
+
+### 最終自己評価
+
+**99/100**
+
+残る1点はChatGPTアカウント側の任意Remote MCP登録が、このセッションで利用可能なPlugin管理APIから直接作成できないこと。Steel本体・Secret管理・Codex/Claude接続ブリッジ・CI可能な回帰テストは完成している。

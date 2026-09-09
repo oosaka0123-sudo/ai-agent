@@ -159,3 +159,11 @@ egress拒否）と、client側の`GOOGLE_MEDIA_MCP_TOKEN`未設定である。
 
 これらは `AGENTS.md` の「未接続でも全体を停止しない」方針に従い、GitHub Issueまたは
 今後のdevlog/引き継ぎで追跡し、全体の作業は停止しない。
+
+## Steel client connection bridge (2026-09-09)
+
+> Note: older human-gate text above records the 2026-09-06 state before production deployment. Steel Browser MCP is now deployed and has passed the real five-step production acceptance; the local bridge below is only for optional client attachment.
+
+The production Steel Browser MCP remains Cloud Run + GitHub Actions first. For an optional Windows client, `scripts/steel_client_bridge.ps1` reads the existing MCP bearer token from Google Secret Manager at runtime, injects it only into the current process and child AI client, verifies authenticated tool discovery, and then removes/restores the process environment in `finally`.
+
+This avoids a new long-lived local secret store. Codex uses a global streamable-HTTP MCP registration backed by `STEEL_BROWSER_MCP_TOKEN`; Claude Code uses the repository `.mcp.json`. See `docs/STEEL_CLIENT_CONNECTION.md` for the client matrix and failure policy.

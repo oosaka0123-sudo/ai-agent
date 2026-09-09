@@ -931,5 +931,56 @@
       "セキュリティ",
       "MCP-Cloud"
     ]
+  },
+  {
+    "id": "2026-09-09-steel-client-bridge",
+    "date": "2026-09-09",
+    "title": "Steel Browser MCP client connection bridge",
+    "project": "ai-agent",
+    "purpose": "Connect Codex and Claude Code to production Steel Browser MCP without a new long-lived local bearer-token store.",
+    "whatMade": "Added a Windows bridge that reads the existing MCP bearer token from Google Secret Manager at runtime, injects it only into process scope, verifies authenticated MCP tool discovery, checks Codex registration and Claude Code health, then cleans up the environment.",
+    "changes": [
+      "scripts/steel_client_bridge.ps1",
+      "scripts/verify_steel_client.py",
+      "tests/steel_browser/test_client_bridge.py",
+      "docs/STEEL_CLIENT_CONNECTION.md",
+      "docs/MOBILE_CLOUD_FIRST.md",
+      "PROJECT_SPEC.md",
+      "CHANGELOG.md",
+      "docs/devlog/2026-09-09.md",
+      "docs/devlog/self-eval/chatgpt.md"
+    ],
+    "aiUsed": [
+      "ChatGPT"
+    ],
+    "services": [
+      "Steel Browser MCP",
+      "Google Cloud Secret Manager",
+      "Codex",
+      "Claude Code"
+    ],
+    "tech": [
+      "PowerShell",
+      "Python",
+      "MCP",
+      "Google Cloud Run",
+      "gcloud"
+    ],
+    "problems": "Persistent Windows user environment storage would add a long-lived local secret. A Remote Desktop Codex non-interactive probe also waited on stdin.",
+    "solutions": "Use Secret Manager as credential source of truth, process-scoped injection, finally cleanup, and GitHub Actions as production acceptance. Treat stdin wait as a CLI invocation issue.",
+    "learnings": "Remote HTTP MCP can remain cloud-first while local AI clients use process-scoped credential injection. Verify direct MCP auth and client-specific health separately.",
+    "images": [],
+    "githubCommits": [],
+    "pullRequests": [],
+    "relatedUrls": [],
+    "nextSteps": "Run tests and CI, merge through PR, then update ai-master CONNECT.md with verified client capability without secret names or values.",
+    "tags": [
+      "Steel Browser",
+      "MCP",
+      "Secret Manager",
+      "Codex",
+      "Claude Code",
+      "Mobile First"
+    ]
   }
 ]
