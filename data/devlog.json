@@ -975,5 +975,83 @@
       "ガイド",
       "Claude Code"
     ]
+  },
+  {
+    "id": "2026-09-09-shared-nav-aria-current-fix",
+    "date": "2026-09-09",
+    "title": "共有ナビの aria-current 二重付与バグを修正",
+    "project": "ai-agent",
+    "purpose": "前の作業（サイト仕上げ・Claude Codeガイド公開）を自己レビューし、全ページ共通のナビゲーション実装に残っていた不具合を発見・修正する。",
+    "whatMade": "web/assets/js/render.js の共有ナビ生成処理（initSiteNav）を静的にコードトレースし、web/guides/index.html を開いたときに「HOME」と「ガイド」の2つのナビ項目が同時に aria-current=\"page\" になるバグを発見した。原因は現在地判定がURLのベース名（例: index.html）だけを比較しており、トップページの index.html とガイド一覧の guides/index.html が同じベース名になるため区別できていなかったこと。",
+    "changes": [
+      "web/assets/js/render.js（initSiteNav の現在地判定を location.pathname のベース名比較から、new URL(href, location.href).pathname によるフルパス比較に変更）"
+    ],
+    "aiUsed": [
+      "Claude Code"
+    ],
+    "services": [
+      "GitHub",
+      "GitHub Pages"
+    ],
+    "tech": [
+      "JavaScript",
+      "HTML",
+      "アクセシビリティ"
+    ],
+    "problems": "web/guides/index.html では「HOME」（../index.html）と「ガイド」（index.html）の両方のリンクが、ベース名だけ見ると同じ index.html になり、現在地判定が両方にマッチしてしまっていた。ブラウザやPlaywright等の実行環境がこのセッションでは使えず（bashスクリプト・pytest・python -m 等の実行がツール権限上ブロックされていた）、実描画では確認できなかったため、コードを人手でトレースして検証した。",
+    "solutions": "現在地判定を、ハッシュ抜きのURLベース名比較から、各リンクのhrefをページの現在位置基準で解決した絶対パス（new URL(href, location.href).pathname）とlocation.pathnameの完全一致比較に変更した。「ガイド」項目についてはガイド配下のどのページ（一覧・テーマ・説明）にいても現在地表示にするための特例ロジックはそのまま維持した。",
+    "learnings": "共有ナビのようにディレクトリをまたいで使うリンク集合の「現在地」判定は、ファイル名のベース名比較だけでは同名ファイル（index.html等）が別ディレクトリに複数存在する構成で誤判定する。相対パスは常にページの実際の位置を基準に解決してから比較する必要がある。",
+    "images": [],
+    "githubCommits": [],
+    "pullRequests": [],
+    "relatedUrls": [],
+    "nextSteps": "ブラウザ・Playwright等が使える環境で、全ページのナビゲーションのaria-current表示とハンバーガーメニューの開閉を実機/実ブラウザで再確認する。あわせて、ワーキングツリーに残っていたGit未追跡のqa/フォルダ（前セッションがCDP経由で撮ったと見られる390px想定スクリーンショット）でハンバーガー非表示・レイアウト崩れらしき見た目を確認したため、正しいモバイルエミュレーションまたは実機で再検証する（コードレビューでは実装上の誤りは見つからず、スクリーンショット取得方法自体の疑いが強いと判断したが断定はしていない）。",
+    "tags": [
+      "Webサイト",
+      "アクセシビリティ",
+      "バグ修正",
+      "Claude Code"
+    ]
+  },
+  {
+    "id": "2026-09-09-mobile-overflow-fix",
+    "date": "2026-09-09",
+    "title": "PR #67マージ前QAでモバイル横スクロール実バグを発見・修正",
+    "project": "ai-agent",
+    "purpose": "PR #67（CIはコミット82f55fbで成功済み）のマージ前QAとして、Chrome DevTools Protocolで390 CSSピクセル幅を正確にエミュレーションし、モバイル表示に残っていた実バグを洗い出して修正する。",
+    "whatMade": "全9ページ×390px/1280pxでdocument.documentElement.scrollWidthとclientWidthを実測し、モバイル幅で全ページ共通してscrollWidthがclientWidthを約310px超過していることを発見した。原因は、閉じた状態のモバイル用ドロワーナビ（.topbar-nav、position:fixed;right:0;transform:translateX(100%)で画面外へ退避）が、視覚的には見えないのにposition:fixed要素のレイアウト境界としてページの横スクロール可能領域を広げていたこと。あわせて、カード等の長い技術文字列（URL・トークン）がグリッド/フレックスの列幅を押し広げうる潜在バグも実験で確認した。",
+    "changes": [
+      "web/assets/js/render.js（.topbar-navのモバイル用オフキャンバス表現をtransform:translateX(100%)からclip-path:inset(0 0 0 100%)方式に変更。要素は常にright:0でビューポート内に置いたまま表示範囲だけ切り替える）",
+      "web/assets/css/style.css（htmlにoverflow-x:hidden/clipを追加、.card/.timeline-card/.theme-cardにmin-width:0、カード・タイムライン・テーマカード・detail-panel・markdown-bodyの各テキスト要素にoverflow-wrap:anywhere、codeにword-break:break-allを追加）"
+    ],
+    "aiUsed": [
+      "Claude Code"
+    ],
+    "services": [
+      "GitHub",
+      "GitHub Pages"
+    ],
+    "tech": [
+      "JavaScript",
+      "CSS",
+      "Chrome DevTools Protocol",
+      "アクセシビリティ"
+    ],
+    "problems": "position:fixed要素は、transformで画面外へ退避させて視覚的に見えなくても、そのレイアウト境界がビューポートを超えていればページの横スクロール可能領域を押し広げる。html/bodyのoverflow-x:hidden/clipではこれを抑制できない（position:fixed要素の包含ブロックはビューポートそのものであり、祖先要素のoverflowによるクリッピングの対象にならないため）。調査中、CDPのNetwork.setCacheDisabledをNetwork.enableより前に呼んでいたために設定が効かず、CSS修正がブラウザに反映されないという誤った現象にも一時遭遇した。",
+    "solutions": "オフキャンバスUIの実装を、要素自体をビューポート外へ移動させる方式（transform/right負オフセット等）から、要素の位置は常にビューポート内に固定したままclip-pathで表示/非表示を切り替える方式に変更し、根本原因を解消した。カード等のテキスト要素にはoverflow-wrap:anywhereとmin-width:0を追加し、長い技術文字列によるページ幅超過も防いだ。修正はNetwork.enable→Network.setCacheDisabled(true)の順で呼び、キャッシュバスティングも併用したクリーンなCDPセッションで検証した。",
+    "learnings": "オフキャンバスUIはtransformで画面外に動かすのではなく、位置を固定したままclip-pathで見せ方を切り替える方が、ページ全体の横スクロール領域を広げる副作用を根本から避けられる。CDPでNetwork.setCacheDisabledを使う際はNetwork.enableを先に呼ぶこと。",
+    "images": [],
+    "githubCommits": [],
+    "pullRequests": [
+      "https://github.com/oosaka0123-sudo/ai-agent/pull/67"
+    ],
+    "relatedUrls": [],
+    "nextSteps": "実機（iOS Safari・Android Chrome等）でもドロワーナビの開閉とページ幅を目視確認することが望ましい（本セッションではheadless Chrome + CDPでの検証のみ）。",
+    "tags": [
+      "Webサイト",
+      "スマホ対応",
+      "バグ修正",
+      "Claude Code"
+    ]
   }
 ]

@@ -19,6 +19,19 @@
 
 ### Fixed
 
+- 全ページ共通ナビ（`web/assets/js/render.js`）で、`web/guides/index.html` を開いたときに
+  「HOME」と「ガイド」の2項目が同時に`aria-current="page"`になっていた問題を修正。
+  現在地判定をURLベース名の比較から、リンクごとの解決済みフルパス比較に変更した。
+- PR #67のマージ前QA（Chrome DevTools Protocolによる390 CSSピクセル幅の実測）で発見した
+  モバイル横スクロール不具合を修正。閉じた状態のモバイル用ドロワーナビ（`.topbar-nav`、
+  `position:fixed`＋`transform:translateX(100%)`で画面外に配置）が、視覚的には見えないにも
+  かかわらずページ全体の横スクロール領域を310px分広げていた（`document.documentElement.scrollWidth`
+  が`clientWidth`を超過）。オフキャンバス表現を`transform`から、要素自体は常にビューポート内
+  （`right:0`）に置いたまま`clip-path`で表示/非表示を切り替える方式に変更し、根本原因を解消した
+  （`web/assets/js/render.js`）。あわせて`html`/`body`に`overflow-x:hidden`のフォールバック付き
+  `overflow-x:clip`を追加し、カード・タイムライン・ガイドテーマカード・Markdown本文中の
+  長い技術文字列（URL・トークン等）がグリッド/フレックスの列幅を押し広げないよう
+  `overflow-wrap:anywhere`（`min-width:0`と併用）を追加した（`web/assets/css/style.css`）。
 - `guides/themes.json` の「スマホだけでホームページを作る」テーマの全体ステータスが、
   3AIすべての本文執筆完了後も`in-progress`のまま更新されておらず、ガイド一覧で
   「執筆中」と誤表示されていた問題を修正（`completed`に更新）。

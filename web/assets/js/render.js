@@ -107,10 +107,9 @@ const ArchiveRender = (() => {
       topbar.appendChild(nav);
     }
 
-    const current = location.pathname.split("/").pop() || "index.html";
     nav.innerHTML = items.map(([label, href]) => {
-      const hrefFile = href.split("/").pop();
-      const isCurrent = (label === "ガイド" && inGuides) || hrefFile === current;
+      const resolvedPath = new URL(href, location.href).pathname;
+      const isCurrent = (label === "ガイド" && inGuides) || resolvedPath === location.pathname;
       return `<a href="${href}"${isCurrent ? ' aria-current="page"' : ""}>${label}</a>`;
     }).join("");
 
@@ -143,7 +142,7 @@ const ArchiveRender = (() => {
         .nav-toggle span{display:block;width:18px;height:2px;background:currentColor;border-radius:2px;transition:transform .2s ease,opacity .2s ease}.nav-toggle[aria-expanded="true"] span:nth-child(1){transform:translateY(6px) rotate(45deg)}.nav-toggle[aria-expanded="true"] span:nth-child(2){opacity:0}.nav-toggle[aria-expanded="true"] span:nth-child(3){transform:translateY(-6px) rotate(-45deg)}
         .nav-toggle:focus-visible,.topbar-nav a:focus-visible,.topbar-brand:focus-visible{outline:2px solid #60a5fa;outline-offset:3px}
         .nav-backdrop{position:fixed;inset:0;z-index:34;background:rgba(2,3,8,.64);opacity:0;pointer-events:none;transition:opacity .2s ease}.nav-backdrop.is-open{opacity:1;pointer-events:auto}body.nav-open-lock{overflow:hidden}
-        @media(max-width:640px){.nav-toggle{display:inline-flex}.topbar-nav{position:fixed;top:0;right:0;bottom:0;z-index:35;width:min(82vw,310px);margin:0;padding:72px 18px 26px;display:flex;flex-direction:column;align-items:stretch;gap:4px;background:#0c1224;border-left:1px solid rgba(255,255,255,.12);box-shadow:-24px 0 60px rgba(0,0,0,.45);transform:translateX(100%);transition:transform .24s ease;overflow-y:auto}.topbar-nav.is-open{transform:translateX(0)}.topbar-nav a{display:flex;align-items:center;min-height:46px;padding:12px 10px;border-radius:10px;font-size:15px}.topbar-nav a:hover,.topbar-nav a:focus-visible{background:rgba(255,255,255,.06)}}
+        @media(max-width:640px){.nav-toggle{display:inline-flex}.topbar-nav{position:fixed;top:0;right:0;bottom:0;z-index:35;width:min(82vw,310px);margin:0;padding:72px 18px 26px;display:flex;flex-direction:column;align-items:stretch;gap:4px;background:#0c1224;border-left:1px solid rgba(255,255,255,.12);box-shadow:-24px 0 60px rgba(0,0,0,.45);clip-path:inset(0 0 0 100%);transition:clip-path .24s ease;overflow-y:auto}.topbar-nav.is-open{clip-path:inset(0 0 0 0%)}.topbar-nav a{display:flex;align-items:center;min-height:46px;padding:12px 10px;border-radius:10px;font-size:15px}.topbar-nav a:hover,.topbar-nav a:focus-visible{background:rgba(255,255,255,.06)}}
         @media(prefers-reduced-motion:reduce){.nav-toggle span,.topbar-nav,.nav-backdrop{transition:none!important}}
       `;
       document.head.appendChild(style);

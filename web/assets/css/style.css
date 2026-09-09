@@ -38,6 +38,8 @@ html, body {
   color: var(--text);
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Hiragino Sans", "Noto Sans JP", sans-serif;
   -webkit-text-size-adjust: 100%;
+  overflow-x: hidden;
+  overflow-x: clip;
 }
 
 body {
@@ -46,6 +48,7 @@ body {
   background-repeat: no-repeat;
   padding-bottom: calc(48px + env(safe-area-inset-bottom));
   overflow-x: hidden;
+  overflow-x: clip;
 }
 
 a { color: inherit; }
@@ -586,6 +589,7 @@ input:focus-visible,
 }
 
 .card {
+  min-width: 0;
   display: flex;
   flex-direction: column;
   gap: 8px;
@@ -610,6 +614,7 @@ input:focus-visible,
   margin: 0;
   font-size: 16px;
   font-weight: 700;
+  overflow-wrap: anywhere;
 }
 
 .card-sub {
@@ -618,6 +623,7 @@ input:focus-visible,
   color: var(--text-dim);
   line-height: 1.5;
   overflow: hidden;
+  overflow-wrap: anywhere;
   display: -webkit-box;
   -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
@@ -667,6 +673,7 @@ input:focus-visible,
 
 .timeline-card {
   display: block;
+  min-width: 0;
   background: var(--panel);
   border: 1px solid var(--border);
   border-left: 3px solid var(--accent-purple);
@@ -685,6 +692,7 @@ input:focus-visible,
   margin: 0 0 4px;
   font-size: 15px;
   font-weight: 700;
+  overflow-wrap: anywhere;
 }
 
 .timeline-card-desc {
@@ -692,6 +700,7 @@ input:focus-visible,
   font-size: 13px;
   color: var(--text-dim);
   line-height: 1.5;
+  overflow-wrap: anywhere;
 }
 
 .timeline-card-meta {
@@ -792,6 +801,7 @@ input:focus-visible,
   font-size: 14.5px;
   line-height: 1.7;
   color: var(--text);
+  overflow-wrap: anywhere;
 }
 
 .detail-panel ul {
@@ -918,6 +928,7 @@ input:focus-visible,
 .theme-card {
   display: flex;
   flex-direction: column;
+  min-width: 0;
   gap: 10px;
   text-decoration: none;
   color: var(--text);
@@ -940,6 +951,7 @@ input:focus-visible,
   margin: 0;
   font-size: 19px;
   font-weight: 800;
+  overflow-wrap: anywhere;
 }
 
 .theme-card-desc {
@@ -947,6 +959,7 @@ input:focus-visible,
   font-size: 13.5px;
   line-height: 1.6;
   color: var(--text-dim);
+  overflow-wrap: anywhere;
 }
 
 .ai-choice-grid {
@@ -1009,6 +1022,7 @@ input:focus-visible,
   font-size: 14.5px;
   line-height: 1.75;
   color: var(--text);
+  overflow-wrap: anywhere;
 }
 
 .markdown-body ul {
@@ -1019,6 +1033,7 @@ input:focus-visible,
 .markdown-body li {
   font-size: 14.5px;
   line-height: 1.7;
+  overflow-wrap: anywhere;
 }
 
 .markdown-body code {
@@ -1026,4 +1041,6 @@ input:focus-visible,
   border-radius: 4px;
   padding: 1px 6px;
   font-size: 13px;
+  overflow-wrap: anywhere;
+  word-break: break-all;
 }
