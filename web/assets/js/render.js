@@ -85,6 +85,7 @@ const ArchiveRender = (() => {
     const base = inGuides ? "../" : "";
     const items = [
       ["HOME", `${base}index.html`],
+      ["COMMAND CENTER", `${base}command-center.html`],
       ["REMOTE + GCLOUD", `${base}remote-gcloud.html`],
       ["MEDIA LAB", `${base}media-lab.html`],
       ["ガイド", inGuides ? "index.html" : "guides/index.html"],
