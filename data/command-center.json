@@ -1,0 +1,24 @@
+{
+  "updatedAt": "2026-09-10",
+  "mode": "manual-snapshot",
+  "note": "この表示は自動監視ではなく、確認済み事実をまとめた運用スナップショットです。",
+  "nextActions": [
+    {"title":"Google Media MCPをClaude Code実行環境から接続","detail":"Cloud Run自体は稼働確認済み。実行環境側の接続条件を整え、実生成ワークフローを安定運用する。","owner":"Human + Claude Code","priority":"high","status":"blocked"},
+    {"title":"Steel Browser MCPの本番運用確認","detail":"コードとローカル確認済み。認証・課金境界を人間承認の上で本番接続を確認する。","owner":"Human + Claude Code","priority":"high","status":"blocked"},
+    {"title":"新規プロジェクトの状態を司令塔へ集約","detail":"projects.jsonとdevlogを基に、今動いている案件と次アクションを一画面で把握できる状態を維持する。","owner":"ChatGPT PM","priority":"medium","status":"open"}
+  ],
+  "agentRoles": [
+    {"name":"ChatGPT","tag":"PM / QA","scope":"全体設計、優先順位、作業分解、レビュー、公開判定。"},
+    {"name":"Claude Code","tag":"Primary Implementer","scope":"コード実装、テスト、CI/CD、デバッグ、リファクタリング。"},
+    {"name":"Gemini / Jules","tag":"Independent Review","scope":"独立した第二意見、比較レビュー、設計上の抜け漏れ確認。"},
+    {"name":"Codex","tag":"Secondary Implementer","scope":"独立実装、調査、難所の補助、比較検証。"}
+  ],
+  "stackHealth": [
+    {"name":"Claude Code","status":"ok","summary":"主実装環境として運用。","lastVerified":"2026-09-10"},
+    {"name":"GitHub / Actions","status":"ok","summary":"Branch → PR → CI → merge の運用が稼働。","lastVerified":"2026-09-10"},
+    {"name":"GitHub Pages","status":"ok","summary":"main更新後の自動公開を確認済み。","lastVerified":"2026-09-10"},
+    {"name":"Google Media MCP","status":"warn","summary":"実生成済み素材は公開済み。Claude Code実行環境からの恒常接続は継続課題。","lastVerified":"2026-09-10"},
+    {"name":"Steel Browser MCP","status":"warn","summary":"本番運用の最終確認が残る。","lastVerified":"2026-09-10"},
+    {"name":"390px Mobile QA","status":"ok","summary":"主要公開ページで横スクロール0を本番確認済み。","lastVerified":"2026-09-10"}
+  ]
+}
