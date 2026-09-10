@@ -9,59 +9,40 @@
 <link rel="stylesheet" href="assets/css/style.css">
 <style>
 :root{--lab-cyan:#55e6ff;--lab-violet:#9c78ff;--lab-card:rgba(12,18,35,.78)}
-.lab-wrap{width:min(1180px,calc(100% - 28px));margin:0 auto;padding:42px 0 70px}
-.lab-hero{position:relative;overflow:hidden;border:1px solid rgba(85,230,255,.22);border-radius:28px;padding:38px 24px;background:radial-gradient(circle at 85% 10%,rgba(156,120,255,.22),transparent 38%),radial-gradient(circle at 12% 8%,rgba(85,230,255,.17),transparent 35%),#090d19}
-.lab-kicker{font-size:.78rem;letter-spacing:.18em;color:var(--lab-cyan);font-weight:800}.lab-title{font-size:clamp(2.1rem,8vw,5.5rem);line-height:.9;margin:10px 0 16px;letter-spacing:-.05em}.lab-title span{background:linear-gradient(90deg,var(--lab-cyan),#fff,var(--lab-violet));-webkit-background-clip:text;color:transparent}.lab-lead{max-width:720px;color:#b7c2d8;font-size:1.02rem;line-height:1.8}.lab-badges{display:flex;flex-wrap:wrap;gap:8px;margin-top:20px}.lab-badges span{padding:8px 11px;border-radius:999px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);font-size:.8rem}.lab-section{margin-top:42px}.lab-head{display:flex;justify-content:space-between;gap:16px;align-items:end;margin-bottom:16px}.lab-head h2{font-size:clamp(1.45rem,4vw,2.2rem);margin:0}.lab-head p{margin:0;color:#8e9ab3;font-size:.85rem}.lab-wrap .status-item b{color:var(--lab-cyan);font-size:1rem}
+.lab-wrap{width:min(1180px,calc(100% - 28px));margin:0 auto;padding:42px 0 70px}.lab-hero{position:relative;overflow:hidden;border:1px solid rgba(85,230,255,.22);border-radius:28px;padding:38px 24px;background:radial-gradient(circle at 85% 10%,rgba(156,120,255,.22),transparent 38%),radial-gradient(circle at 12% 8%,rgba(85,230,255,.17),transparent 35%),#090d19}.lab-kicker{font-size:.78rem;letter-spacing:.18em;color:var(--lab-cyan);font-weight:800}.lab-title{font-size:clamp(2.1rem,8vw,5.5rem);line-height:.9;margin:10px 0 16px;letter-spacing:-.05em}.lab-title span{background:linear-gradient(90deg,var(--lab-cyan),#fff,var(--lab-violet));-webkit-background-clip:text;color:transparent}.lab-lead{max-width:720px;color:#b7c2d8;font-size:1.02rem;line-height:1.8}.lab-badges{display:flex;flex-wrap:wrap;gap:8px;margin-top:20px}.lab-badges span{padding:8px 11px;border-radius:999px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);font-size:.8rem}.lab-section{margin-top:42px}.lab-head{display:flex;justify-content:space-between;gap:16px;align-items:end;margin-bottom:16px}.lab-head h2{font-size:clamp(1.45rem,4vw,2.2rem);margin:0}.lab-head p{margin:0;color:#8e9ab3;font-size:.85rem}.lab-wrap .status-item b{color:var(--lab-cyan);font-size:1rem}.media-grid{display:grid;grid-template-columns:repeat(12,1fr);gap:14px}.media-card{position:relative;overflow:hidden;border-radius:22px;background:var(--lab-card);border:1px solid rgba(255,255,255,.09);box-shadow:0 18px 45px rgba(0,0,0,.24)}.media-card img,.media-card video{display:block;width:100%;height:100%;object-fit:cover;background:#02040a}.media-card img{min-height:280px}.media-card video{aspect-ratio:16/9}.media-card.large{grid-column:span 8}.media-card.small{grid-column:span 4}.media-card.half{grid-column:span 6}.media-meta{position:absolute;left:12px;right:12px;bottom:12px;padding:10px 12px;border-radius:14px;background:rgba(3,7,16,.74);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,.08)}.media-meta strong{display:block;font-size:.92rem}.media-meta span{display:block;color:#aab6cc;font-size:.72rem;margin-top:3px}.video-card{padding:10px}.video-card video{border-radius:15px}.video-label{padding:12px 4px 4px;color:#c8d3e8;font-size:.82rem}.video-label b{display:block;margin-bottom:4px}.video-label span{display:block;color:#9fadc5;line-height:1.55}.lab-note{margin-top:40px;padding:18px;border:1px dashed rgba(85,230,255,.25);border-radius:18px;color:#9fadc5;line-height:1.7;font-size:.85rem}@media(max-width:760px){.media-card.large,.media-card.small,.media-card.half{grid-column:1/-1}.media-card img{min-height:220px}.lab-head{align-items:start;flex-direction:column}.lab-wrap{padding-top:24px}}
 </style>
 </head>
 <body>
-<header class="topbar">
-<a class="topbar-brand" href="index.html">MY <span>DEV</span> ARCHIVE</a>
-<nav class="topbar-nav" aria-label="メインメニュー"><a href="index.html">HOME</a><a href="remote-gcloud.html">REMOTE + GCLOUD</a><a href="media-lab.html" aria-current="page">MEDIA LAB</a><a href="guides/index.html">ガイド</a><a href="diagram.html">構成図</a></nav>
-</header><style>
-.media-grid{display:grid;grid-template-columns:repeat(12,1fr);gap:14px}.media-card{position:relative;overflow:hidden;border-radius:22px;background:var(--lab-card);border:1px solid rgba(255,255,255,.09);box-shadow:0 18px 45px rgba(0,0,0,.24)}.media-card img,.media-card video{display:block;width:100%;height:100%;object-fit:cover;background:#02040a}.media-card img{min-height:280px}.media-card video{aspect-ratio:16/9}.media-card.large{grid-column:span 8}.media-card.small{grid-column:span 4}.media-card.half{grid-column:span 6}.media-meta{position:absolute;left:12px;right:12px;bottom:12px;padding:10px 12px;border-radius:14px;background:rgba(3,7,16,.74);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,.08)}.media-meta strong{display:block;font-size:.92rem}.media-meta span{display:block;color:#aab6cc;font-size:.72rem;margin-top:3px}.video-card{padding:10px}.video-card video{border-radius:15px}.video-label{display:flex;justify-content:space-between;gap:12px;padding:12px 4px 4px;color:#c8d3e8;font-size:.82rem}.lab-note{margin-top:40px;padding:18px;border:1px dashed rgba(85,230,255,.25);border-radius:18px;color:#9fadc5;line-height:1.7;font-size:.85rem}@media(max-width:760px){.media-card.large,.media-card.small,.media-card.half{grid-column:1/-1}.media-card img{min-height:220px}.lab-head{align-items:start;flex-direction:column}.lab-wrap{padding-top:24px}}
-</style>
+<header class="topbar"><a class="topbar-brand" href="index.html">MY <span>DEV</span> ARCHIVE</a><nav class="topbar-nav" aria-label="メインメニュー"><a href="index.html">HOME</a><a href="command-center.html">COMMAND CENTER</a><a href="remote-gcloud.html">REMOTE + GCLOUD</a><a href="media-lab.html" aria-current="page">MEDIA LAB</a><a href="guides/index.html">ガイド</a><a href="diagram.html">構成図</a></nav></header>
 <main class="lab-wrap" id="main">
 <section class="lab-hero">
-<p class="lab-kicker">LIVE ACCEPTANCE GALLERY</p>
+<p class="lab-kicker">GENERATION TEST GALLERY</p>
 <h1 class="lab-title">GOOGLE MEDIA<br><span>MCP LAB</span></h1>
-<p class="lab-lead">Google Media MCPで実際に生成した画像と動画を、そのまま見せる開発テストギャラリー。画像生成、画像から動画へのVeo処理、GCS保存まで本番フローで確認済み。</p>
-<div class="lab-badges"><span>Gemini Image</span><span>Veo 3.1 Fast</span><span>Image → Video</span><span>Cloud Run</span><span>GCS</span></div>
-<div class="status-strip"><div class="status-item"><b>3</b><span>GENERATED IMAGES</span></div><div class="status-item"><b>4</b><span>GENERATED VIDEOS</span></div><div class="status-item"><b>100%</b><span>CLOUD RUN TRAFFIC</span></div><div class="status-item"><b>PASS</b><span>PRODUCTION ACCEPTANCE</span></div></div>
+<p class="lab-lead">ここはサイトの演出用ギャラリーではなく、Google Media MCPの画像生成・Veo動画生成が本当に動いたかを確認する検証ページです。動画は自動再生せず、見たいものだけ再生できます。</p>
+<div class="lab-badges"><span>Gemini Image</span><span>Veo</span><span>Image → Video</span><span>Cloud Run</span><span>GCS</span></div>
+<div class="status-strip"><div class="status-item"><b>3</b><span>生成画像</span></div><div class="status-item"><b>4</b><span>生成動画</span></div><div class="status-item"><b>USER</b><span>手動再生</span></div><div class="status-item"><b>PASS</b><span>受入確認</span></div></div>
 </section>
 <section class="lab-section">
-<div class="lab-head"><h2>Generated Images</h2><p>実際のMCP生成物</p></div>
-<div class="media-grid"><article class="media-card large"><img src="assets/google-media-acceptance/image-01.png" alt="Google Media MCP generated image 1" loading="lazy"><div class="media-meta"><strong>IMAGE 01</strong><span>Google Media MCP / acceptance artifact</span></div></article>
-<article class="media-card small"><img src="assets/google-media-acceptance/image-02.png" alt="Google Media MCP generated image 2" loading="lazy"><div class="media-meta"><strong>IMAGE 02</strong><span>Gemini image generation</span></div></article>
-<article class="media-card half"><img src="assets/google-media-acceptance/image-03.png" alt="Google Media MCP generated image 3" loading="lazy"><div class="media-meta"><strong>IMAGE 03</strong><span>Production acceptance image</span></div></article>
-<article class="media-card half"><img src="assets/google-media-acceptance/image-01.png" alt="Google Media MCP generated image detail" loading="lazy"><div class="media-meta"><strong>DETAIL VIEW</strong><span>Same artifact / alternate crop test</span></div></article>
-</div>
+<div class="lab-head"><h2>Generated Images</h2><p>Google Media MCPの生成確認用素材</p></div>
+<div class="media-grid"><article class="media-card large"><img src="assets/google-media-acceptance/image-01.png" alt="Google Media MCP生成テスト画像1" loading="lazy"><div class="media-meta"><strong>IMAGE 01</strong><span>画像生成パイプラインの受入確認</span></div></article><article class="media-card small"><img src="assets/google-media-acceptance/image-02.png" alt="Google Media MCP生成テスト画像2" loading="lazy"><div class="media-meta"><strong>IMAGE 02</strong><span>Gemini画像生成の出力確認</span></div></article><article class="media-card half"><img src="assets/google-media-acceptance/image-03.png" alt="Google Media MCP生成テスト画像3" loading="lazy"><div class="media-meta"><strong>IMAGE 03</strong><span>Cloud Run → 画像生成 → 保存の確認</span></div></article><article class="media-card half"><img src="assets/google-media-acceptance/image-01.png" alt="Google Media MCP生成画像の再表示" loading="lazy"><div class="media-meta"><strong>DETAIL VIEW</strong><span>同一成果物の表示確認</span></div></article></div>
 </section>
 <section class="lab-section">
-<div class="lab-head"><h2>Generated Videos</h2><p>Veo実生成動画・4本</p></div>
+<div class="lab-head"><h2>Generated Videos</h2><p>すべて受入確認用。自動再生なし</p></div>
 <div class="media-grid">
-<article class="media-card half video-card"><video src="assets/google-media-acceptance/video-01.mp4" controls muted playsinline loop preload="metadata" aria-label="Veo生成動画1"></video><div class="video-label"><b>VIDEO 01</b><span>Veo test</span></div></article>
-<article class="media-card half video-card"><video src="assets/google-media-acceptance/video-02.mp4" controls muted playsinline loop preload="metadata" aria-label="Veo生成動画2"></video><div class="video-label"><b>VIDEO 02</b><span>Veo test</span></div></article>
-<article class="media-card large video-card"><video src="assets/google-media-acceptance/video-03.mp4" controls muted playsinline loop preload="metadata" aria-label="Veo生成動画3（非同期生成の受入テスト）"></video><div class="video-label"><b>VIDEO 03</b><span>Async generation artifact</span></div></article>
-<article class="media-card small video-card"><video src="assets/google-media-acceptance/video-04.mp4" controls muted playsinline loop preload="metadata" aria-label="Veo生成動画4（画像から動画への受入テスト）"></video><div class="video-label"><b>VIDEO 04</b><span>Image → Video acceptance</span></div></article>
+<article class="media-card half video-card"><video src="assets/google-media-acceptance/video-01.mp4" controls muted playsinline preload="metadata" aria-label="Veo生成テスト動画1"></video><div class="video-label"><b>VIDEO 01 · 基本動画生成</b><span>Veoで動画ファイルを生成し、ブラウザで再生できることを確認するテスト。</span></div></article>
+<article class="media-card half video-card"><video src="assets/google-media-acceptance/video-02.mp4" controls muted playsinline preload="metadata" aria-label="Veo生成テスト動画2"></video><div class="video-label"><b>VIDEO 02 · 2本目の生成確認</b><span>同じ生成経路で複数回の動画出力が成立することを確認するテスト。</span></div></article>
+<article class="media-card large video-card"><video src="assets/google-media-acceptance/video-03.mp4" controls muted playsinline preload="metadata" aria-label="Veo非同期生成テスト動画3"></video><div class="video-label"><b>VIDEO 03 · 非同期ジョブ確認</b><span>動画生成開始 → 状態確認 → 完了ファイル取得という非同期フローの受入テスト。</span></div></article>
+<article class="media-card small video-card"><video src="assets/google-media-acceptance/video-04.mp4" controls muted playsinline preload="metadata" aria-label="Veo画像から動画への生成テスト4"></video><div class="video-label"><b>VIDEO 04 · Image → Video</b><span>生成済み画像を入力にしてVeo動画へ変換できることを確認した受入テスト。</span></div></article>
 </div>
-</section><section class="lab-section">
+</section>
+<section class="lab-section">
 <div class="lab-head"><h2>Production Flow</h2><p>本番受入経路</p></div>
 <div class="status-strip"><div class="status-item"><b>01</b><span>generate_image</span></div><div class="status-item"><b>02</b><span>start_video_generation</span></div><div class="status-item"><b>03</b><span>check_video_generation</span></div><div class="status-item"><b>04</b><span>persist to GCS</span></div></div>
-<p class="lab-note">このページは開発テスト用です。掲載している画像・動画はGoogle Media MCPの実生成物で、受入試験の証跡兼ショーケースとして公開しています。認証情報やSecret値は掲載していません。</p>
+<p class="lab-note">このページは開発テスト用です。通常ページの主役にはせず、「Google Media MCPが実際に何を出力したか」を確認するときだけ見る場所に整理しました。認証情報やSecret値は掲載していません。</p>
 </section>
-<footer class="site-footer"><p>MY DEVELOPMENT ARCHIVE ・ <a href="index.html">HOME</a> ・ <a href="https://github.com/oosaka0123-sudo/ai-agent" target="_blank" rel="noopener">GitHub</a></p></footer>
+<footer class="site-footer"><p>MY DEVELOPMENT ARCHIVE ・ <a href="index.html">HOME</a> ・ <a href="command-center.html">COMMAND CENTER</a> ・ <a href="https://github.com/oosaka0123-sudo/ai-agent" target="_blank" rel="noopener">GitHub</a></p></footer>
 </main>
 <script src="assets/js/data.js"></script>
 <script src="assets/js/render.js"></script>
-<script>
-if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-  var firstVideo = document.querySelector('.media-grid video');
-  if (firstVideo) {
-    firstVideo.autoplay = true;
-    firstVideo.addEventListener('canplay', function () { firstVideo.play().catch(function () {}); }, { once: true });
-  }
-}
-</script>
 </body>
 </html>
