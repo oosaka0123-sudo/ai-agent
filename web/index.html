@@ -17,6 +17,7 @@
     </label>
     <nav class="topbar-nav" aria-label="メインメニュー">
       <a href="index.html" aria-current="page">HOME</a>
+      <a href="command-center.html">COMMAND CENTER</a>
       <a href="remote-gcloud.html">REMOTE + GCLOUD</a>
       <a href="media-lab.html">MEDIA LAB</a>
       <a href="guides/index.html">ガイド</a>
@@ -29,9 +30,7 @@
       <p class="hero-eyebrow">MY DEVELOPMENT ARCHIVE</p>
       <h1 class="hero-title">MY DEVELOPMENT ARCHIVE</h1>
       <p class="hero-subtitle">自分の開発記録</p>
-      <p class="hero-lede">Claude Codeが主実装、ChatGPTがPM/QAを担当し、GitHubを共通記憶（SSOT）にして
-        並行作業するAI開発基盤です。Remote Desktop Commander・gcloud・Google Media MCP・
-        Steel Browser MCPをつなぎ、GitHub Pagesまで公開する実働中のスタックをそのまま公開しています。</p>
+      <p class="hero-lede">Claude Codeが主実装、ChatGPTがPM/QAを担当し、GitHubを共通記憶（SSOT）にして並行作業するAI開発基盤です。Remote Desktop Commander・gcloud・Google Media MCP・Steel Browser MCPをつなぎ、GitHub Pagesまで公開する実働中の構成を記録しています。</p>
       <div class="hero-team" aria-label="使用しているAI・サービス">
         <span class="badge">Claude Code</span>
         <span class="badge">ChatGPT</span>
@@ -43,20 +42,19 @@
         <span class="badge">GitHub Pages</span>
       </div>
 
-      <div class="hero-media" aria-label="Google Media MCPで実際に生成した画像・動画">
-        <div class="hero-media-main">
-          <video src="assets/google-media-acceptance/video-04.mp4" muted autoplay loop playsinline preload="metadata" aria-label="Google Media MCPとVeoで生成した動画サンプル（画像から動画への変換）"></video>
-          <span>VEO GENERATED VIDEO</span>
+      <a class="stack-feature" href="diagram.html" style="margin-top:28px;text-align:left">
+        <div class="stack-feature-copy">
+          <p class="stack-feature-kicker">HOW THE SYSTEM WORKS</p>
+          <h3>AI開発の流れを、まず1枚で。</h3>
+          <p>ChatGPT → Claude Code → Remote Desktop → gcloud → Cloud Run → GitHub Pages。意味のない自動再生動画ではなく、実際の開発構成が分かる図をトップに置きました。</p>
+          <div class="stack-feature-tags"><span>PM</span><span>主実装</span><span>Remote</span><span>Cloud</span><span>Deploy</span></div>
         </div>
-        <div class="hero-media-side">
-          <img src="assets/google-media-acceptance/image-02.png" alt="Google Media MCPで生成した画像サンプル2" loading="eager">
-          <img src="assets/google-media-acceptance/image-03.png" alt="Google Media MCPで生成した画像サンプル3" loading="lazy">
-        </div>
-      </div>
+        <div class="stack-feature-media"><img src="assets/remote-ai-agent-diagram.webp" alt="ChatGPT、Claude Code、Remote Desktop Commander、Google Cloud、GitHub PagesをつないだAI開発構成図" loading="eager"></div>
+      </a>
 
       <div class="hero-cta-row">
-        <a class="cta primary" href="remote-gcloud.html">開発スタックを見る</a>
-        <a class="cta" href="media-lab.html">生成メディアを見る</a>
+        <a class="cta primary" href="command-center.html">司令塔を開く</a>
+        <a class="cta" href="remote-gcloud.html">開発スタックを見る</a>
         <a class="cta" href="guides/index.html">3AI比較ガイドを見る</a>
       </div>
 
@@ -82,16 +80,13 @@
     <section class="section" id="media-lab">
       <div class="section-head">
         <h2 class="section-title">Google Media MCP LAB</h2>
-        <p class="section-hint"><a href="media-lab.html">ギャラリーを見る →</a></p>
+        <p class="section-hint"><a href="media-lab.html">生成テストを見る →</a></p>
       </div>
+      <p class="hero-lede" style="text-align:left;margin:0 0 16px">ここはGoogle Media MCPの生成結果を確認する検証エリアです。動画はトップでは自動再生せず、MEDIA LAB内だけで目的を明示して見られるようにしています。</p>
       <div class="media-preview-grid">
-        <a class="media-preview-card media-preview-wide" href="media-lab.html"><img src="assets/google-media-acceptance/image-01.png" alt="Google Media MCPで生成した画像1（アーカイブ表紙カット）" loading="lazy"></a>
-        <a class="media-preview-card" href="media-lab.html"><img src="assets/google-media-acceptance/image-02.png" alt="Google Media MCPで生成した画像2" loading="lazy"></a>
-        <a class="media-preview-card" href="media-lab.html"><img src="assets/google-media-acceptance/image-03.png" alt="Google Media MCPで生成した画像3" loading="lazy"></a>
-        <div class="media-preview-card media-preview-video">
-          <video src="assets/google-media-acceptance/video-01.mp4" muted loop playsinline preload="metadata" poster="assets/google-media-acceptance/image-01.png" controls aria-label="Google Media MCPで生成した動画サンプル1"></video>
-          <span>VEO SAMPLE</span>
-        </div>
+        <a class="media-preview-card media-preview-wide" href="media-lab.html"><img src="assets/google-media-acceptance/image-01.png" alt="Google Media MCPの生成テスト画像1" loading="lazy"></a>
+        <a class="media-preview-card" href="media-lab.html"><img src="assets/google-media-acceptance/image-02.png" alt="Google Media MCPの生成テスト画像2" loading="lazy"></a>
+        <a class="media-preview-card" href="media-lab.html"><img src="assets/google-media-acceptance/image-03.png" alt="Google Media MCPの生成テスト画像3" loading="lazy"></a>
       </div>
     </section>
 
@@ -104,58 +99,39 @@
     </section>
 
     <hr class="section-divider">
-
     <div id="activeFilters" class="active-filters" style="margin-top:24px"></div>
 
     <section class="section" id="recent">
-      <div class="section-head">
-        <h2 class="section-title">最近の開発</h2>
-      </div>
+      <div class="section-head"><h2 class="section-title">最近の開発</h2></div>
       <div class="card-grid" id="recentList"></div>
     </section>
 
     <hr class="section-divider">
-
     <section class="section" id="projects">
-      <div class="section-head">
-        <h2 class="section-title">プロジェクト</h2>
-        <p class="section-hint">タップして詳細へ</p>
-      </div>
+      <div class="section-head"><h2 class="section-title">プロジェクト</h2><p class="section-hint">タップして詳細へ</p></div>
       <div class="card-grid" id="projectList"></div>
     </section>
 
     <hr class="section-divider">
-
     <section class="section" id="timeline">
-      <div class="section-head">
-        <h2 class="section-title">開発タイムライン</h2>
-        <p class="section-hint">新しい順</p>
-      </div>
+      <div class="section-head"><h2 class="section-title">開発タイムライン</h2><p class="section-hint">新しい順</p></div>
       <div id="timelineList"></div>
     </section>
 
     <hr class="section-divider">
-
     <section class="section" id="ai">
-      <div class="section-head">
-        <h2 class="section-title">使用したAI</h2>
-        <p class="section-hint">タップで絞り込み</p>
-      </div>
+      <div class="section-head"><h2 class="section-title">使用したAI</h2><p class="section-hint">タップで絞り込み</p></div>
       <div class="chip-row" id="aiChips"></div>
     </section>
 
     <hr class="section-divider">
-
     <section class="section" id="tech">
-      <div class="section-head">
-        <h2 class="section-title">使用技術</h2>
-        <p class="section-hint">タップで絞り込み</p>
-      </div>
+      <div class="section-head"><h2 class="section-title">使用技術</h2><p class="section-hint">タップで絞り込み</p></div>
       <div class="chip-row" id="techChips"></div>
     </section>
 
     <footer class="site-footer">
-      <p>MY DEVELOPMENT ARCHIVE ・ <a href="remote-gcloud.html">REMOTE + GCLOUD</a> ・ <a href="media-lab.html">MEDIA LAB</a> ・ <a href="diagram.html">構成図を見る</a> ・ <a href="https://github.com/oosaka0123-sudo/ai-agent" target="_blank" rel="noopener">GitHub</a></p>
+      <p>MY DEVELOPMENT ARCHIVE ・ <a href="command-center.html">COMMAND CENTER</a> ・ <a href="remote-gcloud.html">REMOTE + GCLOUD</a> ・ <a href="media-lab.html">MEDIA LAB</a> ・ <a href="diagram.html">構成図を見る</a> ・ <a href="https://github.com/oosaka0123-sudo/ai-agent" target="_blank" rel="noopener">GitHub</a></p>
     </footer>
   </main>
 
