@@ -82,8 +82,8 @@ def test_generate_image_raises_when_no_images_returned(monkeypatch):
         provider.generate_image(prompt="a blue circle")
 
 
-def test_default_video_model_is_veo_3_1_fast():
-    assert google_provider.DEFAULT_VIDEO_MODEL == "veo-3.1-fast-generate-001"
+def test_default_video_model_is_veo_3_1_lite():
+    assert google_provider.DEFAULT_VIDEO_MODEL == "veo-3.1-lite-generate-001"
 
 
 def test_generate_video_uses_default_model(monkeypatch):
@@ -100,10 +100,28 @@ def test_generate_video_uses_default_model(monkeypatch):
     result = provider.generate_video(prompt="a cat walking")
 
     call_kwargs = fake_client.models.generate_videos.call_args.kwargs
-    assert call_kwargs["model"] == "veo-3.1-fast-generate-001"
+    assert call_kwargs["model"] == "veo-3.1-lite-generate-001"
     assert call_kwargs["source"].image is None
-    assert result.model == "veo-3.1-fast-generate-001"
+    assert result.model == "veo-3.1-lite-generate-001"
     assert result.assets == [video]
+
+
+def test_generate_video_respects_fast_model_override(monkeypatch):
+    fake_client = MagicMock()
+    operation = MagicMock()
+    operation.done = True
+    operation.error = None
+    operation.result.generated_videos = [MagicMock(video=MagicMock())]
+    fake_client.models.generate_videos.return_value = operation
+    monkeypatch.setattr(google_provider.genai, "Client", lambda **_: fake_client)
+
+    provider = GoogleVertexProvider()
+    provider.generate_video(
+        prompt="high-priority clip",
+        model="veo-3.1-fast-generate-001",
+    )
+
+    assert fake_client.models.generate_videos.call_args.kwargs["model"] == "veo-3.1-fast-generate-001"
 
 
 def test_generate_video_without_image_omits_source_image(monkeypatch):

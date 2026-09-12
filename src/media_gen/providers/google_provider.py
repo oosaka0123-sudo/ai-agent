@@ -22,7 +22,7 @@ from ..config import get_google_config
 from .base import GenerationResult
 
 DEFAULT_IMAGE_MODEL = "gemini-2.5-flash-image"
-DEFAULT_VIDEO_MODEL = "veo-3.1-fast-generate-001"
+DEFAULT_VIDEO_MODEL = "veo-3.1-lite-generate-001"
 
 
 class GoogleVertexProvider:
