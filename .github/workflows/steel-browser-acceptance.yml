@@ -31,6 +31,7 @@ env:
 
 jobs:
   deploy-and-accept:
+    if: github.event_name != 'push' || !contains(github.event.head_commit.message, '[deploy-google-media]')
     name: Deploy Steel and run real 5-step lifecycle
     runs-on: ubuntu-latest
     steps:
@@ -131,7 +132,6 @@ jobs:
           with open(sys.argv[2], encoding="utf-8") as fh:
               payload = json.load(fh)
 
-          # The endpoint intentionally returns no session ID, token, or screenshot payload.
           print(json.dumps(payload, ensure_ascii=False, indent=2))
           if status != 200:
               raise SystemExit(f"acceptance endpoint returned HTTP {status}")
@@ -151,3 +151,93 @@ jobs:
 
           print("Steel Browser MCP deploy + acceptance: ALL PASS")
           PY
+
+  deploy-google-media:
+    if: github.event_name == 'push' && contains(github.event.head_commit.message, '[deploy-google-media]')
+    name: Deploy Google Media MCP with approved WIF
+    runs-on: ubuntu-latest
+    env:
+      SERVICE: google-media-mcp
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@v7
+
+      - name: Verify Lite is the default before deployment
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          grep -q 'DEFAULT_VIDEO_MODEL = "veo-3.1-lite-generate-001"' src/media_gen/providers/google_provider.py
+          echo "Verified: Veo 3.1 Lite is the source default."
+
+      - name: Authenticate to Google Cloud with approved keyless WIF
+        uses: google-github-actions/auth@v3
+        with:
+          project_id: ${{ env.PROJECT_ID }}
+          workload_identity_provider: ${{ env.WIF_PROVIDER }}
+          service_account: ${{ env.DEPLOYER_SA }}
+
+      - name: Set up gcloud
+        uses: google-github-actions/setup-gcloud@v3
+
+      - name: Configure Artifact Registry Docker authentication
+        shell: bash
+        run: gcloud auth configure-docker "${REGION}-docker.pkg.dev" --quiet
+
+      - name: Capture current Google Media revision
+        id: before
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          revision="$(gcloud run services describe "$SERVICE" --project="$PROJECT_ID" --region="$REGION" --format='value(status.latestReadyRevisionName)')"
+          test -n "$revision"
+          echo "revision=$revision" >> "$GITHUB_OUTPUT"
+          echo "Current revision: $revision"
+
+      - name: Build and push Google Media MCP image
+        id: image
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          image="${REGION}-docker.pkg.dev/${PROJECT_ID}/${ARTIFACT_REPO}/${SERVICE}:${GITHUB_SHA}"
+          docker build -f Dockerfile -t "$image" .
+          docker push "$image"
+          echo "uri=$image" >> "$GITHUB_OUTPUT"
+
+      - name: Update Google Media Cloud Run image only
+        shell: bash
+        env:
+          IMAGE: ${{ steps.image.outputs.uri }}
+        run: |
+          set -Eeuo pipefail
+          gcloud run services update "$SERVICE" \
+            --project="$PROJECT_ID" \
+            --region="$REGION" \
+            --image="$IMAGE" \
+            --quiet
+
+      - name: Verify new Google Media revision and readiness
+        shell: bash
+        env:
+          BEFORE_REVISION: ${{ steps.before.outputs.revision }}
+        run: |
+          set -Eeuo pipefail
+          after="$(gcloud run services describe "$SERVICE" --project="$PROJECT_ID" --region="$REGION" --format='value(status.latestReadyRevisionName)')"
+          url="$(gcloud run services describe "$SERVICE" --project="$PROJECT_ID" --region="$REGION" --format='value(status.url)')"
+          test -n "$after"
+          test -n "$url"
+          test "$after" != "$BEFORE_REVISION"
+          echo "Ready revision: $after"
+          echo "Service URL: $url"
+
+          ready=false
+          for _ in $(seq 1 10); do
+            body="$(curl -fsS --connect-timeout 10 --max-time 20 "${url%/}/readyz" 2>/dev/null || true)"
+            if [[ "$body" == *'"ready":true'* || "$body" == *'"ready": true'* ]]; then
+              ready=true
+              echo "$body"
+              break
+            fi
+            sleep 3
+          done
+          [[ "$ready" == true ]]
+          echo "Google Media MCP deploy: ready=true"
