@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://oosaka0123-sudo.github.io/ai-agent/sitemap.xml
