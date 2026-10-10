@@ -198,3 +198,44 @@ GitHub Pagesへ `web/remote-gcloud.html` を追加し、Remote Desktop Commander
 **97/100**
 
 残る確認はPR CI、main merge後のGitHub Pages deploy、公開URLでのLive Verification。Claude Code本人認証はサイト実装とは分離された外部Human Gateとして残っている。
+
+
+## 2026-10-10 — Current AI development snapshot
+
+### 初回実装
+
+MY DEVELOPMENT ARCHIVEのトップを2026年10月の実運用に合わせ、ChatGPT / Claude / Gemini、GitHub SSOT / Cloud First、PC03 / PC04をCURRENT SETUPとして追加した。過去のSteel Browser MCP等は履歴として残し、トップの現在情報からは外した。
+
+### 自己評価
+
+**97/100**
+
+- 仕様適合性: 99
+- 正常動作: 96
+- スマホ対応: 97
+- UI/UX: 96
+- コード品質: 96
+- 保守性: 98
+- パフォーマンス: 98
+- セキュリティ: 100
+
+### 発見した問題と修正
+
+- トップの説明が2026年9月の役割分担・ツール構成のままで、現在の実運用とズレていた。
+  - 現在スナップショットとして書き換え、履歴はdevlogへ残した。
+- PC情報を詳細に書きすぎると端末識別情報の公開につながる。
+  - 型番・CPU・RAM・SSD・OS・役割だけに限定し、端末ID・アカウント・認証情報は非掲載とした。
+- スマホでカードが横並びのままだと読みにくい。
+  - 640px以下ではCURRENT SETUPを1列に落とすCSSを追加した。
+
+### 再テスト項目
+
+- HTML構造と内部リンク
+- 390px付近での横スクロール有無
+- CURRENT SETUPの1列化
+- GitHub Pages deploy後の公開文言
+- Secret / credential文字列の混入なし
+
+### 最終評価
+
+備忘録として現在構成を一目で確認でき、過去履歴を消さずに現行状態と分離できた。公開後の実ブラウザ確認まで完了して最終確定とする。
