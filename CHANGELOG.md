@@ -8,6 +8,8 @@
 
 ### Added
 
+- MY DEVELOPMENT ARCHIVEトップに「CURRENT SETUP — 2026.10」を追加。現在の3AI構成（ChatGPT / Claude / Gemini）、GitHub SSOT / Cloud First方針、PC03 / PC04の2台構成を備忘録として表示する。PCはDell Latitude 7340 / Core i5-1345U / RAM 32GB / SSD 256GB / Windows 11 Proで、端末固有ID・認証情報・秘密値は公開しない。
+
 - 「スマホだけでホームページを作る」ガイドのClaude Code版本文（`guides/smartphone-website/claude.md`）を執筆し、
   3AI（Claude Code / Gemini・Jules / Codex）すべての本文が出揃った。
 - トップページ（`web/index.html`）にAI開発スタックのヒーローセクション（実生成メディアのプレビュー、
