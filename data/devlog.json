@@ -1093,7 +1093,12 @@
     "learnings": "備忘録サイトでは過去の実験を消すのではなく、現在スナップショットと履歴を分離すると、実運用の変化を追いやすい。ハードウェアは公開に必要な一般スペックだけを残し、端末識別子や認証情報は記録しない。",
     "images": [],
     "githubCommits": [],
-    "pullRequests": [],
+    "pullRequests": [
+      {
+        "label": "MY DEVELOPMENT ARCHIVE current setup refresh",
+        "url": "https://github.com/oosaka0123-sudo/ai-agent/pull/75"
+      }
+    ],
     "relatedUrls": [
       {
         "label": "MY DEVELOPMENT ARCHIVE",
