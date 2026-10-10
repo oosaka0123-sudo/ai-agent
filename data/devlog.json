@@ -1053,5 +1053,64 @@
       "バグ修正",
       "Claude Code"
     ]
+  },
+  {
+    "id": "2026-10-10-current-ai-development-snapshot",
+    "date": "2026-10-10",
+    "title": "MY DEVELOPMENT ARCHIVEを2026年10月のAI開発環境へ更新",
+    "project": "ai-agent",
+    "purpose": "個人用の開発備忘録として、GitHub Pagesトップに現在のAI・クラウド・ローカルPC構成を残し、古いトップ説明と現行運用の差を解消する。",
+    "whatMade": "トップページにCURRENT SETUP — 2026.10を追加し、ChatGPT・Claude・Gemini、GitHub SSOT / Cloud First、PC03 / PC04の2台構成をコンパクトに記録。過去のSteel Browser MCP等の履歴は消さず、現在スナップショットと履歴を分離した。",
+    "changes": [
+      "web/index.html（現在のAI開発構成、AI/サービスバッジ、CURRENT SETUP、開発フロー文言を更新）",
+      "web/assets/css/style.css（CURRENT SETUP用レスポンシブカードを追加）",
+      "web/diagram.html（2026年10月のCloud First / PC03・PC04前提を追記）",
+      "data/projects.json（ai-agentプロジェクトの現在構成を更新）",
+      "CHANGELOG.md / docs/devlog/2026-10-10.md / docs/devlog/self-eval/chatgpt.md"
+    ],
+    "aiUsed": [
+      "ChatGPT",
+      "Claude Code",
+      "Gemini / Antigravity"
+    ],
+    "services": [
+      "GitHub",
+      "GitHub Pages",
+      "Remote Desktop Commander",
+      "Google Cloud",
+      "Opera Browser Connector"
+    ],
+    "tech": [
+      "HTML",
+      "CSS",
+      "JavaScript",
+      "GitHub Actions",
+      "MCP",
+      "Cloud Run"
+    ],
+    "problems": "トップページの説明が2026年9月時点のClaude Code中心構成とSteel Browser MCPを前面に出したままで、現在のCloud First、実3AI運用、PC03 / PC04構成を反映していなかった。",
+    "solutions": "過去の記録や実装を削除せず、トップだけを現在スナップショットとして更新。現在構成は4カードに圧縮し、PC固有ID・アカウント・認証情報などは掲載しない。",
+    "learnings": "備忘録サイトでは過去の実験を消すのではなく、現在スナップショットと履歴を分離すると、実運用の変化を追いやすい。ハードウェアは公開に必要な一般スペックだけを残し、端末識別子や認証情報は記録しない。",
+    "images": [],
+    "githubCommits": [],
+    "pullRequests": [],
+    "relatedUrls": [
+      {
+        "label": "MY DEVELOPMENT ARCHIVE",
+        "url": "https://oosaka0123-sudo.github.io/ai-agent/"
+      }
+    ],
+    "nextSteps": "構成が変わったときにCURRENT SETUPとprojects/devlogを同時更新する。過去のSteel Browser MCP実装は履歴として維持し、現在運用と混同しない。",
+    "tags": [
+      "AI開発",
+      "GitHub Pages",
+      "備忘録",
+      "Cloud First",
+      "PC03",
+      "PC04",
+      "ChatGPT",
+      "Claude",
+      "Gemini"
+    ]
   }
 ]
