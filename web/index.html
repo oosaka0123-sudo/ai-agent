@@ -30,24 +30,39 @@
       <p class="hero-eyebrow">MY DEVELOPMENT ARCHIVE</p>
       <h1 class="hero-title">MY DEVELOPMENT ARCHIVE</h1>
       <p class="hero-subtitle">自分の開発記録</p>
-      <p class="hero-lede">Claude Codeが主実装、ChatGPTがPM/QAを担当し、GitHubを共通記憶（SSOT）にして並行作業するAI開発基盤です。Remote Desktop Commander・gcloud・Google Media MCP・Steel Browser MCPをつなぎ、GitHub Pagesまで公開する実働中の構成を記録しています。</p>
-      <div class="hero-team" aria-label="使用しているAI・サービス">
-        <span class="badge">Claude Code</span>
+      <p class="hero-lede">ChatGPT・Claude・Geminiを実際に使い分け、GitHubを共通記憶（SSOT）にするAI開発の備忘録です。Cloud Firstを基本に、ローカルWindows処理が必要な場面はPC03・PC04へ分担。Remote Desktop Commander・gcloud・Google Media MCP・Opera Browser Connector・Antigravity CLIなど、その時点で実際に使っている構成と変化を記録しています。</p>
+      <div class="hero-team" aria-label="現在使用しているAI・サービス">
         <span class="badge">ChatGPT</span>
-        <span class="badge">GitHub</span>
+        <span class="badge">Claude Code</span>
+        <span class="badge">Gemini / Antigravity</span>
+        <span class="badge">GitHub SSOT</span>
+        <span class="badge">Cloud First</span>
         <span class="badge">Remote Desktop Commander</span>
-        <span class="badge">gcloud</span>
         <span class="badge">Google Media MCP</span>
-        <span class="badge">Steel Browser MCP</span>
+        <span class="badge">Opera Browser Connector</span>
         <span class="badge">GitHub Pages</span>
       </div>
+
+      <section class="current-setup" aria-labelledby="currentSetupTitle">
+        <div class="current-setup-head">
+          <p class="stack-feature-kicker">CURRENT SETUP — 2026.10</p>
+          <h2 id="currentSetupTitle">いま使っている開発環境</h2>
+          <p>営業資料ではなく、自分用のスナップショット。役割やPC構成が変わったらここを更新します。</p>
+        </div>
+        <div class="current-setup-grid">
+          <article class="setup-card"><span>AI TEAM</span><strong>ChatGPT / Claude / Gemini</strong><p>実装・レビュー・調査を分担し、重要な判断は複数AIでクロスチェック。</p></article>
+          <article class="setup-card"><span>CONTROL</span><strong>GitHub SSOT / Cloud First</strong><p>GitHubを正本にし、クラウドで完結できる作業を優先。必要時のみWindowsへ接続。</p></article>
+          <article class="setup-card"><span>PC03 · PRIMARY</span><strong>Dell Latitude 7340</strong><p>Core i5-1345U / RAM 32GB / SSD 256GB / Windows 11 Pro。主ローカル実行ノード。</p></article>
+          <article class="setup-card"><span>PC04 · SECONDARY</span><strong>Dell Latitude 7340</strong><p>Core i5-1345U / RAM 32GB / SSD 256GB / Windows 11 Pro。第2ローカル実行ノード。</p></article>
+        </div>
+      </section>
 
       <a class="stack-feature" href="diagram.html" style="margin-top:28px;text-align:left">
         <div class="stack-feature-copy">
           <p class="stack-feature-kicker">HOW THE SYSTEM WORKS</p>
           <h3>AI開発の流れを、まず1枚で。</h3>
-          <p>ChatGPT → Claude Code → Remote Desktop → gcloud → Cloud Run → GitHub Pages。意味のない自動再生動画ではなく、実際の開発構成が分かる図をトップに置きました。</p>
-          <div class="stack-feature-tags"><span>PM</span><span>主実装</span><span>Remote</span><span>Cloud</span><span>Deploy</span></div>
+          <p>スマホ / ChatGPT → GitHub → Cloud First → 必要時にPC03 / PC04 → Claude・Gemini・OpenAI → CI / 公開確認。構成は固定せず、実際の運用に合わせて更新します。</p>
+          <div class="stack-feature-tags"><span>SSOT</span><span>Cloud First</span><span>PC03 / PC04</span><span>3AI</span><span>Deploy</span></div>
         </div>
         <div class="stack-feature-media"><img src="assets/remote-ai-agent-diagram.webp" alt="ChatGPT、Claude Code、Remote Desktop Commander、Google Cloud、GitHub PagesをつないだAI開発構成図" loading="eager"></div>
       </a>
